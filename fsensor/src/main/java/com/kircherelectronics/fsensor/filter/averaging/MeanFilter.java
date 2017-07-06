@@ -1,7 +1,5 @@
 package com.kircherelectronics.fsensor.filter.averaging;
 
-import com.kircherelectronics.fsensor.filter.BaseFilter;
-
 import java.util.ArrayDeque;
 
 /*
@@ -34,23 +32,11 @@ import java.util.ArrayDeque;
  *
  * @author Kaleb
  */
-public class MeanFilter  implements BaseFilter {
-
-    public static float DEFAULT_TIME_CONSTANT = 0.18f;
+public class MeanFilter extends AveragingFilter {
 
     private static final String tag = MeanFilter.class.getSimpleName();
 
-    // The size of the mean filters rolling window.
-    private int filterWindow;
-
     private ArrayDeque<float[]> values;
-
-    private long startTime;
-    private long timestamp;
-
-    private int count;
-
-    private float timeConstant;
 
     /**
      * Initialize a new MeanFilter object.
@@ -60,10 +46,8 @@ public class MeanFilter  implements BaseFilter {
     }
 
     public MeanFilter(float timeConstant) {
-        this.timeConstant = timeConstant;
-        this.values = new ArrayDeque<>();
-
-        reset();
+        super(timeConstant);
+        values = new ArrayDeque<>();
     }
 
     /**
@@ -87,7 +71,7 @@ public class MeanFilter  implements BaseFilter {
         // determine the delivery rate.
         float hz = (count++ / ((timestamp - startTime) / 1000000000.0f));
 
-        this.filterWindow = (int) (hz * timeConstant);
+        int filterWindow = (int) (hz * timeConstant);
 
         values.addLast(data);
 
@@ -124,12 +108,11 @@ public class MeanFilter  implements BaseFilter {
         this.timeConstant = timeConstant;
     }
 
-    public void reset()
-    {
-        startTime = 0;
-        timestamp = 0;
-        count = 0;
+    public void reset() {
+        super.reset();
 
-        this.values.clear();
+        if(values != null) {
+            this.values.clear();
+        }
     }
 }

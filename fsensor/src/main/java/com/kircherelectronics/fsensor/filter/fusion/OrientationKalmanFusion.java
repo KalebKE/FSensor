@@ -23,6 +23,10 @@ public class OrientationKalmanFusion extends OrientationFusion {
     private RotationProcessModel pm;
     private RotationMeasurementModel mm;
 
+    public OrientationKalmanFusion() {
+        this(DEFAULT_TIME_CONSTANT);
+    }
+
     public OrientationKalmanFusion(float timeConstant) {
         super(timeConstant);
 

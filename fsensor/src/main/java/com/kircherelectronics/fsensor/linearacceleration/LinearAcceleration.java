@@ -33,7 +33,7 @@ public abstract class LinearAcceleration {
     private float[] output = new float[]
             {0, 0, 0};
 
-    private BaseFilter filter;
+    protected BaseFilter filter;
 
     public LinearAcceleration(BaseFilter filter) {
         this.filter = filter;

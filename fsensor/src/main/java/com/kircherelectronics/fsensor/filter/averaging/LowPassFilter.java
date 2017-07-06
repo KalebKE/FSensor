@@ -30,18 +30,9 @@ import com.kircherelectronics.fsensor.filter.BaseFilter;
  * http://developer.android.com/reference/android/hardware/SensorEvent.html
  * @author Kaleb
  */
-public class LowPassFilter implements BaseFilter
+public class LowPassFilter extends AveragingFilter
 {
-    public static float DEFAULT_TIME_CONSTANT = 0.18f;
-
-    // Constants for the low-pass filters
-    private float timeConstant;
-
-    // Timestamps for the low-pass filters
-    private float timestamp;
-    private float startTime;
-
-    private int count;
+    private static final String tag = LowPassFilter.class.getSimpleName();
 
     // Gravity and linear accelerations components for the
     // Wikipedia low-pass filter
@@ -97,9 +88,7 @@ public class LowPassFilter implements BaseFilter
 
     public void reset()
     {
-        startTime = 0;
-        timestamp = 0;
-        count = 0;
+        super.reset();
         this.output = new float[]
                 { 0, 0, 0 };
 

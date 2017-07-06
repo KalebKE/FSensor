@@ -1,7 +1,5 @@
 package com.kircherelectronics.fsensor.filter.averaging;
 
-import com.kircherelectronics.fsensor.filter.BaseFilter;
-
 import org.apache.commons.math3.stat.StatUtils;
 
 import java.util.ArrayDeque;
@@ -38,23 +36,13 @@ import java.util.ArrayDeque;
  * @author Kaleb
  * @version %I%, %G%
  */
-public class MedianFilter implements BaseFilter {
-    public static float DEFAULT_TIME_CONSTANT = 0.18f;
+public class MedianFilter extends AveragingFilter {
 
     private static final String tag = MedianFilter.class
             .getSimpleName();
 
-    // The size of the mean filters rolling window.
-    private int filterWindow;
-
     private ArrayDeque<float[]> values;
 
-    private long startTime;
-    private long timestamp;
-
-    private int count;
-
-    private float timeConstant;
 
     /**
      * Initialize a new MeanFilter object.
@@ -91,7 +79,7 @@ public class MedianFilter implements BaseFilter {
         // determine the delivery rate.
         float hz = (count++ / ((timestamp - startTime) / 1000000000.0f));
 
-        this.filterWindow = (int) (hz * timeConstant);
+        int filterWindow = (int) (hz * timeConstant);
 
         values.addLast(data);
 
@@ -133,10 +121,10 @@ public class MedianFilter implements BaseFilter {
     }
 
     public void reset() {
-        startTime = 0;
-        timestamp = 0;
-        count = 0;
+        super.reset();
 
-        this.values.clear();
+        if(values != null) {
+            this.values.clear();
+        }
     }
 }
