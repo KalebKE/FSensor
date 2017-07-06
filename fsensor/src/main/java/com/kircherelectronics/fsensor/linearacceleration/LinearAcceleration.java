@@ -28,7 +28,7 @@ import com.kircherelectronics.fsensor.filter.BaseFilter;
  *
  * @author Kaleb
  */
-public class LinearAcceleration {
+public abstract class LinearAcceleration {
 
     private float[] output = new float[]
             {0, 0, 0};
@@ -55,9 +55,7 @@ public class LinearAcceleration {
         filter.setTimeConstant(timeConstant);
     }
 
-    private float[] getGravity(float[] values) {
-        return this.filter.filter(values);
-    }
+    public abstract float[] getGravity(float[] values);
 
     public void reset() {
         filter.reset();
