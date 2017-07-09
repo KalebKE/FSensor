@@ -24,6 +24,8 @@ import android.hardware.SensorManager;
  */
 public class Util {
 
+    private static final String tag = Util.class.getSimpleName();
+
     public static float[] getGravityFromOrientation(float[] orientation) {
         // components[0]: azimuth, rotation around the Z axis.
         // components[1]: pitch, rotation around the X axis.

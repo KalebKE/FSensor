@@ -16,8 +16,6 @@ package com.kircherelectronics.fsensor.filter.averaging;
  * limitations under the License.
  */
 
-import com.kircherelectronics.fsensor.filter.BaseFilter;
-
 /**
  * An implementation of the Android Developer low-pass filter. The Android
  * Developer LowPassFilter, is an IIR single-pole implementation. The coefficient, a

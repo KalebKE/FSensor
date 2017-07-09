@@ -2,6 +2,8 @@ package com.kircherelectronics.fsensor.linearacceleration;
 
 import com.kircherelectronics.fsensor.filter.BaseFilter;
 
+import java.util.Arrays;
+
 /*
  * Acceleration Explorer
  * Copyright (C) 2013-2015, Kaleb Kircher - Kircher Engineering, LLC
@@ -30,6 +32,8 @@ import com.kircherelectronics.fsensor.filter.BaseFilter;
  */
 public abstract class LinearAcceleration {
 
+    private static final String tag = LinearAcceleration.class.getSimpleName();
+
     private float[] output = new float[]
             {0, 0, 0};
 
@@ -41,7 +45,7 @@ public abstract class LinearAcceleration {
 
     public float[] filter(float[] values) {
 
-        float[] gravity = getGravity(values);
+        float[] gravity = getGravity(Arrays.copyOf(values, values.length));
 
         // Determine the linear acceleration
         output[0] = values[0] - gravity[0];

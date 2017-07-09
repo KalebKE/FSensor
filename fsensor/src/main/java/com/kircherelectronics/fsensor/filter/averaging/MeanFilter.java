@@ -1,6 +1,7 @@
 package com.kircherelectronics.fsensor.filter.averaging;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 
 /*
  * Copyright 2017, Kircher Electronics, LLC
@@ -71,9 +72,9 @@ public class MeanFilter extends AveragingFilter {
         // determine the delivery rate.
         float hz = (count++ / ((timestamp - startTime) / 1000000000.0f));
 
-        int filterWindow = (int) (hz * timeConstant);
+        int filterWindow = (int) Math.ceil(hz * timeConstant);
 
-        values.addLast(data);
+        values.addLast(Arrays.copyOf(data, data.length));
 
         while (values.size() > filterWindow) {
             values.removeFirst();
@@ -98,7 +99,7 @@ public class MeanFilter extends AveragingFilter {
         }
 
         for (int i = 0; i < mean.length; i++) {
-            mean[i] = mean[i] / data.size();
+            mean[i] /= data.size();
         }
 
         return mean;

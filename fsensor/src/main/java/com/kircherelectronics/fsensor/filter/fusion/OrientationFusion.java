@@ -3,7 +3,9 @@ package com.kircherelectronics.fsensor.filter.fusion;
 import android.hardware.SensorManager;
 
 import com.kircherelectronics.fsensor.filter.BaseFilter;
+
 import org.apache.commons.math3.complex.Quaternion;
+
 import java.util.Arrays;
 
 /*
@@ -43,11 +45,10 @@ public abstract class OrientationFusion implements BaseFilter {
     // accelerometer vector
     private float[] acceleration;
     private boolean accelerationUpdated;
-    private boolean hasOrientation = false;
     // magnetic field vector
     private float[] magnetic;
     private boolean magneticUpdated;
-    private long timeStamp;
+    private long timestamp;
 
     /**
      * Initialize a singleton instance.
@@ -68,14 +69,13 @@ public abstract class OrientationFusion implements BaseFilter {
      * @param values
      */
     public float[] filter(float[] values) {
-        return setRateOfRotation(values);
+        return getFusedOrientation(values);
     }
 
     public void reset() {
         accelerationUpdated = false;
         magneticUpdated = false;
-        hasOrientation = false;
-        timeStamp = 0;
+        timestamp = 0;
         magnetic = new float[3];
         acceleration = new float[3];
         rotationVectorGyroscope = null;
@@ -83,7 +83,7 @@ public abstract class OrientationFusion implements BaseFilter {
 
     public void setAcceleration(float[] acceleration) {
         // Get a local copy of the raw magnetic values from the device sensor.
-        this.acceleration = acceleration;
+        this.acceleration = Arrays.copyOf(acceleration, acceleration.length);;
         this.accelerationUpdated = true;
     }
 
@@ -102,6 +102,8 @@ public abstract class OrientationFusion implements BaseFilter {
         this.timeConstant = timeConstant;
     }
 
+    public abstract void startFusion();
+    public abstract void stopFusion();
     /**
      * Calculate the fused orientation.
      */
@@ -221,31 +223,21 @@ public abstract class OrientationFusion implements BaseFilter {
     }
 
     protected void initializeRotationVectorGyroscopeIfRequired(Quaternion rotationVectorAccelerationMagnetic) {
-        if (!hasOrientation) {
-            rotationVectorGyroscope = new Quaternion(rotationVectorAccelerationMagnetic.getScalarPart(),
+        rotationVectorGyroscope = new Quaternion(rotationVectorAccelerationMagnetic.getScalarPart(),
                     rotationVectorAccelerationMagnetic.getVectorPart());
-        }
-
-        hasOrientation = true;
     }
 
-    private float[] setRateOfRotation(float[] gyroscope) {
-        // don't start until first accelerometer/magnetometer orientation has
-        // been acquired
-        if (!hasOrientation) {
-            return null;
-        }
-
-        long timestamp = 0;
-        if (this.timeStamp != 0 && accelerationUpdated && magneticUpdated) {
-            timestamp = System.nanoTime();
-            float dt = (timestamp - this.timeStamp) * NS2S;
+    private float[] getFusedOrientation(float[] gyroscope) {
+        long timestamp = System.nanoTime();
+        if (accelerationUpdated && magneticUpdated) {
+            if(this.timestamp == 0) {
+                this.timestamp = System.nanoTime();
+            }
+            float dt = (timestamp - this.timestamp) * NS2S;
+            this.timestamp = timestamp;
             return calculateFusedOrientation(gyroscope, dt, acceleration, magnetic);
         }
 
-        // measurement done, save current time for next interval
-        this.timeStamp = timestamp;
-
-        return null;
+        return new float[3];
     }
 }
