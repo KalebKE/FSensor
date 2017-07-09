@@ -11,7 +11,45 @@ import org.apache.commons.math3.complex.Quaternion;
 
 import java.util.Arrays;
 
+/*
+ * Copyright 2017, Kircher Electronics, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
+ * An implementation of a Kalman filter based orientation sensor fusion.
+ *  * <p>
+ * The filter attempts to fuse magnetometer, gravity and gyroscope
+ * sensors together to produce an accurate measurement of the rotation of the
+ * device.
+ * <p>
+ * The magnetometer and acceleration sensors are used to determine one of the
+ * two orientation estimations of the device. This measurement is subject to the
+ * constraint that the device must not be accelerating and hard and soft-iron
+ * distortions are not present in the local magnetic field.
+ * <p>
+ * The gyroscope is used to determine the second of two orientation estimations
+ * of the device. The gyroscope can have a shorter response time and is not
+ * effected by linear acceleration or magnetic field distortions, however it
+ * experiences drift and has to be compensated periodically by the
+ * acceleration/magnetic sensors to remain accurate.
+ * <p>
+ * Quaternions are used to integrate the measurements of the gyroscope and apply
+ * the rotations to each sensors measurements via Kalman filter. This the
+ * ideal method because quaternions are not subject to many of the singularties
+ * of rotation matrices, such as gimbal lock.
+ * <p>
  * Created by kaleb on 7/6/17.
  */
 
