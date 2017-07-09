@@ -3,11 +3,7 @@ package com.kircherelectronics.fsensor.filter.fusion;
 import android.hardware.SensorManager;
 import android.util.Log;
 
-import com.kircherelectronics.fsensor.filter.BaseFilter;
-
 import org.apache.commons.math3.complex.Quaternion;
-
-import java.util.Arrays;
 
 /*
  * Copyright 2017, Kircher Electronics, LLC
@@ -102,7 +98,6 @@ public class OrientationComplimentaryFusion extends OrientationFusion {
         float[] baseOrientation = getBaseOrientation(acceleration, magnetic);
 
         if (baseOrientation != null) {
-
             float alpha = timeConstant / (timeConstant + dt);
             float oneMinusAlpha = (1.0f - alpha);
 
@@ -159,4 +154,10 @@ public class OrientationComplimentaryFusion extends OrientationFusion {
 
         return null;
     }
+
+    @Override
+    public void startFusion() {}
+
+    @Override
+    public void stopFusion() {}
 }

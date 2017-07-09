@@ -22,6 +22,17 @@ public class OrientationKalmanFusion extends OrientationFusion {
     private RotationKalmanFilter kalmanFilter;
     private RotationProcessModel pm;
     private RotationMeasurementModel mm;
+    private volatile boolean run;
+    private volatile float dt;
+    private volatile float[] fusedOrientation = new float[3];
+    private volatile float[] acceleration = new float[3];
+    private volatile float[] magnetic = new float[3];
+    private volatile float[] gyroscope = new float[4];
+    private Thread thread;
+
+    public OrientationKalmanFusion() {
+        this(DEFAULT_TIME_CONSTANT);
+    }
 
     public OrientationKalmanFusion(float timeConstant) {
         super(timeConstant);
@@ -32,11 +43,41 @@ public class OrientationKalmanFusion extends OrientationFusion {
         kalmanFilter = new RotationKalmanFilter(pm, mm);
     }
 
-    /**
-     * Calculate the fused orientation.
-     */
-    protected float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] acceleration, float[] magnetic) {
+    @Override
+    public void startFusion() {
+        if (run == false && thread == null) {
+            run = true;
 
+            thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (run && !Thread.interrupted()) {
+
+                        calculate();
+
+                        try {
+                            Thread.sleep(20);
+                        } catch (InterruptedException e) {
+                            Log.e(tag, "Kalman Thread Run", e);
+                        }
+                    }
+                }
+            });
+
+            thread.start();
+        }
+    }
+
+    @Override
+    public void stopFusion() {
+        if (run == true && thread != null) {
+            run = false;
+            thread.interrupt();
+            thread = null;
+        }
+    }
+
+    private float[] calculate() {
         float[] baseOrientation = getBaseOrientation(acceleration, magnetic);
 
         if (baseOrientation != null) {
@@ -45,6 +86,11 @@ public class OrientationKalmanFusion extends OrientationFusion {
             initializeRotationVectorGyroscopeIfRequired(rotationVectorAccelerationMagnetic);
 
             rotationVectorGyroscope = getGyroscopeRotationVector(rotationVectorGyroscope, gyroscope, dt);
+
+            // Since we have to sample at a different rate than the samples are delivered, we integrate and the reset
+            // when
+            // we sample in the thread...
+            dt = 0;
 
             double[] vectorGyroscope = new double[4];
 
@@ -66,7 +112,6 @@ public class OrientationKalmanFusion extends OrientationFusion {
             kalmanFilter.predict(vectorGyroscope);
             kalmanFilter.correct(vectorAccelerationMagnetic);
 
-            // Apply the new gyroscope delta rotation to the new Kalman filter
             // rotation estimation.
             rotationVectorGyroscope = new Quaternion(kalmanFilter.getStateEstimation()[3],
                     Arrays.copyOfRange(kalmanFilter.getStateEstimation(), 0, 3));
@@ -93,9 +138,7 @@ public class OrientationKalmanFusion extends OrientationFusion {
             // not the fastest way of doing this.
             SensorManager.getRotationMatrixFromVector(fusedMatrix, fusedVector);
 
-            float[] fusedOrientation = new float[3];
-
-            // Get the fused orienatation
+            // Get the fused orientation
             SensorManager.getOrientation(fusedMatrix, fusedOrientation);
 
             return fusedOrientation;
@@ -107,5 +150,19 @@ public class OrientationKalmanFusion extends OrientationFusion {
         Log.w(tag, "Base Device Orientation could not be computed!");
 
         return null;
+    }
+
+    /**
+     * Calculate the fused orientation.
+     */
+    protected float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] acceleration, float[] magnetic) {
+        this.gyroscope = gyroscope;
+        // Since we have to sample at a different rate than the samples are delivered, we integrate and the reset when
+        // we sample in the thread...
+        this.dt += dt;
+        this.acceleration = acceleration;
+        this.magnetic = magnetic;
+
+        return fusedOrientation;
     }
 }
