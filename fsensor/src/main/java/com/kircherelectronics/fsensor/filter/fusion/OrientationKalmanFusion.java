@@ -97,8 +97,11 @@ public class OrientationKalmanFusion extends OrientationFusion {
                             Thread.sleep(20);
                         } catch (InterruptedException e) {
                             Log.e(tag, "Kalman Thread Run", e);
+                            Thread.currentThread().interrupt();
                         }
                     }
+
+                    Thread.currentThread().interrupt();
                 }
             });
 
