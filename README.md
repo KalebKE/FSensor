@@ -61,7 +61,7 @@ The complementary filter is a frequency domain filter. In its strictest sense, t
 
  A complimentary filter is used to fuse the two orienation estimations (the gyroscope and acceleration/magentic, respectively) together. It takes the form of gyro[0] = alpha * gyro[0] + (1 - alpha) * accel/magnetic[0]. Alpha is defined as alpha = timeConstant / (timeConstant + dt) where the time constant is the length of signals the filter should act on and dt is the sample period (1/frequency) of the sensor.
  
- ### Quaternion Kalman Filter (ImuOKfQuaternion)
+ ### Quaternion Kalman Filter
  
 Quaternions offer an angle-axis solution to rotations which do not suffer from many of the singularies, including gimbal lock, that you will find with rotation matrices. Quaternions can also be scaled and applied to a complimentary filter. The quaternion complimentary filter is probably the most elegant, robust and accurate of the filters, although it can also be the most difficult to implement.
 
