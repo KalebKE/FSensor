@@ -84,3 +84,37 @@ public void onSensorChanged(SensorEvent event) {
     }
 }
 ```
+
+
+## Orientation IMU Sensor Fusion Linear Acceleration
+
+```
+private LinearAcceleration linearAccelerationFilter;
+private OrientationFusion orientationFusion;
+
+private void init() {
+  orientationFusion = new ...  // OrientationComplimentaryFusion(), new OrientationKalmanFusion();
+  linearAccelerationFilter = new LinearAccelerationFusion(orientationFusion);
+}
+
+@Override
+public void onSensorChanged(SensorEvent event) {
+    if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+      // Android reuses events, so you probably want a copy
+      System.arraycopy(event.values, 0, acceleration, 0, event.values.length);
+      orientationFusion.setAcceleration(acceleration);
+      
+      // Apply the orientation to the raw acceleration to estimate linear acceleration
+      linearAcceleration = linearAccelerationFilter.filter(acceleration)
+    } else  if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+     // Android reuses events, so you probably want a copy
+      System.arraycopy(event.values, 0, magnetic, 0, event.values.length);
+      orientationFusion.setMagneticField(this.magnetic);
+    } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+      // Android reuses events, so you probably want a copy
+      System.arraycopy(event.values, 0, rotation, 0, event.values.length);
+      // Filter the rotation 
+      orientationFusion.filter(this.rotation);
+    }
+}
+```
