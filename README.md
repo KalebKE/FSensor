@@ -37,7 +37,7 @@ FSensor implements three of the most common smoothing filters, low-pass, mean an
 
 ### Low-Pass Filter
 
-FSensor use an IIR single-pole implementation of a low-pass filter. The coefficient (alpha) can be adjusted based on the sample period of the sensor to produce the desired time constant that the filter will act on. It takes a simple form of output[0] = alpha * output[0] + (1 - alpha) * input[0]. Alpha is defined as alpha = timeConstant / (timeConstant + dt) where the time constant is the length of signals the filter should act on and dt is the sample period (1/frequency) of the sensor. Computationally efficient versus a mean or median filter (constant time vs linear time). For more information on low-pass filters, see the [Acceleration Explorer Wiki (https://github.com/KalebKE/AccelerationExplorer/wiki)].
+FSensor use an IIR single-pole implementation of a low-pass filter. The coefficient (alpha) can be adjusted based on the sample period of the sensor to produce the desired time constant that the filter will act on. It takes a simple form of output[0] = alpha * output[0] + (1 - alpha) * input[0]. Alpha is defined as alpha = timeConstant / (timeConstant + dt) where the time constant is the length of signals the filter should act on and dt is the sample period (1/frequency) of the sensor. Computationally efficient versus a mean or median filter (constant time vs linear time). For more information on low-pass filters, see the [Acceleration Explorer Wiki](https://github.com/KalebKE/AccelerationExplorer/wiki).
 
 ### Mean Filter
 
@@ -86,3 +86,6 @@ The most simple linear acceleration filter is based on a low-pass filter. It has
 ### IMU Sensor Fusion Linear Acceleration
 
 Calculating the gravity components of a normalized orientation is trivial, so FSensor can easily use the IMU orientation fusions to provide an estimation of linear acceleration that is far more customizable than what Android provides alone.
+
+
+Published under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
