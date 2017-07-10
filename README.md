@@ -31,6 +31,9 @@ dependencies {
 }
 ```
 
+## Usage
+
+* [Usage](/documentation/Usage.md)
 ## Averaging Filters
 
 FSensor implements three of the most common smoothing filters, low-pass, mean and meadian filters. All the filters are user configurable based on the time constant in units of seconds. The larger the time constant, the smoother the signal. However, latency also increases with the time constant. Because the filter coefficient is in the time domain, differences in sensor output frequencies have little effect on the performance of the filter. These filters should perform about the same across all devices regardless of the sensor frequency. FSensor is clever about providing an implementation where the time constant is agnostic to the output frequencies of the devices sensors which vary greatly by model and manufacturer.
