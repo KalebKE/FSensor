@@ -63,7 +63,7 @@ public void onSensorChanged(SensorEvent event) {
 private OrientationFusion orientationFusion;
 
 private void init() {
-  orientationFusion = new ...  //OrientationComplimentaryFusion(), new OrientationKalmanFusion();
+  orientationFusion = new ...  // OrientationComplimentaryFusion(), new OrientationKalmanFusion();
 }
 
 @Override
