@@ -15,10 +15,7 @@ In the project level build.gradle:
 ```
 allprojects {
     repositories {
-        jcenter()
-        maven {
-            maven { url "https://jitpack.io" }
-        }
+        maven { url "https://jitpack.io" }
     }
 }
 ```
