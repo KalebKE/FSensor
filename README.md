@@ -1,6 +1,8 @@
 # FSensor
 Android Sensor Filter and Fusion
 
+![Alt text](http://www.kircherelectronics.com/resources/images/fsensor/FSensor.png "Android Acceleration Explorer Screenshot")
+
 ## Introduction
 FSensor (FusionSensor) is an Android library that (hopefully) removes some/most of the complexity of using Androids orientation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
 
