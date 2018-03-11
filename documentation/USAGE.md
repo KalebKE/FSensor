@@ -83,6 +83,22 @@ public void onSensorChanged(SensorEvent event) {
       fusedOrientation = orientationFusion.filter(this.rotation);
     }
 }
+
+@Override
+public void onResume() {
+    super.onResume();
+
+    // Required for OrientationKalmanFusion only
+    orientationFusion.startFusion();
+}
+
+@Override
+public void onPause() {
+     // Required for OrientationKalmanFusion only
+    orientationFusion.stopFusion();
+
+    super.onPause();
+}
 ```
 
 
@@ -118,20 +134,20 @@ public void onSensorChanged(SensorEvent event) {
     }
 }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        
-        // Required for OrientationKalmanFusion only
-        orientationFusion.startFusion();
-    }
+@Override
+public void onResume() {
+    super.onResume();
 
-    @Override
-    public void onPause() {
-         // Required for OrientationKalmanFusion only
-        orientationFusion.stopFusion();
-        
-        super.onPause();
-    }
+    // Required for OrientationKalmanFusion only
+    orientationFusion.startFusion();
+}
+
+@Override
+public void onPause() {
+     // Required for OrientationKalmanFusion only
+    orientationFusion.stopFusion();
+
+    super.onPause();
+}
 
 ```
