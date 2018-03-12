@@ -155,7 +155,7 @@ public void onPause() {
 ## Full Example
 
 ```
-ublic class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private LinearAcceleration linearAccelerationFilter;
     private OrientationFusion orientationFusion;
@@ -235,4 +235,5 @@ ublic class MainActivity extends AppCompatActivity implements SensorEventListene
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {}
+}
 ```
