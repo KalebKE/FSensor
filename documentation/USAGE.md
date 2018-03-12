@@ -151,3 +151,88 @@ public void onPause() {
 }
 
 ```
+
+## Full Example
+
+```
+ublic class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+    private LinearAcceleration linearAccelerationFilter;
+    private OrientationFusion orientationFusion;
+
+    private float[] acceleration;
+    private float[] magnetic;
+    private float[] linearAcceleration;
+    private float[] rotation;
+
+    private SensorManager sensorManager;
+    private Sensor accelerationSensor;
+    private Sensor magneticSensor;
+    private Sensor gyroscopeSensor;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(layout.activity_main);
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magneticSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+        init();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        sensorManager.registerListener(this, accelerationSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, magneticSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_FASTEST);
+
+        orientationFusion.startFusion();
+    }
+
+    @Override
+    public void onPause() {
+        orientationFusion.stopFusion();
+
+        sensorManager.unregisterListener(this);
+        super.onPause();
+    }
+
+    private void init() {
+        acceleration = new float[3];
+        magnetic = new float[3];
+        rotation = new float[4];
+
+        orientationFusion = new OrientationKalmanFusion();
+        //orientationFusion = new OrientationComplimentaryFusion();
+        linearAccelerationFilter = new LinearAccelerationFusion(orientationFusion);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            // Android reuses events, so you probably want a copy
+            System.arraycopy(event.values, 0, acceleration, 0, event.values.length);
+            orientationFusion.setAcceleration(acceleration);
+
+            // Apply the orientation to the raw acceleration to estimate linear acceleration
+            linearAcceleration = linearAccelerationFilter.filter(acceleration);
+        } else  if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            // Android reuses events, so you probably want a copy
+            System.arraycopy(event.values, 0, magnetic, 0, event.values.length);
+            orientationFusion.setMagneticField(this.magnetic);
+        } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            // Android reuses events, so you probably want a copy
+            System.arraycopy(event.values, 0, rotation, 0, event.values.length);
+            // Filter the rotation
+            orientationFusion.filter(this.rotation);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {}
+```
