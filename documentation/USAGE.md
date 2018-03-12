@@ -152,7 +152,7 @@ public void onPause() {
 
 ```
 
-## Full Example
+## OrientationKalmanFusion Full Example
 
 ```
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
