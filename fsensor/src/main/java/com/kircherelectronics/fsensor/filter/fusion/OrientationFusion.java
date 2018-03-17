@@ -48,6 +48,8 @@ public abstract class OrientationFusion implements BaseFilter {
     // magnetic field vector
     private float[] magnetic;
     private boolean magneticUpdated;
+    private float[] orientation;
+    private boolean orientationUpdated;
     private long timestamp;
 
     /**
@@ -75,6 +77,7 @@ public abstract class OrientationFusion implements BaseFilter {
     public void reset() {
         accelerationUpdated = false;
         magneticUpdated = false;
+        orientationUpdated = false;
         timestamp = 0;
         magnetic = new float[3];
         acceleration = new float[3];
@@ -92,6 +95,11 @@ public abstract class OrientationFusion implements BaseFilter {
         this.magneticUpdated = true;
     }
 
+    public void setOrientation(float[] orientation) {
+        this.orientation = orientation;
+        this.orientationUpdated = true;
+    }
+
     /**
      * The complementary filter coefficient, a floating point value between 0-1,
      * exclusive of 0, inclusive of 1.
@@ -104,11 +112,25 @@ public abstract class OrientationFusion implements BaseFilter {
 
     public abstract void startFusion();
     public abstract void stopFusion();
+
     /**
-     * Calculate the fused orientation.
+     * Calculate the fused orientation of the device.
+     * @param gyroscope the gyroscope measurements.
+     * @param dt the gyroscope delta
+     * @param acceleration the acceleration measurements
+     * @param magnetic the magnetic measurements
+     * @return the fused orientation estimation.
      */
-    protected abstract float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] acceleration, float[]
-            magnetic);
+    protected abstract float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] acceleration, float[] magnetic);
+
+    /**
+     * Calculate the fused orientation of the device.
+     * @param gyroscope the gyroscope measurements.
+     * @param dt the gyroscope delta
+     * @param orientation an estimation of device orientation.
+     * @return the fused orientation estimation.
+     */
+    protected abstract float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] orientation);
 
     /**
      * Create an angle-axis vector, in this case a unit quaternion, from the
@@ -120,7 +142,7 @@ public abstract class OrientationFusion implements BaseFilter {
      *
      * @param orientation
      */
-    protected Quaternion getAccelerationMagneticRotationVector(float[] orientation) {
+    protected Quaternion rotationVectorToQuaternion(float[] orientation) {
         // Assuming the angles are in radians.
 
         // getFusedOrientation() values:
@@ -229,13 +251,18 @@ public abstract class OrientationFusion implements BaseFilter {
 
     private float[] getFusedOrientation(float[] gyroscope) {
         long timestamp = System.nanoTime();
-        if (accelerationUpdated && magneticUpdated) {
+        if ((accelerationUpdated && magneticUpdated) || orientationUpdated) {
             if(this.timestamp == 0) {
                 this.timestamp = System.nanoTime();
             }
             float dt = (timestamp - this.timestamp) * NS2S;
             this.timestamp = timestamp;
-            return calculateFusedOrientation(gyroscope, dt, acceleration, magnetic);
+
+            if(orientation == null) {
+                return calculateFusedOrientation(gyroscope, dt, acceleration, magnetic);
+            } else {
+                return calculateFusedOrientation(gyroscope, dt, orientation);
+            }
         }
 
         return new float[3];

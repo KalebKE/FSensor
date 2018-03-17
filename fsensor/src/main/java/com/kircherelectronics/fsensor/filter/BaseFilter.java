@@ -6,6 +6,7 @@ package com.kircherelectronics.fsensor.filter;
 
 public interface BaseFilter {
     float[] filter(float[] values);
+    float[] getOutput();
     void setTimeConstant(float timeConstant);
     void reset();
 }

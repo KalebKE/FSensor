@@ -62,9 +62,10 @@ public class OrientationKalmanFusion extends OrientationFusion {
     private RotationMeasurementModel mm;
     private volatile boolean run;
     private volatile float dt;
-    private volatile float[] fusedOrientation = new float[3];
+    private volatile float[] output = new float[3];
     private volatile float[] acceleration = new float[3];
     private volatile float[] magnetic = new float[3];
+    private volatile float[] orientation;
     private volatile float[] gyroscope = new float[4];
     private Thread thread;
 
@@ -118,12 +119,23 @@ public class OrientationKalmanFusion extends OrientationFusion {
         }
     }
 
+    @Override
+    public float[] getOutput() {
+        return output;
+    }
+
     private float[] calculate() {
-        float[] baseOrientation = getBaseOrientation(acceleration, magnetic);
+        float[] baseOrientation;
+
+        if(orientation == null) {
+            baseOrientation = getBaseOrientation(acceleration, magnetic);
+        } else {
+            baseOrientation = orientation;
+        }
 
         if (baseOrientation != null) {
 
-            Quaternion rotationVectorAccelerationMagnetic = getAccelerationMagneticRotationVector(baseOrientation);
+            Quaternion rotationVectorAccelerationMagnetic = rotationVectorToQuaternion(baseOrientation);
             initializeRotationVectorGyroscopeIfRequired(rotationVectorAccelerationMagnetic);
 
             rotationVectorGyroscope = getGyroscopeRotationVector(rotationVectorGyroscope, gyroscope, dt);
@@ -180,9 +192,9 @@ public class OrientationKalmanFusion extends OrientationFusion {
             SensorManager.getRotationMatrixFromVector(fusedMatrix, fusedVector);
 
             // Get the fused orientation
-            SensorManager.getOrientation(fusedMatrix, fusedOrientation);
+            SensorManager.getOrientation(fusedMatrix, output);
 
-            return fusedOrientation;
+            return output;
         }
 
         // The device had a problem determining the base orientation from the acceleration and magnetic sensors,
@@ -194,7 +206,12 @@ public class OrientationKalmanFusion extends OrientationFusion {
     }
 
     /**
-     * Calculate the fused orientation.
+     * Calculate the fused orientation of the device.
+     * @param gyroscope the gyroscope measurements.
+     * @param dt the gyroscope delta
+     * @param acceleration the acceleration measurements
+     * @param magnetic the magnetic measurements
+     * @return the fused orientation estimation.
      */
     protected float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] acceleration, float[] magnetic) {
         this.gyroscope = gyroscope;
@@ -204,6 +221,23 @@ public class OrientationKalmanFusion extends OrientationFusion {
         this.acceleration = acceleration;
         this.magnetic = magnetic;
 
-        return fusedOrientation;
+        return output;
+    }
+
+    /**
+     * Calculate the fused orientation of the device.
+     * @param gyroscope the gyroscope measurements.
+     * @param dt the gyroscope delta
+     * @param orientation an estimation of device orientation.
+     * @return the fused orientation estimation.
+     */
+    protected float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] orientation) {
+        this.gyroscope = gyroscope;
+        // Since we have to sample at a different rate than the samples are delivered, we integrate and the reset when
+        // we sample in the thread...
+        this.dt += dt;
+        this.orientation = orientation;
+
+        return output;
     }
 }

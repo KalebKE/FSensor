@@ -30,7 +30,7 @@ public class LinearAccelerationAveraging extends LinearAcceleration {
     }
 
     @Override
-    public float[] getGravity(float[] values) {
-        return filter.filter(values);
+    public float[] getGravity() {
+        return filter.getOutput();
     }
 }
