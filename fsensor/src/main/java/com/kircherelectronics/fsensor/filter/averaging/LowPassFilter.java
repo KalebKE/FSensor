@@ -79,6 +79,11 @@ public class LowPassFilter extends AveragingFilter
         return output;
     }
 
+    @Override
+    public float[] getOutput() {
+        return output;
+    }
+
     public void setTimeConstant(float timeConstant)
     {
         this.timeConstant = timeConstant;

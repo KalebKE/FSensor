@@ -31,5 +31,5 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
 
-    compile files('libs/commons-math3-3.6.1.jar')
+    api 'org.apache.commons:commons-math3:3.6.1'
 }
