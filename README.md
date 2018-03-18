@@ -93,5 +93,24 @@ The most simple linear acceleration filter is based on a low-pass filter. It has
 
 Calculating the gravity components of a normalized orientation is trivial, so FSensor can easily use the IMU orientation fusions to provide an estimation of linear acceleration that is far more customizable than what Android provides alone.
 
+## Sensor Offset Calibration
+
+FSensor contains an algorithm capable of compenstating for hard and soft iron distortions in the magnetic field. This same algorithm can also be used to correct for static offsets found in acceleration sensors. The algorithm fits points from an ellipsoid to the polynomial expression Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx + 2Hy + 2Iz = 1. The polynomial expression is then solved and the center and radii of the ellipse are determined. 
+
+Under certain conditions this algorithm can calibrate a magnetic sensor in an environment that has hard and soft iron distortions (usually from metal or electronics). These environments are commonly found in vehicles, boats and aircraft.
+
+### Hard Iron Distortions
+
+Hard iron distortions manifest as an offset of center from the point (0,0,0) Once the center of the ellipsoid is known, it can be transposed to the position (0,0,0) correcting for any hard iron distortions or static offsets found on the sensor. 
+
+### Soft Iron Distortions
+
+Soft iron distortions manifest as radii that do not have a normalized unit length of 1 (effectively creating a ellipsoid instead of a sphere). Since the radii of the ellipsoid are known, they can be rescaled to a unit length of 1 providing a sphere with a radii of (1,1,1) centered on the point (0,0,0).
+
+The algorithm can be visualized. The red cloud of dots represent the initial measurements as an ellipsoid with an offset. The green cloud of dots represent the red cloud of dots after being corrected by the algorithm with a center of (0,0,0) and a radii of (1,1,1).
+
+![Alt text](http://kircherelectronics.com.23.38-89-161.groveurl.com/wp-content/uploads/2018/03/fsensor_ellipsoid_fit.png "FSensor")
+
+
 
 Published under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
