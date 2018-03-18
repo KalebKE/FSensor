@@ -150,7 +150,7 @@ public abstract class OrientationFusion implements BaseFilter {
         // values[1]: pitch, rotation around the X axis.
         // values[2]: roll, rotation around the Y axis.
 
-        // Heading, Azimuth, Yaw
+        // Heading, AzimuthUtil, Yaw
         double c1 = Math.cos(orientation[0] / 2);
         double s1 = Math.sin(orientation[0] / 2);
 
