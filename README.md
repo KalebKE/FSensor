@@ -43,7 +43,7 @@ Full app usage examples of FSensor can be found here:
 
 ## Averaging Filters
 
-FSensor implements three of the most common smoothing filters, low-pass, mean and median filters. All the filters are user configurable based on the time constant in units of seconds. The larger the time constant is, the smoother the signal will be. However, latency also increases with the time constant. Because the filter coefficient is in the time domain, differences in sensor output frequencies have little effect on the performance of the filter. These filters should perform about the same across all devices regardless of the sensor frequency. FSensor is clever about providing an implementation where the time constant is agnostic to the output frequencies of the devices sensors which vary greatly by model and manufacturer.
+FSensor implements three of the most common smoothing filters, low-pass, mean and median filters. The averaging filters can be found in the *.filter.averaging* package. All the filters are user configurable based on the time constant in units of seconds. The larger the time constant is, the smoother the signal will be. However, latency also increases with the time constant. Because the filter coefficient is in the time domain, differences in sensor output frequencies have little effect on the performance of the filter. These filters should perform about the same across all devices regardless of the sensor frequency. FSensor is clever about providing an implementation where the time constant is agnostic to the output frequencies of the devices sensors which vary greatly by model and manufacturer.
 
 ### Low-Pass Filter
 
@@ -59,7 +59,7 @@ FSensor uses a median filter designed to smooth the data points based on a time 
 
 ## Orientation Sensor Fusions
 
-FSensor offers two different estimations of rotation using IMU sensor fusions. One fusion is based on a quaternion backed complimentary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
+FSensor offers two different estimations of rotation using IMU sensor fusions. These filters can be found in the *.filter.fusion* package. One fusion is based on a quaternion backed complimentary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
 
 The gyroscope is used to measure the devices orientation. However, the gyroscope tends to drift due to round off errors and other factors. Most gyroscopes work by measuring very small vibrations in the earth's rotation, which means they really do not like external vibrations. Because of drift and external vibrations, the gyroscope has to be compensated with a second estimation of the devices orientation, which comes from the acceleration sensor and magnetic sensor. The acceleration sensor provides the pitch and roll estimations while the magnetic sensor provides the azimuth.
 
@@ -79,7 +79,7 @@ Kalman filtering, also known as linear quadratic estimation (LQE), is an algorit
 
 ## Linear Acceleration
 
-Acceleration Explorer offers a number of different linear acceleration filters. Linear acceleration is defined as linearAcceleration = (acceleration - gravity). An acceleration sensor is not capable of determining the difference between gravity/tilt and true linear acceleration. There is one standalone approach, a low-pass filter, and many sensor fusion based approaches. Acceleration Explorer offers implementations of all the common linear acceleration filters as well as the Android API implementation.
+Acceleration Explorer offers a number of different linear acceleration filters. These filters can be found in the *.linearacceleration* package. Linear acceleration is defined as linearAcceleration = (acceleration - gravity). An acceleration sensor is not capable of determining the difference between gravity/tilt and true linear acceleration. There is one standalone approach, a low-pass filter, and many sensor fusion based approaches. Acceleration Explorer offers implementations of all the common linear acceleration filters as well as the Android API implementation.
 
 ### Android Linear Acceleration
 
@@ -91,11 +91,11 @@ The most simple linear acceleration filter is based on a low-pass filter. It has
 
 ### IMU Sensor Fusion Linear Acceleration
 
-Calculating the gravity components of a normalized orientation is trivial, so FSensor can easily use the IMU orientation fusions to provide an estimation of linear acceleration that is far more customizable than what Android provides alone.
+Calculating the gravity components of a normalized orientation is trivial, so FSensor can use the IMU orientation fusions to provide an estimation of linear acceleration that is far more customizable than what Android provides alone.
 
 ## Sensor Offset Calibration
 
-FSensor contains an algorithm capable of compenstating for hard and soft iron distortions in the magnetic field. This same algorithm can also be used to correct for static offsets found in acceleration sensors. The algorithm fits points from an ellipsoid to the polynomial expression Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx + 2Hy + 2Iz = 1. The polynomial expression is then solved and the center and radii of the ellipse are determined. 
+FSensor contains an algorithm capable of compenstating for hard and soft iron distortions in the magnetic field. This algorithm can be found in the *.util* package. This same algorithm can also be used to correct for static offsets found in acceleration sensors. The algorithm fits points from an ellipsoid to the polynomial expression Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx + 2Hy + 2Iz = 1. The polynomial expression is then solved and the center and radii of the ellipse are determined. 
 
 Under certain conditions this algorithm can calibrate a magnetic sensor in an environment that has hard and soft iron distortions (usually from metal or electronics). These environments are commonly found in vehicles, boats and aircraft.
 
