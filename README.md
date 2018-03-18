@@ -30,6 +30,8 @@ dependencies {
 }
 ```
 
+[![](https://jitpack.io/v/KalebKE/FSensor.svg)](https://jitpack.io/#KalebKE/FSensor)
+
 ## Usage
 
 Simple examples of using FSensor can be found here:
