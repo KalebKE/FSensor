@@ -113,6 +113,8 @@ The algorithm can be visualized. The red cloud of dots represent the initial mea
 
 ![Alt text](http://kircherelectronics.com.23.38-89-161.groveurl.com/wp-content/uploads/2018/03/fsensor_ellipsoid_fit.png "FSensor")
 
+## Magnetic Tilt Compensation
 
+The trigonometry used to calculate the heading from the magnetic sensors vector depends the vector being measured on a flat cartesian plane. Any tilt in the device will skew the measurements. FSensor provides helper functions to compenstate the tilt from either the acceleration sensor directly (for static cases) or from one of the Orientation Fusions provided by FSensor (in dynamic cases).
 
 Published under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
