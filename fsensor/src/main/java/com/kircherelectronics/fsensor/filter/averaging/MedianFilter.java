@@ -43,6 +43,7 @@ public class MedianFilter extends AveragingFilter {
             .getSimpleName();
 
     private ArrayDeque<float[]> values;
+    private float[] output;
 
 
     /**
@@ -88,7 +89,14 @@ public class MedianFilter extends AveragingFilter {
             values.removeFirst();
         }
 
-        return getMean(values);
+        output = getMean(values);
+
+        return output;
+    }
+
+    @Override
+    public float[] getOutput() {
+        return output;
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.util;
+package com.kircherelectronics.fsensor.util.gravity;
 
 import android.hardware.SensorManager;
 
@@ -22,9 +22,11 @@ import android.hardware.SensorManager;
  * Helpful utility methods.
  * Created by kaleb on 7/6/17.
  */
-public class Util {
+public class GravityUtil {
 
-    private static final String tag = Util.class.getSimpleName();
+    private static final String tag = GravityUtil.class.getSimpleName();
+
+    private static float[] gravity = new float[]{SensorManager.GRAVITY_EARTH, SensorManager.GRAVITY_EARTH, SensorManager.GRAVITY_EARTH};
 
     public static float[] getGravityFromOrientation(float[] orientation) {
         // components[0]: azimuth, rotation around the Z axis.
@@ -34,20 +36,28 @@ public class Util {
 
         // Find the gravity component of the X-axis
         // = g*-cos(pitch)*sin(roll);
-        components[0] = (float) (SensorManager.GRAVITY_EARTH
+        components[0] = (float) (gravity[0]
                 * -Math.cos(orientation[1]) * Math
                 .sin(orientation[2]));
 
         // Find the gravity component of the Y-axis
         // = g*-sin(pitch);
-        components[1] = (float) (SensorManager.GRAVITY_EARTH * -Math
+        components[1] = (float) (gravity[1] * -Math
                 .sin(orientation[1]));
 
         // Find the gravity component of the Z-axis
         // = g*cos(pitch)*cos(roll);
-        components[2] = (float) (SensorManager.GRAVITY_EARTH
+        components[2] = (float) (gravity[2]
                 * Math.cos(orientation[1]) * Math.cos(orientation[2]));
 
         return components;
+    }
+
+    /**
+     * Set the gravity as measured by the sensor. Defaults to SensorManager.GRAVITY_EARTH
+     * @param g the gravity of earth in units of m/s^2
+     */
+    public static void setGravity(float[] g) {
+        gravity = g;
     }
 }

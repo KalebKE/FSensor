@@ -1,7 +1,8 @@
 package com.kircherelectronics.fsensor.linearacceleration;
 
 import com.kircherelectronics.fsensor.filter.fusion.OrientationFusion;
-import com.kircherelectronics.fsensor.util.Util;
+import com.kircherelectronics.fsensor.util.gravity.GravityUtil;
+
 
 /*
  * Copyright 2017, Kircher Electronics, LLC
@@ -31,7 +32,7 @@ public class LinearAccelerationFusion extends LinearAcceleration {
     }
 
     @Override
-    public float[] getGravity(float[] values) {
-        return Util.getGravityFromOrientation(filter.filter(values));
+    public float[] getGravity() {
+        return GravityUtil.getGravityFromOrientation(filter.getOutput());
     }
 }
