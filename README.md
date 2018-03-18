@@ -57,7 +57,7 @@ FSensor implements a mean filter designed to smooth the data points based on a t
 
 FSensor uses a median filter designed to smooth the data points based on a time constant in units of seconds. The median filter will take the median of the samples that occur over a period defined by the time constant... the number of samples that are considered is known as the filter window. The approach allows the filter window to be defined over a period of time, instead of a fixed number of samples.
 
-## Sensor Fusions
+## Orientation Sensor Fusions
 
 FSensor offers two different estimations of rotation using IMU sensor fusions. One fusion is based on a quaternion backed complimentary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
 
