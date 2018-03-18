@@ -15,23 +15,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Determines the center, radii, eigenvalues and eigenvectors of the ellipse
+ * Determines the offset, radii, eigenvalues and eigenvectors of the ellipse
  * using an expanded algorithm based on Yury Petrov's Ellipsoid Fit MATLAB script. The
  * algorithm fits points from an ellipsoid to the polynomial expression Ax^2 +
  * By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx + 2Hy + 2Iz = 1. The polynomial
- * expression is then solved and the center and radii of the ellipse are
+ * expression is then solved and the offset and radii of the ellipse are
  * determined.
- *
+ * <p>
  * Caveat Emptor: The polynomial expression not guaranteed to be one of an
  * ellipsoid. It could result in any quadric (hyperboloid, paraboloid, etc). If
  * the data is to sparse, the values of the eigenvectors could be reversed
  * resulting in a fit that is not an ellipsoid.
  *
  * @author Kaleb
- *
  */
-public class FitPoints
-{
+public class FitPoints {
     private static final String TAG = FitPoints.class.getSimpleName();
 
     public RealVector center;
@@ -45,14 +43,12 @@ public class FitPoints
 
     /**
      * Fit points to the polynomial expression Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz
-     * + 2Fyz + 2Gx + 2Hy + 2Iz = 1 and determine the center and radii of the
+     * + 2Fyz + 2Gx + 2Hy + 2Iz = 1 and determine the offset and radii of the
      * fit ellipsoid.
      *
-     * @param points
-     *            the points to be fit to the ellipsoid.
+     * @param points the points to be fit to the ellipsoid.
      */
-    public FitPoints(ArrayList<ThreeSpacePoint> points)
-    {
+    public FitPoints(ArrayList<ThreeSpacePoint> points) {
         // Fit the points to Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz
         // + 2Fyz + 2Gx + 2Hy + 2Iz = 1 and solve the system.
         // v = (( d' * d )^-1) * ( d' * ones.mapAddToSelf(1));
@@ -61,10 +57,10 @@ public class FitPoints
         // Form the algebraic form of the ellipsoid.
         RealMatrix a = formAlgebraicMatrix(v);
 
-        // Find the center of the ellipsoid.
+        // Find the offset of the ellipsoid.
         center = findCenter(a);
 
-        // Translate the algebraic form of the ellipsoid to the center.
+        // Translate the algebraic form of the ellipsoid to the offset.
         RealMatrix r = translateToCenter(center, a);
 
         // Generate a submatrix of r.
@@ -75,10 +71,8 @@ public class FitPoints
 
         // subr[i][j] = subr[i][j] / -r[3][3]).
         double divr = -r.getEntry(3, 3);
-        for (int i = 0; i < subr.getRowDimension(); i++)
-        {
-            for (int j = 0; j < subr.getRowDimension(); j++)
-            {
+        for (int i = 0; i < subr.getRowDimension(); i++) {
+            for (int j = 0; j < subr.getRowDimension(); j++) {
                 subr.setEntry(i, j, subr.getEntry(i, j) / divr);
             }
         }
@@ -98,12 +92,10 @@ public class FitPoints
      * Solve the polynomial expression Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz +
      * 2Gx + 2Hy + 2Iz from the provided points.
      *
-     * @param points
-     *            the points that will be fit to the polynomial expression.
+     * @param points the points that will be fit to the polynomial expression.
      * @return the solution vector to the polynomial expression.
      */
-    private RealVector solveSystem(ArrayList<ThreeSpacePoint> points)
-    {
+    private RealVector solveSystem(ArrayList<ThreeSpacePoint> points) {
         // determine the number of points
         int numPoints = points.size();
 
@@ -113,8 +105,7 @@ public class FitPoints
 
         // Fit the ellipsoid in the form of
         // Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx + 2Hy + 2Iz
-        for (int i = 0; i < d.getRowDimension(); i++)
-        {
+        for (int i = 0; i < d.getRowDimension(); i++) {
             double xx = Math.pow(points.get(i).x, 2);
             double yy = Math.pow(points.get(i).y, 2);
             double zz = Math.pow(points.get(i).z, 2);
@@ -164,12 +155,10 @@ public class FitPoints
      * Create a matrix in the algebraic form of the polynomial Ax^2 + By^2 +
      * Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx + 2Hy + 2Iz = 1.
      *
-     * @param v
-     *            the vector polynomial.
+     * @param v the vector polynomial.
      * @return the matrix of the algebraic form of the polynomial.
      */
-    private RealMatrix formAlgebraicMatrix(RealVector v)
-    {
+    private RealMatrix formAlgebraicMatrix(RealVector v) {
         // a =
         // [ Ax^2 2Dxy 2Exz 2Gx ]
         // [ 2Dxy By^2 2Fyz 2Hy ]
@@ -198,20 +187,16 @@ public class FitPoints
     }
 
     /**
-     * Find the center of the ellipsoid.
+     * Find the offset of the ellipsoid.
      *
-     * @param a
-     *            the algebraic from of the polynomial.
-     * @return a vector containing the center of the ellipsoid.
+     * @param a the algebraic from of the polynomial.
+     * @return a vector containing the offset of the ellipsoid.
      */
-    private RealVector findCenter(RealMatrix a)
-    {
+    private RealVector findCenter(RealMatrix a) {
         RealMatrix subA = a.getSubMatrix(0, 2, 0, 2);
 
-        for (int q = 0; q < subA.getRowDimension(); q++)
-        {
-            for (int s = 0; s < subA.getColumnDimension(); s++)
-            {
+        for (int q = 0; q < subA.getRowDimension(); q++) {
+            for (int s = 0; s < subA.getColumnDimension(); s++) {
                 subA.multiplyEntry(q, s, -1.0);
             }
         }
@@ -227,16 +212,13 @@ public class FitPoints
     }
 
     /**
-     * Translate the algebraic form of the ellipsoid to the center.
+     * Translate the algebraic form of the ellipsoid to the offset.
      *
-     * @param center
-     *            vector containing the center of the ellipsoid.
-     * @param a
-     *            the algebraic form of the polynomial.
-     * @return the center translated form of the algebraic ellipsoid.
+     * @param center vector containing the offset of the ellipsoid.
+     * @param a      the algebraic form of the polynomial.
+     * @return the offset translated form of the algebraic ellipsoid.
      */
-    private RealMatrix translateToCenter(RealVector center, RealMatrix a)
-    {
+    private RealMatrix translateToCenter(RealVector center, RealMatrix a) {
         // Form the corresponding translation matrix.
         RealMatrix t = MatrixUtils.createRealIdentityMatrix(4);
 
@@ -246,7 +228,7 @@ public class FitPoints
 
         t.setSubMatrix(centerMatrix.getData(), 3, 0);
 
-        // Translate to the center.
+        // Translate to the offset.
         RealMatrix r = t.multiply(a).multiply(t.transpose());
 
         return r;
@@ -255,11 +237,9 @@ public class FitPoints
     /**
      * Generates a vector from the identity matrix of r.
      *
-     * @param subr
-     *            centered algebraic form of the ellipsoid
+     * @param subr centered algebraic form of the ellipsoid
      */
-    private RealVector generateRIV(RealMatrix subr)
-    {
+    private RealVector generateRIV(RealMatrix subr) {
         riv = new ArrayRealVector(3);
 
         riv.setEntry(0, Math.abs(subr.getEntry(0, 0)));
@@ -271,24 +251,22 @@ public class FitPoints
 
     /**
      * Find the radii of the ellipsoid in ascending order.
+     *
      * @param evals the eigenvalues of the ellipsoid.
      * @return the radii of the ellipsoid.
      */
-    private RealVector findRadii(double[] evals)
-    {
+    private RealVector findRadii(double[] evals) {
         RealVector radii = new ArrayRealVector(evals.length);
 
         // radii[i] = sqrt(1/eval[i]);
-        for (int i = 0; i < evals.length; i++)
-        {
+        for (int i = 0; i < evals.length; i++) {
             radii.setEntry(i, Math.sqrt(1 / evals[i]));
         }
 
         return radii;
     }
 
-    public void printLog()
-    {
+    public void printLog() {
         Log.d(TAG, riv.toString());
 
         for (double eval : evals) {
