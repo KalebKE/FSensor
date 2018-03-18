@@ -1,11 +1,16 @@
 package com.kircherelectronics.fsensor.util.magnetic.tilt;
 
 /**
+ * Providers helpers to compensate for the tilt of a magnetic sensor.
  * Created by kaleb on 3/18/18.
  */
-
 public class TiltCompensationUtil {
 
+    /**
+     * Get the rotation vector based on the tilt of the acceleration sensor.
+     * @param acceleration the acceleration vector (tilt) from the device.
+     * @return a rotation vector [roll, pitch, azimuth (always 0)]
+     */
     public static float[] getRotationFromAcceleration(float[] acceleration) {
         float gpx = acceleration[0];
         float gpy = acceleration[1];
@@ -20,6 +25,12 @@ public class TiltCompensationUtil {
         return new float[]{phi, the, 0};
     }
 
+    /**
+     * Compensate for the tilt of the magnetic sensor with a rotation vector.
+     * @param magnetic the magnetic sensor vector.
+     * @param rotation the rotation vector [roll, pitch, azimuth] from the gyroscope, acceleration sensor or both (note that azimuth is not used).
+     * @return the compensated magnetic vector.
+     */
     public static float[] compensateTilt(float[] magnetic, float[] rotation)
     {
         float bpx = magnetic[0];
