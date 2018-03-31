@@ -245,8 +245,10 @@ public abstract class OrientationFusion implements BaseFilter {
     }
 
     protected void initializeRotationVectorGyroscopeIfRequired(Quaternion rotationVectorAccelerationMagnetic) {
-        rotationVectorGyroscope = new Quaternion(rotationVectorAccelerationMagnetic.getScalarPart(),
+        if(rotationVectorGyroscope == null) {
+            rotationVectorGyroscope = new Quaternion(rotationVectorAccelerationMagnetic.getScalarPart(),
                     rotationVectorAccelerationMagnetic.getVectorPart());
+        }
     }
 
     private float[] getFusedOrientation(float[] gyroscope) {
