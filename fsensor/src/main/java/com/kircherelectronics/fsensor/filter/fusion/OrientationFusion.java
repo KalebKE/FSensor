@@ -180,7 +180,7 @@ public abstract class OrientationFusion implements BaseFilter {
         // Android Y (roll) = Equation X (roll)
         // Android Z (azimuth) = Equation Y (azimuth)
 
-        return new Quaternion(w, z, x, y);
+        return new Quaternion(w, z, x, -y);
     }
 
     /**
