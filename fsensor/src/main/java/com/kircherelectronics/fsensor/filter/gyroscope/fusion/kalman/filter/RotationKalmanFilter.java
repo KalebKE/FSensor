@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.filter.kalman;
+package com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

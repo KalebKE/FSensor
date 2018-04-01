@@ -1,7 +1,5 @@
 package com.kircherelectronics.fsensor.filter.averaging;
 
-import com.kircherelectronics.fsensor.filter.BaseFilter;
-
 /*
  * Copyright 2017, Kircher Electronics, LLC
  *
@@ -18,13 +16,15 @@ import com.kircherelectronics.fsensor.filter.BaseFilter;
  * limitations under the License.
  */
 
+import com.kircherelectronics.fsensor.BaseFilter;
+
 /**
- * A base implementation of an averaging filter.
+ * A base implementation of an averaging fusedOrientation.
  *
  * Created by kaleb on 7/6/17.
  */
 
-public abstract class AveragingFilter implements BaseFilter {
+public abstract class AveragingFilter extends BaseFilter {
     public static float DEFAULT_TIME_CONSTANT = 0.18f;
 
     protected float timeConstant;
