@@ -1,7 +1,6 @@
 package com.kircherelectronics.fsensor.util.rotation;
 
 import android.hardware.SensorManager;
-import android.util.Log;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -68,8 +67,6 @@ public class RotationUtil {
         if (SensorManager.getRotationMatrix(rotationMatrix, null, acceleration, magnetic)) {
             float[] baseOrientation = new float[3];
             SensorManager.getOrientation(rotationMatrix, baseOrientation);
-
-            Log.d("kbk", "Base Orientation: " + Arrays.toString(baseOrientation));
 
             return baseOrientation;
         }

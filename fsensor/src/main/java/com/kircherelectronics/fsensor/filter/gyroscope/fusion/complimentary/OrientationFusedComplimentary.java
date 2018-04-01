@@ -152,8 +152,6 @@ public class OrientationFusedComplimentary extends OrientationFused {
             // Get the fused orienatation
             SensorManager.getOrientation(fusedMatrix, output);
 
-            Log.d("kbk", "Gyro Orientation: " + Arrays.toString(output));
-
             return output;
         } else {
             throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
