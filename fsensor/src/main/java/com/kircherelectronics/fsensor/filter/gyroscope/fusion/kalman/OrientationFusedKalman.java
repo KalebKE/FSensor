@@ -1,11 +1,14 @@
-package com.kircherelectronics.fsensor.filter.fusion;
+package com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman;
 
 import android.hardware.SensorManager;
 import android.util.Log;
 
-import com.kircherelectronics.fsensor.filter.kalman.RotationKalmanFilter;
-import com.kircherelectronics.fsensor.filter.kalman.RotationMeasurementModel;
-import com.kircherelectronics.fsensor.filter.kalman.RotationProcessModel;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.OrientationFused;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary.OrientationFusedComplimentary;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationKalmanFilter;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationMeasurementModel;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationProcessModel;
+import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -28,9 +31,9 @@ import java.util.Arrays;
  */
 
 /**
- * An implementation of a Kalman filter based orientation sensor fusion.
- *  * <p>
- * The filter attempts to fuse magnetometer, gravity and gyroscope
+ * An implementation of a Kalman fusedOrientation based orientation sensor fusion.
+ * * <p>
+ * The fusedOrientation attempts to fuse magnetometer, gravity and gyroscope
  * sensors together to produce an accurate measurement of the rotation of the
  * device.
  * <p>
@@ -46,34 +49,32 @@ import java.util.Arrays;
  * acceleration/magnetic sensors to remain accurate.
  * <p>
  * Quaternions are used to integrate the measurements of the gyroscope and apply
- * the rotations to each sensors measurements via Kalman filter. This the
+ * the rotations to each sensors measurements via Kalman fusedOrientation. This the
  * ideal method because quaternions are not subject to many of the singularties
  * of rotation matrices, such as gimbal lock.
  * <p>
  * Created by kaleb on 7/6/17.
  */
 
-public class OrientationKalmanFusion extends OrientationFusion {
+public class OrientationFusedKalman extends OrientationFused {
 
-    private static final String tag = OrientationComplimentaryFusion.class.getSimpleName();
+    private static final String tag = OrientationFusedComplimentary.class.getSimpleName();
 
     private RotationKalmanFilter kalmanFilter;
     private RotationProcessModel pm;
     private RotationMeasurementModel mm;
     private volatile boolean run;
-    private volatile float dt;
+    private volatile float dT;
     private volatile float[] output = new float[3];
-    private volatile float[] acceleration = new float[3];
-    private volatile float[] magnetic = new float[3];
-    private volatile float[] orientation;
-    private volatile float[] gyroscope = new float[4];
     private Thread thread;
 
-    public OrientationKalmanFusion() {
+    private volatile Quaternion rotationOrientation;
+
+    public OrientationFusedKalman() {
         this(DEFAULT_TIME_CONSTANT);
     }
 
-    public OrientationKalmanFusion(float timeConstant) {
+    public OrientationFusedKalman(float timeConstant) {
         super(timeConstant);
 
         pm = new RotationProcessModel();
@@ -82,7 +83,6 @@ public class OrientationKalmanFusion extends OrientationFusion {
         kalmanFilter = new RotationKalmanFilter(pm, mm);
     }
 
-    @Override
     public void startFusion() {
         if (run == false && thread == null) {
             run = true;
@@ -110,7 +110,6 @@ public class OrientationKalmanFusion extends OrientationFusion {
         }
     }
 
-    @Override
     public void stopFusion() {
         if (run == true && thread != null) {
             run = false;
@@ -119,31 +118,12 @@ public class OrientationKalmanFusion extends OrientationFusion {
         }
     }
 
-    @Override
     public float[] getOutput() {
         return output;
     }
 
     private float[] calculate() {
-        float[] baseOrientation;
-
-        if(orientation == null) {
-            baseOrientation = getBaseOrientation(acceleration, magnetic);
-        } else {
-            baseOrientation = orientation;
-        }
-
-        if (baseOrientation != null) {
-
-            Quaternion rotationVectorAccelerationMagnetic = rotationVectorToQuaternion(baseOrientation);
-            initializeRotationVectorGyroscopeIfRequired(rotationVectorAccelerationMagnetic);
-
-            rotationVectorGyroscope = getGyroscopeRotationVector(rotationVectorGyroscope, gyroscope, dt);
-
-            // Since we have to sample at a different rate than the samples are delivered, we integrate and the reset
-            // when
-            // we sample in the thread...
-            dt = 0;
+        if (rotationVectorGyroscope != null && rotationOrientation != null && dT != 0) {
 
             double[] vectorGyroscope = new double[4];
 
@@ -154,13 +134,13 @@ public class OrientationKalmanFusion extends OrientationFusion {
 
             double[] vectorAccelerationMagnetic = new double[4];
 
-            vectorAccelerationMagnetic[0] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[0];
-            vectorAccelerationMagnetic[1] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[1];
-            vectorAccelerationMagnetic[2] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[2];
-            vectorAccelerationMagnetic[3] = (float) rotationVectorAccelerationMagnetic.getScalarPart();
+            vectorAccelerationMagnetic[0] = (float) rotationOrientation.getVectorPart()[0];
+            vectorAccelerationMagnetic[1] = (float) rotationOrientation.getVectorPart()[1];
+            vectorAccelerationMagnetic[2] = (float) rotationOrientation.getVectorPart()[2];
+            vectorAccelerationMagnetic[3] = (float) rotationOrientation.getScalarPart();
 
-            // Apply the Kalman filter... Note that the prediction and correction
-            // inputs could be swapped, but the filter is much more stable in this
+            // Apply the Kalman fusedOrientation... Note that the prediction and correction
+            // inputs could be swapped, but the fusedOrientation is much more stable in this
             // configuration.
             kalmanFilter.predict(vectorGyroscope);
             kalmanFilter.correct(vectorAccelerationMagnetic);
@@ -197,47 +177,56 @@ public class OrientationKalmanFusion extends OrientationFusion {
             return output;
         }
 
-        // The device had a problem determining the base orientation from the acceleration and magnetic sensors,
-        // possible because of bad inputs or possibly because the device determined the orientation could not be
-        // calculated, e.g the device is in free-fall
-        Log.w(tag, "Base Device Orientation could not be computed!");
-
         return null;
     }
 
     /**
      * Calculate the fused orientation of the device.
-     * @param gyroscope the gyroscope measurements.
-     * @param dt the gyroscope delta
+     *
+     * @param gyroscope    the gyroscope measurements.
+     * @param timestamp    the gyroscope timestamp
      * @param acceleration the acceleration measurements
-     * @param magnetic the magnetic measurements
+     * @param magnetic     the magnetic measurements
      * @return the fused orientation estimation.
      */
-    protected float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] acceleration, float[] magnetic) {
-        this.gyroscope = gyroscope;
-        // Since we have to sample at a different rate than the samples are delivered, we integrate and the reset when
-        // we sample in the thread...
-        this.dt += dt;
-        this.acceleration = acceleration;
-        this.magnetic = magnetic;
+    public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic) {
 
-        return output;
+        if(rotationVectorGyroscope != null) {
+            if (this.timestamp != 0) {
+                dT = (timestamp - this.timestamp) * NS2S;
+
+                rotationOrientation = RotationUtil.getOrientationQuaternionFromAccelerationMagnetic(acceleration, magnetic);
+                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
+            }
+            this.timestamp = timestamp;
+
+            return output;
+        }  else {
+            throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
+        }
     }
 
     /**
      * Calculate the fused orientation of the device.
-     * @param gyroscope the gyroscope measurements.
-     * @param dt the gyroscope delta
+     *
+     * @param gyroscope   the gyroscope measurements.
+     * @param timestamp   the gyroscope timestamp
      * @param orientation an estimation of device orientation.
      * @return the fused orientation estimation.
      */
-    protected float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] orientation) {
-        this.gyroscope = gyroscope;
-        // Since we have to sample at a different rate than the samples are delivered, we integrate and the reset when
-        // we sample in the thread...
-        this.dt += dt;
-        this.orientation = orientation;
+    public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] orientation) {
+        if(rotationVectorGyroscope != null) {
+            if (this.timestamp != 0) {
+                dT = (timestamp - this.timestamp) * NS2S;
 
-        return output;
+                rotationOrientation = RotationUtil.vectorToQuaternion(orientation);
+                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
+            }
+            this.timestamp = timestamp;
+
+            return output;
+        } else {
+            throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
+        }
     }
 }

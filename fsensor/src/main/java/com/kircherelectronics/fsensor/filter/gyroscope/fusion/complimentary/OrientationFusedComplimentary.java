@@ -1,9 +1,14 @@
-package com.kircherelectronics.fsensor.filter.fusion;
+package com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary;
 
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.OrientationFused;
+import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
+
 import org.apache.commons.math3.complex.Quaternion;
+
+import java.util.Arrays;
 
 /*
  * Copyright 2017, Kircher Electronics, LLC
@@ -23,10 +28,10 @@ import org.apache.commons.math3.complex.Quaternion;
 
 /**
  * OrientationComplimentaryFilter estimates the orientation of the devices based on a sensor fusion of a
- * gyroscope, accelerometer and magnetometer. The filter is backed by a quaternion based complimentary filter.
+ * gyroscope, accelerometer and magnetometer. The fusedOrientation is backed by a quaternion based complimentary fusedOrientation.
  * <p>
- * The complementary filter is a frequency domain filter. In its strictest
- * sense, the definition of a complementary filter refers to the use of two or
+ * The complementary fusedOrientation is a frequency domain fusedOrientation. In its strictest
+ * sense, the definition of a complementary fusedOrientation refers to the use of two or
  * more transfer functions, which are mathematical complements of one another.
  * Thus, if the data from one sensor is operated on by G(s), then the data from
  * the other sensor is operated on by I-G(s), and the sum of the transfer
@@ -48,13 +53,13 @@ import org.apache.commons.math3.complex.Quaternion;
  * acceleration/magnetic sensors to remain accurate.
  * <p>
  * Quaternions are used to integrate the measurements of the gyroscope and apply
- * the rotations to each sensors measurements via complementary filter. This the
+ * the rotations to each sensors measurements via complementary fusedOrientation. This the
  * ideal method because quaternions are not subject to many of the singularties
  * of rotation matrices, such as gimbal lock.
  * <p>
  * The quaternion for the magnetic/acceleration sensor is only needed to apply
  * the weighted quaternion to the gyroscopes weighted quaternion via
- * complementary filter to produce the fused rotation. No integrations are
+ * complementary fusedOrientation to produce the fused rotation. No integrations are
  * required.
  * <p>
  * The gyroscope provides the angular rotation speeds for all three axes. To
@@ -75,63 +80,57 @@ import org.apache.commons.math3.complex.Quaternion;
  * @author Kaleb
  *         http://developer.android.com/reference/android/hardware/SensorEvent.html#values
  */
-public class OrientationComplimentaryFusion extends OrientationFusion {
+public class OrientationFusedComplimentary extends OrientationFused {
 
-    private static final String tag = OrientationComplimentaryFusion.class.getSimpleName();
-
-    private float[] output;
+    private static final String tag = OrientationFusedComplimentary.class.getSimpleName();
 
     /**
      * Initialize a singleton instance.
      */
-    public OrientationComplimentaryFusion() {
+    public OrientationFusedComplimentary() {
         this(DEFAULT_TIME_CONSTANT);
-
-        output = new float[3];
     }
 
-    public OrientationComplimentaryFusion(float timeConstant) {
+    public OrientationFusedComplimentary(float timeConstant) {
         super(timeConstant);
-
-        output = new float[3];
     }
 
     /**
      * Calculate the fused orientation of the device.
      * @param gyroscope the gyroscope measurements.
-     * @param dt the gyroscope delta
+     * @param timestamp the gyroscope timestamp
      * @param acceleration the acceleration measurements
      * @param magnetic the magnetic measurements
      * @return the fused orientation estimation.
      */
-    protected float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] acceleration, float[] magnetic) {
+    public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic) {
+        if (rotationVectorGyroscope != null) {
 
-        float[] baseOrientation = getBaseOrientation(acceleration, magnetic);
+            if (this.timestamp != 0) {
+                final float dT = (timestamp - this.timestamp) * NS2S;
 
-        if (baseOrientation != null) {
-            float alpha = timeConstant / (timeConstant + dt);
-            float oneMinusAlpha = (1.0f - alpha);
+                float alpha = timeConstant / (timeConstant + dT);
+                float oneMinusAlpha = (1.0f - alpha);
 
-            Quaternion rotationVectorAccelerationMagnetic = rotationVectorToQuaternion(baseOrientation);
-            initializeRotationVectorGyroscopeIfRequired(rotationVectorAccelerationMagnetic);
+                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationQuaternionFromAccelerationMagnetic(acceleration, magnetic);
 
-            rotationVectorGyroscope = getGyroscopeRotationVector(rotationVectorGyroscope, gyroscope, dt);
+                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
 
-            // Apply the complementary filter. // We multiply each rotation by their
-            // coefficients (scalar matrices)...
-            Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply
-                    (oneMinusAlpha);
+                // Apply the complementary fusedOrientation. // We multiply each rotation by their
+                // coefficients (scalar matrices)...
+                Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply
+                        (oneMinusAlpha);
 
-            // Scale our quaternion for the gyroscope
-            Quaternion scaledRotationVectorGyroscope = rotationVectorGyroscope.multiply(alpha);
+                // Scale our quaternion for the gyroscope
+                Quaternion scaledRotationVectorGyroscope = rotationVectorGyroscope.multiply(alpha);
 
-            // ...and then add the two quaternions together.
-            // output[0] = alpha * output[0] + (1 - alpha) * input[0];
-            rotationVectorGyroscope = scaledRotationVectorGyroscope.add
-                    (scaledRotationVectorAccelerationMagnetic);
+                // ...and then add the two quaternions together.
+                // output[0] = alpha * output[0] + (1 - alpha) * input[0];
+                rotationVectorGyroscope = scaledRotationVectorGyroscope.add
+                        (scaledRotationVectorAccelerationMagnetic);
+            }
 
-            // Now we get a structure we can pass to get a rotation matrix, and then
-            // an orientation vector from Android.
+            this.timestamp = timestamp;
 
             float[] fusedVector = new float[4];
 
@@ -153,53 +152,47 @@ public class OrientationComplimentaryFusion extends OrientationFusion {
             // Get the fused orienatation
             SensorManager.getOrientation(fusedMatrix, output);
 
+            Log.d("kbk", "Gyro Orientation: " + Arrays.toString(output));
+
             return output;
+        } else {
+            throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
         }
-
-        // The device had a problem determining the base orientation from the acceleration and magnetic sensors,
-        // possible because of bad inputs or possibly because the device determined the orientation could not be
-        // calculated, e.g the device is in free-fall
-        Log.w(tag, "Base Device Orientation could not be computed!");
-
-        return null;
     }
 
     /**
      * Calculate the fused orientation of the device.
      * @param gyroscope the gyroscope measurements.
-     * @param dt the gyroscope delta
-     * @param orientation an estimation of device orientation.
+     * @param timestamp the gyroscope timestamp
+     * @param orientationVector an estimation of device orientation.
      * @return the fused orientation estimation.
      */
-    protected float[] calculateFusedOrientation(float[] gyroscope, float dt, float[] orientation) {
-        float[] baseOrientation = orientation;
+    public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] orientationVector) {
+        if (rotationVectorGyroscope != null) {
+            if (this.timestamp != 0) {
+                final float dT = (timestamp - this.timestamp) * NS2S;
 
-        if (baseOrientation != null) {
-            float alpha = timeConstant / (timeConstant + dt);
-            float oneMinusAlpha = (1.0f - alpha);
+                float alpha = timeConstant / (timeConstant + dT);
+                float oneMinusAlpha = (1.0f - alpha);
 
-            Quaternion baseOrientationQuaternion = rotationVectorToQuaternion(baseOrientation);
+                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.vectorToQuaternion(orientationVector);
+                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
 
-            initializeRotationVectorGyroscopeIfRequired(baseOrientationQuaternion);
+                // Apply the complementary fusedOrientation. // We multiply each rotation by their
+                // coefficients (scalar matrices)...
+                Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply
+                        (oneMinusAlpha);
 
-            rotationVectorGyroscope = getGyroscopeRotationVector(rotationVectorGyroscope, gyroscope, dt);
+                // Scale our quaternion for the gyroscope
+                Quaternion scaledRotationVectorGyroscope = rotationVectorGyroscope.multiply(alpha);
 
-            // Apply the complementary filter. // We multiply each rotation by their
-            // coefficients (scalar matrices)...
-            Quaternion scaledRotationVectorAccelerationMagnetic = baseOrientationQuaternion.multiply
-                    (oneMinusAlpha);
+                // ...and then add the two quaternions together.
+                // output[0] = alpha * output[0] + (1 - alpha) * input[0];
+                rotationVectorGyroscope = scaledRotationVectorGyroscope.add
+                        (scaledRotationVectorAccelerationMagnetic);
+            }
 
-            // Scale our quaternion for the gyroscope
-            Quaternion scaledRotationVectorGyroscope = rotationVectorGyroscope.multiply(alpha);
-
-            // ...and then add the two quaternions together.
-            // output[0] = alpha * output[0] + (1 - alpha) * input[0];
-            rotationVectorGyroscope = scaledRotationVectorGyroscope.add
-                    (scaledRotationVectorAccelerationMagnetic);
-
-            // Now we get a structure we can pass to get a rotation matrix, and then
-            // an orientation vector from Android.
-
+            this.timestamp = timestamp;
             float[] fusedVector = new float[4];
 
             fusedVector[0] = (float) rotationVectorGyroscope.getVectorPart()[0];
@@ -221,24 +214,8 @@ public class OrientationComplimentaryFusion extends OrientationFusion {
             SensorManager.getOrientation(fusedMatrix, output);
 
             return output;
+        } else {
+            throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
         }
-
-        // The device had a problem determining the base orientation from the acceleration and magnetic sensors,
-        // possible because of bad inputs or possibly because the device determined the orientation could not be
-        // calculated, e.g the device is in free-fall
-        Log.w(tag, "Base Device Orientation could not be computed!");
-
-        return null;
     }
-
-    @Override
-    public float[] getOutput() {
-        return output;
-    }
-
-    @Override
-    public void startFusion() {}
-
-    @Override
-    public void stopFusion() {}
 }
