@@ -27,7 +27,7 @@ public void onSensorChanged(SensorEvent event) {
 
 ## Averaging Filter Linear Acceleration
 
-```
+```java
 // Stil a BaseFilter under the hood
 private AveragingFilter averagingFilter;
 private LinearAcceleration linearAccelerationFilter;
@@ -59,7 +59,7 @@ public void onSensorChanged(SensorEvent event) {
 
 ## Orientation IMU Sensor Fusions
 
-```
+```java
 private OrientationFusion orientationFusion;
 
 private void init() {
@@ -104,7 +104,7 @@ public void onPause() {
 
 ## Orientation IMU Sensor Fusion Linear Acceleration
 
-```
+```java
 private LinearAcceleration linearAccelerationFilter;
 private OrientationFusion orientationFusion;
 
@@ -154,7 +154,7 @@ public void onPause() {
 
 ## Magnetic Tilt Compenstation
 
-```
+```java
 private OrientationFusion orientationFusion;
 
 private void init() {
@@ -204,7 +204,8 @@ public void onPause() {
 ```
 
 ## OrientationComplimentaryFusion Full Example
-```
+
+```java
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private LinearAcceleration linearAccelerationFilter;
@@ -285,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 ## OrientationKalmanFusion Full Example
 
-```
+```java
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private LinearAcceleration linearAccelerationFilter;
