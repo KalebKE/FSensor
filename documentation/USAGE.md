@@ -6,7 +6,7 @@ Using FSensor involves two steps:
 
 ## Averaging Filters
 
-```
+```java
 private BaseFilter filter; 
 
 private void init() {
