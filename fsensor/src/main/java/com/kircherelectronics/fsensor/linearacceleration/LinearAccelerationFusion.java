@@ -1,6 +1,6 @@
 package com.kircherelectronics.fsensor.linearacceleration;
 
-import com.kircherelectronics.fsensor.filter.fusion.OrientationFusion;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.OrientationFused;
 import com.kircherelectronics.fsensor.util.gravity.GravityUtil;
 
 
@@ -27,8 +27,8 @@ import com.kircherelectronics.fsensor.util.gravity.GravityUtil;
  */
 public class LinearAccelerationFusion extends LinearAcceleration {
 
-    public LinearAccelerationFusion(OrientationFusion orientationFusion) {
-        super(orientationFusion);
+    public LinearAccelerationFusion(OrientationFused orientationFused) {
+        super(orientationFused);
     }
 
     @Override

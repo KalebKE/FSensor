@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.filter.kalman;
+package com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter;
 
 import org.apache.commons.math3.filter.MeasurementModel;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;

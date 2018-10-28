@@ -152,6 +152,57 @@ public void onPause() {
 
 ```
 
+## Magnetic Tilt Compenstation
+
+```
+private OrientationFusion orientationFusion;
+
+private void init() {
+  orientationFusion = new ...  // OrientationComplimentaryFusion(), new OrientationKalmanFusion();
+}
+
+@Override
+public void onSensorChanged(SensorEvent event) {
+    if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+      // Android reuses events, so you probably want a copy
+      System.arraycopy(event.values, 0, acceleration, 0, event.values.length);
+      orientationFusion.setAcceleration(acceleration);
+    } else  if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+     // Android reuses events, so you probably want a copy
+      System.arraycopy(event.values, 0, magnetic, 0, event.values.length);
+      orientationFusion.setMagneticField(this.magnetic);
+      
+      // Compensate for tilt. Note: This sensor orientation assumes portrait mode with the device laying flat and the compass       // pointing out of the top of the device. Your milage may vary.
+      float[] output = TiltCompensationUtil.compensateTilt(new float[]{magnetic[0], -magnetic[1], magnetic[2]}, new float[]{fusedOrientation[1], fusedOrientation[2], 0});
+      // Reorient to the device
+      output[1] = -output[1];
+      azimuth = AzimuthUtil.getAzimuth(output);
+      
+    } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+      // Android reuses events, so you probably want a copy
+      System.arraycopy(event.values, 0, rotation, 0, event.values.length);
+      // Filter the rotation 
+      fusedOrientation = orientationFusion.filter(this.rotation);
+    }
+}
+
+@Override
+public void onResume() {
+    super.onResume();
+
+    // Required for OrientationKalmanFusion only
+    orientationFusion.startFusion();
+}
+
+@Override
+public void onPause() {
+     // Required for OrientationKalmanFusion only
+    orientationFusion.stopFusion();
+
+    super.onPause();
+}
+```
+
 ## OrientationComplimentaryFusion Full Example
 ```
 public class MainActivity extends AppCompatActivity implements SensorEventListener {

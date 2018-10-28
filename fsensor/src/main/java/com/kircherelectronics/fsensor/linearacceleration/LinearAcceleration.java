@@ -1,7 +1,5 @@
 package com.kircherelectronics.fsensor.linearacceleration;
 
-import com.kircherelectronics.fsensor.filter.BaseFilter;
-
 /*
  * Copyright 2017 Kircher Electronics, LLC
  *
@@ -18,8 +16,10 @@ import com.kircherelectronics.fsensor.filter.BaseFilter;
  * limitations under the License.
  */
 
+import com.kircherelectronics.fsensor.BaseFilter;
+
 /**
- * A base implementation of a linear acceleration filter. Linear acceleration is defined as
+ * A base implementation of a linear acceleration fusedOrientation. Linear acceleration is defined as
  * linearAcceleration = (acceleration - gravity). An acceleration sensor by itself is not capable of determining the
  * difference between gravity/tilt and true linear acceleration. There are standalone-sensor weighted averaging methods
  * as well as multi-sensor fusion methods available to estimate linear acceleration.
@@ -51,13 +51,5 @@ public abstract class LinearAcceleration {
         return output;
     }
 
-    public void setTimeConstant(float timeConstant) {
-        filter.setTimeConstant(timeConstant);
-    }
-
     public abstract float[] getGravity();
-
-    public void reset() {
-        filter.reset();
-    }
 }

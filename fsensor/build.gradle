@@ -7,11 +7,15 @@ android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
 
+    lintOptions {
+        abortOnError false
+    }
+
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 5
+        versionName "1.1.5"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
