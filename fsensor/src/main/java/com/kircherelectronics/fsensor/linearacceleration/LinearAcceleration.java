@@ -16,7 +16,11 @@ package com.kircherelectronics.fsensor.linearacceleration;
  * limitations under the License.
  */
 
+import android.util.Log;
+
 import com.kircherelectronics.fsensor.BaseFilter;
+
+import java.util.Arrays;
 
 /**
  * A base implementation of a linear acceleration fusedOrientation. Linear acceleration is defined as

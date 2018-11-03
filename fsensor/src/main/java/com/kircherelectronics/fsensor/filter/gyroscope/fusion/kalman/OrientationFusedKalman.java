@@ -191,41 +191,17 @@ public class OrientationFusedKalman extends OrientationFused {
      */
     public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic) {
 
-        if(rotationVectorGyroscope != null) {
+        if(isBaseOrientationSet()) {
             if (this.timestamp != 0) {
                 dT = (timestamp - this.timestamp) * NS2S;
 
-                rotationOrientation = RotationUtil.getOrientationQuaternionFromAccelerationMagnetic(acceleration, magnetic);
+                rotationOrientation = RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic);
                 rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
             }
             this.timestamp = timestamp;
 
             return output;
         }  else {
-            throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
-        }
-    }
-
-    /**
-     * Calculate the fused orientation of the device.
-     *
-     * @param gyroscope   the gyroscope measurements.
-     * @param timestamp   the gyroscope timestamp
-     * @param orientation an estimation of device orientation.
-     * @return the fused orientation estimation.
-     */
-    public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] orientation) {
-        if(rotationVectorGyroscope != null) {
-            if (this.timestamp != 0) {
-                dT = (timestamp - this.timestamp) * NS2S;
-
-                rotationOrientation = RotationUtil.vectorToQuaternion(orientation);
-                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
-            }
-            this.timestamp = timestamp;
-
-            return output;
-        } else {
             throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
         }
     }

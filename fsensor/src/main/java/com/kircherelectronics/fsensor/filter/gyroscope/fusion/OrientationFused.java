@@ -63,7 +63,7 @@ public abstract class OrientationFused extends BaseFilter {
     }
 
     public boolean isBaseOrientationSet() {
-        return !(rotationVectorGyroscope == null);
+        return rotationVectorGyroscope != null;
     }
 
     /**
@@ -85,15 +85,6 @@ public abstract class OrientationFused extends BaseFilter {
      * @return the fused orientation estimation.
      */
     public abstract float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic);
-
-    /**
-     * Calculate the fused orientation of the device.
-     * @param gyroscope the gyroscope measurements.
-     * @param timestamp the gyroscope timestamp
-     * @param orientation an estimation of device orientation.
-     * @return the fused orientation estimation.
-     */
-    public abstract float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] orientation);
 
     public void setBaseOrientation(Quaternion baseOrientation) {
             rotationVectorGyroscope = baseOrientation;

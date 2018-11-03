@@ -1,14 +1,14 @@
 package com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary;
 
-import android.hardware.SensorManager;
 import android.util.Log;
 
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.OrientationFused;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
-
-import java.util.Arrays;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 
 /*
  * Copyright 2017, Kircher Electronics, LLC
@@ -82,7 +82,7 @@ import java.util.Arrays;
  */
 public class OrientationFusedComplimentary extends OrientationFused {
 
-    private static final String tag = OrientationFusedComplimentary.class.getSimpleName();
+    private static final String TAG = OrientationFusedComplimentary.class.getSimpleName();
 
     /**
      * Initialize a singleton instance.
@@ -104,53 +104,42 @@ public class OrientationFusedComplimentary extends OrientationFused {
      * @return the fused orientation estimation.
      */
     public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic) {
-        if (rotationVectorGyroscope != null) {
-
+        if (isBaseOrientationSet()) {
             if (this.timestamp != 0) {
                 final float dT = (timestamp - this.timestamp) * NS2S;
 
                 float alpha = timeConstant / (timeConstant + dT);
                 float oneMinusAlpha = (1.0f - alpha);
 
-                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationQuaternionFromAccelerationMagnetic(acceleration, magnetic);
+                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic);
+                if(rotationVectorAccelerationMagnetic != null) {
+                    rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
 
-                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
+                    // Apply the complementary fusedOrientation. // We multiply each rotation by their
+                    // coefficients (scalar matrices)...
+                    Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply
+                            (oneMinusAlpha);
 
-                // Apply the complementary fusedOrientation. // We multiply each rotation by their
-                // coefficients (scalar matrices)...
-                Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply
-                        (oneMinusAlpha);
+                    // Scale our quaternion for the gyroscope
+                    Quaternion scaledRotationVectorGyroscope = rotationVectorGyroscope.multiply(alpha);
 
-                // Scale our quaternion for the gyroscope
-                Quaternion scaledRotationVectorGyroscope = rotationVectorGyroscope.multiply(alpha);
+                    // ...and then add the two quaternions together.
+                    // output[0] = alpha * output[0] + (1 - alpha) * input[0];
+                    rotationVectorGyroscope = scaledRotationVectorGyroscope.add
+                            (scaledRotationVectorAccelerationMagnetic);
+                }
 
-                // ...and then add the two quaternions together.
-                // output[0] = alpha * output[0] + (1 - alpha) * input[0];
-                rotationVectorGyroscope = scaledRotationVectorGyroscope.add
-                        (scaledRotationVectorAccelerationMagnetic);
+                Rotation rotation = new Rotation(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(),
+                        rotationVectorGyroscope.getQ3(), true);
+
+                try {
+                    output = doubleToFloat(rotation.getAngles(RotationOrder.XYZ, RotationConvention.FRAME_TRANSFORM));
+                } catch(Exception e) {
+                    Log.d(TAG, "", e);
+                }
             }
 
             this.timestamp = timestamp;
-
-            float[] fusedVector = new float[4];
-
-            fusedVector[0] = (float) rotationVectorGyroscope.getVectorPart()[0];
-            fusedVector[1] = (float) rotationVectorGyroscope.getVectorPart()[1];
-            fusedVector[2] = (float) rotationVectorGyroscope.getVectorPart()[2];
-            fusedVector[3] = (float) rotationVectorGyroscope.getScalarPart();
-
-            // rotation matrix from gyro data
-            float[] fusedMatrix = new float[9];
-
-            // We need a rotation matrix so we can get the orientation vector...
-            // Getting Euler
-            // angles from a quaternion is not trivial, so this is the easiest way,
-            // but perhaps
-            // not the fastest way of doing this.
-            SensorManager.getRotationMatrixFromVector(fusedMatrix, fusedVector);
-
-            // Get the fused orienatation
-            SensorManager.getOrientation(fusedMatrix, output);
 
             return output;
         } else {
@@ -158,62 +147,13 @@ public class OrientationFusedComplimentary extends OrientationFused {
         }
     }
 
-    /**
-     * Calculate the fused orientation of the device.
-     * @param gyroscope the gyroscope measurements.
-     * @param timestamp the gyroscope timestamp
-     * @param orientationVector an estimation of device orientation.
-     * @return the fused orientation estimation.
-     */
-    public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] orientationVector) {
-        if (rotationVectorGyroscope != null) {
-            if (this.timestamp != 0) {
-                final float dT = (timestamp - this.timestamp) * NS2S;
+    private static float[] doubleToFloat(double[] values) {
+        float[] f = new float[values.length];
 
-                float alpha = timeConstant / (timeConstant + dT);
-                float oneMinusAlpha = (1.0f - alpha);
-
-                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.vectorToQuaternion(orientationVector);
-                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
-
-                // Apply the complementary fusedOrientation. // We multiply each rotation by their
-                // coefficients (scalar matrices)...
-                Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply
-                        (oneMinusAlpha);
-
-                // Scale our quaternion for the gyroscope
-                Quaternion scaledRotationVectorGyroscope = rotationVectorGyroscope.multiply(alpha);
-
-                // ...and then add the two quaternions together.
-                // output[0] = alpha * output[0] + (1 - alpha) * input[0];
-                rotationVectorGyroscope = scaledRotationVectorGyroscope.add
-                        (scaledRotationVectorAccelerationMagnetic);
-            }
-
-            this.timestamp = timestamp;
-            float[] fusedVector = new float[4];
-
-            fusedVector[0] = (float) rotationVectorGyroscope.getVectorPart()[0];
-            fusedVector[1] = (float) rotationVectorGyroscope.getVectorPart()[1];
-            fusedVector[2] = (float) rotationVectorGyroscope.getVectorPart()[2];
-            fusedVector[3] = (float) rotationVectorGyroscope.getScalarPart();
-
-            // rotation matrix from gyro data
-            float[] fusedMatrix = new float[9];
-
-            // We need a rotation matrix so we can get the orientation vector...
-            // Getting Euler
-            // angles from a quaternion is not trivial, so this is the easiest way,
-            // but perhaps
-            // not the fastest way of doing this.
-            SensorManager.getRotationMatrixFromVector(fusedMatrix, fusedVector);
-
-            // Get the fused orienatation
-            SensorManager.getOrientation(fusedMatrix, output);
-
-            return output;
-        } else {
-            throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
+        for(int i = 0; i < f.length; i++){
+            f[i] = (float) values[i];
         }
+
+        return f;
     }
 }

@@ -1,11 +1,14 @@
 package com.kircherelectronics.fsensor.filter.gyroscope;
 
-import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.kircherelectronics.fsensor.BaseFilter;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 
 /*
  * Copyright 2017, Kircher Electronics, LLC
@@ -79,7 +82,7 @@ import org.apache.commons.math3.complex.Quaternion;
  */
 public class OrientationGyroscope extends BaseFilter {
 
-    private static final String tag = OrientationGyroscope.class.getSimpleName();
+    private static final String TAG = OrientationGyroscope.class.getSimpleName();
     private static final float NS2S = 1.0f / 1000000000.0f;
     private static final float EPSILON = 0.000000001f;
     private Quaternion rotationVectorGyroscope;
@@ -105,34 +108,23 @@ public class OrientationGyroscope extends BaseFilter {
      * @return An orientation vector -> @link SensorManager#getOrientation(float[], float[])}
      */
     public float[] calculateOrientation(float[] gyroscope, long timestamp) {
-
-        if (rotationVectorGyroscope != null) {
+        if (isBaseOrientationSet()) {
 
             if (this.timestamp != 0) {
                 final float dT = (timestamp - this.timestamp) * NS2S;
                 rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
+
+                Rotation rotation = new Rotation(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(),
+                        rotationVectorGyroscope.getQ3(), true);
+
+                try {
+                    output = doubleToFloat(rotation.getAngles(RotationOrder.XYZ, RotationConvention.FRAME_TRANSFORM));
+                } catch(Exception e) {
+                    Log.d(TAG, "", e);
+                }
             }
 
             this.timestamp = timestamp;
-
-            // Now we get a structure we can pass to get a rotation matrix, and then
-            // an orientation vector from Android.
-
-            float[] fusedVector = new float[4];
-
-            fusedVector[0] = (float) rotationVectorGyroscope.getVectorPart()[0];
-            fusedVector[1] = (float) rotationVectorGyroscope.getVectorPart()[1];
-            fusedVector[2] = (float) rotationVectorGyroscope.getVectorPart()[2];
-            fusedVector[3] = (float) rotationVectorGyroscope.getScalarPart();
-
-            // rotation matrix from gyro data
-            float[] fusedMatrix = new float[9];
-
-            // We need a rotation matrix so we can get the orientation vector
-            SensorManager.getRotationMatrixFromVector(fusedMatrix, fusedVector);
-
-            // Get the OrientationFused
-            SensorManager.getOrientation(fusedMatrix, output);
 
             return output;
         } else {
@@ -160,6 +152,16 @@ public class OrientationGyroscope extends BaseFilter {
     }
 
     public boolean isBaseOrientationSet() {
-        return !(rotationVectorGyroscope == null);
+        return rotationVectorGyroscope != null;
+    }
+
+    private static float[] doubleToFloat(double[] values) {
+        float[] f = new float[values.length];
+
+        for(int i = 0; i < f.length; i++){
+            f[i] = (float) values[i];
+        }
+
+        return f;
     }
 }
