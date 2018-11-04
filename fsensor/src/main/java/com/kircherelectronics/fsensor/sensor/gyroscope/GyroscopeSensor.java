@@ -94,15 +94,15 @@ public class GyroscopeSensor implements FSensor {
     }
 
     private void processAcceleration(float[] rawAcceleration) {
-        System.arraycopy(rawAcceleration, 0, this.acceleration, 0, rawAcceleration.length);
+        System.arraycopy(rawAcceleration, 0, this.acceleration, 0, this.acceleration.length);
     }
 
     private void processMagnetic(float[] magnetic) {
-        System.arraycopy(magnetic, 0, this.magnetic, 0, magnetic.length);
+        System.arraycopy(magnetic, 0, this.magnetic, 0, this.magnetic.length);
     }
 
     private void processRotation(float[] rotation) {
-        System.arraycopy(rotation, 0, this.rotation, 0, rotation.length);
+        System.arraycopy(rotation, 0, this.rotation, 0, this.rotation.length);
     }
 
     private void registerSensors(int sensorDelay) {
@@ -138,14 +138,22 @@ public class GyroscopeSensor implements FSensor {
 
     private class SimpleSensorListener implements SensorEventListener {
 
+        private int sensorEventThreshold = 500;
+        private int numAccelerationEvents = 0;
+        private int numMagneticEvents = 0;
+
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 processAcceleration(event.values);
-                hasAcceleration = true;
+                if(numAccelerationEvents++ > sensorEventThreshold) {
+                    hasAcceleration = true;
+                }
             } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
                 processMagnetic(event.values);
-                hasMagnetic = true;
+                if(numMagneticEvents ++ > sensorEventThreshold) {
+                    hasMagnetic = true;
+                }
             } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
                 processRotation(event.values);
 

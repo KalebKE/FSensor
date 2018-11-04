@@ -5,12 +5,15 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary.OrientationFusedComplimentary;
 import com.kircherelectronics.fsensor.linearacceleration.LinearAcceleration;
 import com.kircherelectronics.fsensor.linearacceleration.LinearAccelerationFusion;
 import com.kircherelectronics.fsensor.sensor.FSensor;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
+
+import java.util.Arrays;
 
 import io.reactivex.subjects.PublishSubject;
 
@@ -102,19 +105,19 @@ public class ComplimentaryLinearAccelerationSensor implements FSensor {
     }
 
     private void processRawAcceleration(float[] rawAcceleration) {
-        System.arraycopy(rawAcceleration, 0, this.rawAcceleration, 0, rawAcceleration.length);
+        System.arraycopy(rawAcceleration, 0, this.rawAcceleration, 0, this.rawAcceleration.length);
     }
 
     private void processAcceleration(float[] acceleration) {
-        System.arraycopy(acceleration, 0, this.acceleration, 0, acceleration.length);
+        System.arraycopy(acceleration, 0, this.acceleration, 0, this.acceleration.length);
     }
 
     private void processMagnetic(float[] magnetic) {
-        System.arraycopy(magnetic, 0, this.magnetic, 0, magnetic.length);
+        System.arraycopy(magnetic, 0, this.magnetic, 0, this.magnetic.length);
     }
 
     private void processRotation(float[] rotation) {
-        System.arraycopy(rotation, 0, this.rotation, 0, rotation.length);
+        System.arraycopy(rotation, 0, this.rotation, 0, this.rotation.length);
     }
 
     private void registerSensors(int sensorDelay) {
@@ -135,7 +138,7 @@ public class ComplimentaryLinearAccelerationSensor implements FSensor {
 
         // Register for sensor updates.
         sensorManager.registerListener(listener,
-                sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
+                sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED),
                 sensorDelay);
 
     }
@@ -161,7 +164,6 @@ public class ComplimentaryLinearAccelerationSensor implements FSensor {
                         orientationFusionComplimentary.setBaseOrientation(RotationUtil.getOrientationVectorFromAccelerationMagnetic(rawAcceleration, magnetic));
                     }
                 } else {
-                    //Log.d("kbk", "A: " + Arrays.toString(event.values));
                     orientationFusionComplimentary.calculateFusedOrientation(rotation, event.timestamp, rawAcceleration, magnetic);
                     processAcceleration(linearAccelerationFilterComplimentary.filter(rawAcceleration));
 
@@ -170,7 +172,7 @@ public class ComplimentaryLinearAccelerationSensor implements FSensor {
             } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
                 processMagnetic(event.values);
                 hasMagnetic = true;
-            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE_UNCALIBRATED) {
                 processRotation(event.values);
                 hasRotation = true;
             }

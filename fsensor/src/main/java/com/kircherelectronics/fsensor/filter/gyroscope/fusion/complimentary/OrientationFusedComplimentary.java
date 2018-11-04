@@ -10,6 +10,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 
+import java.util.Arrays;
+
 /*
  * Copyright 2017, Kircher Electronics, LLC
  *
@@ -112,6 +114,7 @@ public class OrientationFusedComplimentary extends OrientationFused {
                 float oneMinusAlpha = (1.0f - alpha);
 
                 Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic);
+
                 if(rotationVectorAccelerationMagnetic != null) {
                     rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
 
@@ -133,7 +136,7 @@ public class OrientationFusedComplimentary extends OrientationFused {
                         rotationVectorGyroscope.getQ3(), true);
 
                 try {
-                    output = doubleToFloat(rotation.getAngles(RotationOrder.XYZ, RotationConvention.FRAME_TRANSFORM));
+                    output = doubleToFloat(rotation.getAngles(RotationOrder.XYZ, RotationConvention.VECTOR_OPERATOR));
                 } catch(Exception e) {
                     Log.d(TAG, "", e);
                 }

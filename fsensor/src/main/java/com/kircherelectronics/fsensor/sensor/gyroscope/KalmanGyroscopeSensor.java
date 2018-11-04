@@ -95,15 +95,15 @@ public class KalmanGyroscopeSensor implements FSensor {
     }
 
     private void processAcceleration(float[] rawAcceleration) {
-        System.arraycopy(rawAcceleration, 0, this.acceleration, 0, rawAcceleration.length);
+        System.arraycopy(rawAcceleration, 0, this.acceleration, 0, this.acceleration.length);
     }
 
     private void processMagnetic(float[] magnetic) {
-        System.arraycopy(magnetic, 0, this.magnetic, 0, magnetic.length);
+        System.arraycopy(magnetic, 0, this.magnetic, 0, this.magnetic.length);
     }
 
     private void processRotation(float[] rotation) {
-        System.arraycopy(rotation, 0, this.rotation, 0, rotation.length);
+        System.arraycopy(rotation, 0, this.rotation, 0, this.rotation.length);
     }
 
     private void registerSensors(int sensorDelay) {

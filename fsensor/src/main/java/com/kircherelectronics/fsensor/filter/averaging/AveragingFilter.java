@@ -46,4 +46,6 @@ public abstract class AveragingFilter extends BaseFilter {
         timestamp = 0;
         count = 0;
     }
+
+    public abstract float[] filter(float[] data);
 }

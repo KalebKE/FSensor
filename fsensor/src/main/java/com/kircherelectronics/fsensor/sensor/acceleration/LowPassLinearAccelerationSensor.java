@@ -102,11 +102,11 @@ public class LowPassLinearAccelerationSensor implements FSensor {
     }
 
     private void processRawAcceleration(float[] rawAcceleration) {
-        System.arraycopy(rawAcceleration, 0, this.rawAcceleration, 0, rawAcceleration.length);
+        System.arraycopy(rawAcceleration, 0, this.rawAcceleration, 0, this.rawAcceleration.length);
     }
 
     private void processAcceleration(float[] acceleration) {
-        System.arraycopy(acceleration, 0, this.acceleration, 0, acceleration.length);
+        System.arraycopy(acceleration, 0, this.acceleration, 0, this.acceleration.length);
     }
 
     private void registerSensors(int sensorDelay) {

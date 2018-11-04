@@ -76,7 +76,7 @@ public class AccelerationSensor implements FSensor {
     }
 
     private void processAcceleration(float[] acceleration) {
-        System.arraycopy(acceleration, 0, this.acceleration, 0, acceleration.length);
+        System.arraycopy(acceleration, 0, this.acceleration, 0, this.acceleration.length);
     }
 
     private void registerSensors(int sensorDelay) {

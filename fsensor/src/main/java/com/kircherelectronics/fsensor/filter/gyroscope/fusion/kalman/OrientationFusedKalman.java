@@ -11,6 +11,9 @@ import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.Rota
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 
 import java.util.Arrays;
 
@@ -58,7 +61,7 @@ import java.util.Arrays;
 
 public class OrientationFusedKalman extends OrientationFused {
 
-    private static final String tag = OrientationFusedComplimentary.class.getSimpleName();
+    private static final String TAG = OrientationFusedComplimentary.class.getSimpleName();
 
     private RotationKalmanFilter kalmanFilter;
     private RotationProcessModel pm;
@@ -84,7 +87,7 @@ public class OrientationFusedKalman extends OrientationFused {
     }
 
     public void startFusion() {
-        if (run == false && thread == null) {
+        if (!run && thread == null) {
             run = true;
 
             thread = new Thread(new Runnable() {
@@ -97,7 +100,7 @@ public class OrientationFusedKalman extends OrientationFused {
                         try {
                             Thread.sleep(20);
                         } catch (InterruptedException e) {
-                            Log.e(tag, "Kalman Thread Run", e);
+                            Log.e(TAG, "Kalman Thread Run", e);
                             Thread.currentThread().interrupt();
                         }
                     }
@@ -111,7 +114,7 @@ public class OrientationFusedKalman extends OrientationFused {
     }
 
     public void stopFusion() {
-        if (run == true && thread != null) {
+        if (run && thread != null) {
             run = false;
             thread.interrupt();
             thread = null;
@@ -149,30 +152,14 @@ public class OrientationFusedKalman extends OrientationFused {
             rotationVectorGyroscope = new Quaternion(kalmanFilter.getStateEstimation()[3],
                     Arrays.copyOfRange(kalmanFilter.getStateEstimation(), 0, 3));
 
-            // Now we get a structure we can pass to get a rotation matrix, and then
-            // an orientation vector from Android.
+            Rotation rotation = new Rotation(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(),
+                    rotationVectorGyroscope.getQ3(), true);
 
-            float[] fusedVector = new float[4];
-
-            // Now we get a structure we can pass to get a rotation matrix, and then
-            // an orientation vector from Android.
-            fusedVector[0] = (float) rotationVectorGyroscope.getVectorPart()[0];
-            fusedVector[1] = (float) rotationVectorGyroscope.getVectorPart()[1];
-            fusedVector[2] = (float) rotationVectorGyroscope.getVectorPart()[2];
-            fusedVector[3] = (float) rotationVectorGyroscope.getScalarPart();
-
-            // rotation matrix from gyro data
-            float[] fusedMatrix = new float[9];
-
-            // We need a rotation matrix so we can get the orientation vector...
-            // Getting Euler
-            // angles from a quaternion is not trivial, so this is the easiest way,
-            // but perhaps
-            // not the fastest way of doing this.
-            SensorManager.getRotationMatrixFromVector(fusedMatrix, fusedVector);
-
-            // Get the fused orientation
-            SensorManager.getOrientation(fusedMatrix, output);
+            try {
+                output = doubleToFloat(rotation.getAngles(RotationOrder.XYZ, RotationConvention.VECTOR_OPERATOR));
+            } catch(Exception e) {
+                Log.d(TAG, "", e);
+            }
 
             return output;
         }
@@ -204,5 +191,15 @@ public class OrientationFusedKalman extends OrientationFused {
         }  else {
             throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
         }
+    }
+
+    private static float[] doubleToFloat(double[] values) {
+        float[] f = new float[values.length];
+
+        for(int i = 0; i < f.length; i++){
+            f[i] = (float) values[i];
+        }
+
+        return f;
     }
 }
