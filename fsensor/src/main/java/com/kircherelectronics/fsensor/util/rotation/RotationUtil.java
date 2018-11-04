@@ -3,8 +3,27 @@ package com.kircherelectronics.fsensor.util.rotation;
 import android.hardware.SensorManager;
 
 import org.apache.commons.math3.complex.Quaternion;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 
 import java.util.Arrays;
+
+/*
+ * Copyright 2018, Kircher Electronics, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Created by kaleb on 4/1/18.
@@ -58,84 +77,42 @@ public class RotationUtil {
 
     /**
      * Calculates orientation vector from accelerometer and magnetometer output.
+     *
      * @param acceleration the acceleration measurement.
-     * @param magnetic the magnetic measurement.
-     * @return {@link SensorManager#getOrientation(float[], float[])}
+     * @param magnetic     the magnetic measurement.
+     * @return
      */
-    public static float[] getOrientationVectorFromAccelerationMagnetic(float[] acceleration, float[] magnetic) {
+    public static Quaternion getOrientationVectorFromAccelerationMagnetic(float[] acceleration, float[] magnetic) {
         float[] rotationMatrix = new float[9];
         if (SensorManager.getRotationMatrix(rotationMatrix, null, acceleration, magnetic)) {
-            float[] baseOrientation = new float[3];
-            SensorManager.getOrientation(rotationMatrix, baseOrientation);
-
-            return baseOrientation;
+            float[] rv = new float[3];
+            SensorManager.getOrientation(rotationMatrix,rv);
+            // SensorManager.getOrientation() returns an orientation in Earth frame and that needs to be rotated into device frame so the reported angles
+            // are indexed with the orientation of the sensors
+            Rotation rotation = new Rotation(RotationOrder.XYZ, RotationConvention.VECTOR_OPERATOR, rv[1], -rv[2], rv[0]);
+            return new Quaternion(rotation.getQ0(), rotation.getQ1(),rotation.getQ2(),rotation.getQ3());
         }
 
         return null;
     }
 
-    /**
-     * Calculates orientation vector from accelerometer and magnetometer output.
-     * @param acceleration the acceleration measurement.
-     * @param magnetic the magnetic measurement.
-     * @return A Quaternion representation of the vector returned by {@link SensorManager#getOrientation(float[], float[])}
-     */
-    public static Quaternion getOrientationQuaternionFromAccelerationMagnetic(float[] acceleration, float[] magnetic) {
-        return vectorToQuaternion(getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic));
-    }
-
-    /**
-     * Create an quaternion vector, in this case a unit quaternion, from the
-     * provided Euler angle's (presumably from SensorManager.getFusedOrientation()).
-     * <p>
-     *
-     * @see <a href="http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/">Equation</a>
-     * @param vector The vector to convert to a Quaternion
-     * @return A Quaternion representation of the vector.
-     */
-    public static Quaternion vectorToQuaternion(float[] vector) {
-        if (vector != null) {
-            // Assuming the angles are in radians.
-
-            // getFusedOrientation() values:
-            // values[0]: azimuth, rotation around the Z axis.
-            // values[1]: pitch, rotation around the X axis.
-            // values[2]: roll, rotation around the Y axis.
-
-            // Heading, AzimuthUtil, Yaw
-            double c1 = Math.cos(vector[0] / 2);
-            double s1 = Math.sin(vector[0] / 2);
-
-            // Pitch, Attitude
-            // The equation assumes the pitch is pointed in the opposite direction
-            // of the orientation vector provided by Android, so we invert it.
-            double c2 = Math.cos(vector[1] / 2);
-            double s2 = Math.sin(vector[1] / 2);
-
-            // Roll, Bank
-            double c3 = Math.cos(vector[2] / 2);
-            double s3 = Math.sin(vector[2] / 2);
-
-            double c1c2 = c1 * c2;
-            double s1s2 = s1 * s2;
-
-            double w = c1c2 * c3 - s1s2 * s3;
-            double x = c1c2 * s3 + s1s2 * c3;
-            double y = s1 * c2 * c3 + c1 * s2 * s3;
-            double z = c1 * s2 * c3 - s1 * c2 * s3;
-
-            // The quaternion in the equation does not share the same coordinate
-            // system as the Android gyroscope quaternion we are using. We reorder
-            // it here.
-
-            // Android X (pitch) = Equation Z (pitch)
-            // Android Y (roll) = Equation X (roll)
-            // Android Z (azimuth) = Equation Y (azimuth)
-
-            // Note that the gyroscope sensor reports the rotation as positive in the counter-clockwise direction so we invert.
-            return new Quaternion(w, -z, -x, -y);
+    private static double[][] convertTo2DArray(float[] rotation) {
+        if (rotation.length != 9) {
+            throw new IllegalStateException("Length must be of 9! Length: " + rotation.length);
         }
 
-        return null;
+        double[][] rm = new double[3][3];
+
+        rm[0][0] = rotation[0];
+        rm[0][1] = rotation[1];
+        rm[0][2] = rotation[2];
+        rm[1][0] = rotation[3];
+        rm[1][1] = rotation[4];
+        rm[1][2] = rotation[5];
+        rm[2][0] = rotation[6];
+        rm[2][1] = rotation[7];
+        rm[2][2] = rotation[8];
+
+        return rm;
     }
 }

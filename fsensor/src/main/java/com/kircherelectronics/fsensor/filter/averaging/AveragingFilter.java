@@ -1,13 +1,13 @@
 package com.kircherelectronics.fsensor.filter.averaging;
 
 /*
- * Copyright 2017, Kircher Electronics, LLC
+ * Copyright 2018, Kircher Electronics, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,4 +46,6 @@ public abstract class AveragingFilter extends BaseFilter {
         timestamp = 0;
         count = 0;
     }
+
+    public abstract float[] filter(float[] data);
 }

@@ -5,7 +5,7 @@ import com.kircherelectronics.fsensor.BaseFilter;
 import org.apache.commons.math3.complex.Quaternion;
 
 /*
- * Copyright 2017, Kircher Electronics, LLC
+ * Copyright 2018, Kircher Electronics, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public abstract class OrientationFused extends BaseFilter {
     }
 
     public boolean isBaseOrientationSet() {
-        return !(rotationVectorGyroscope == null);
+        return rotationVectorGyroscope != null;
     }
 
     /**
@@ -85,15 +85,6 @@ public abstract class OrientationFused extends BaseFilter {
      * @return the fused orientation estimation.
      */
     public abstract float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic);
-
-    /**
-     * Calculate the fused orientation of the device.
-     * @param gyroscope the gyroscope measurements.
-     * @param timestamp the gyroscope timestamp
-     * @param orientation an estimation of device orientation.
-     * @return the fused orientation estimation.
-     */
-    public abstract float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] orientation);
 
     public void setBaseOrientation(Quaternion baseOrientation) {
             rotationVectorGyroscope = baseOrientation;

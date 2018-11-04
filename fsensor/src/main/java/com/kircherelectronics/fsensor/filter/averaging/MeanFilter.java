@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 
 /*
- * Copyright 2017, Kircher Electronics, LLC
+ * Copyright 2018, Kircher Electronics, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,12 @@ public class MeanFilter extends AveragingFilter {
             values.removeFirst();
         }
 
-        output = getMean(values);
+        if(!values.isEmpty()) {
+            output = getMean(values);
+        } else {
+            output = new float[data.length];
+            System.arraycopy(data, 0, output, 0, data.length);
+        }
 
         return output;
     }
@@ -98,7 +103,7 @@ public class MeanFilter extends AveragingFilter {
      * @return the mean of the data set.
      */
     private float[] getMean(ArrayDeque<float[]> data) {
-        float[] mean = new float[3];
+        float[] mean = new float[data.getFirst().length];
 
         for (float[] axis : data) {
             for (int i = 0; i < axis.length; i++) {

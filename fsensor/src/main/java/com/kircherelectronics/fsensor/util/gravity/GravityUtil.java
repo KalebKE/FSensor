@@ -1,9 +1,12 @@
 package com.kircherelectronics.fsensor.util.gravity;
 
 import android.hardware.SensorManager;
+import android.util.Log;
+
+import java.util.Arrays;
 
 /*
- * Copyright 2017, Kircher Electronics, LLC
+ * Copyright 2018, Kircher Electronics, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,27 +31,33 @@ public class GravityUtil {
 
     private static float[] gravity = new float[]{SensorManager.GRAVITY_EARTH, SensorManager.GRAVITY_EARTH, SensorManager.GRAVITY_EARTH};
 
+    /**
+     * Assumes a positive, counter-clockwise, right-handed rotation
+     * orientation[0] = pitch, rotation around the X axis.
+     * orientation[1] = roll, rotation around the Y axis
+     * orientation[2] = azimuth, rotation around the Z axis
+     * @param orientation The orientation.
+     * @return The gravity components of the orientation.
+     */
     public static float[] getGravityFromOrientation(float[] orientation) {
-        // components[0]: azimuth, rotation around the Z axis.
-        // components[1]: pitch, rotation around the X axis.
-        // components[2]: roll, rotation around the Y axis.
+
         float[] components = new float[3];
 
         // Find the gravity component of the X-axis
         // = g*-cos(pitch)*sin(roll);
-        components[0] = (float) (gravity[0]
-                * -Math.cos(orientation[1]) * Math
-                .sin(orientation[2]));
+        components[0] = (float) -(gravity[0]
+                * -Math.cos(orientation[0]) * Math
+                .sin(orientation[1]));
 
         // Find the gravity component of the Y-axis
         // = g*-sin(pitch);
         components[1] = (float) (gravity[1] * -Math
-                .sin(orientation[1]));
+                .sin(orientation[0]));
 
         // Find the gravity component of the Z-axis
         // = g*cos(pitch)*cos(roll);
         components[2] = (float) (gravity[2]
-                * Math.cos(orientation[1]) * Math.cos(orientation[2]));
+                * Math.cos(orientation[0]) * Math.cos(orientation[1]));
 
         return components;
     }

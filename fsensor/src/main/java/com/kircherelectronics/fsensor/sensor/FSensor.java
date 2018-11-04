@@ -1,4 +1,6 @@
-package com.kircherelectronics.fsensor;
+package com.kircherelectronics.fsensor.sensor;
+
+import io.reactivex.subjects.PublishSubject;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -16,10 +18,6 @@ package com.kircherelectronics.fsensor;
  * limitations under the License.
  */
 
-/**
- * Created by kaleb on 4/1/18.
- */
-
-public abstract class BaseFilter {
-    public abstract float[] getOutput();
+public interface FSensor {
+    PublishSubject<float[]> getPublishSubject();
 }
