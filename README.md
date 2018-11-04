@@ -26,7 +26,7 @@ In the module level build.gradle:
 
 ```
 dependencies {
-    implementation 'com.github.KalebKE:FSensor:v1.2'
+    implementation 'com.github.KalebKE:FSensor:v1.2.1'
 }
 ```
 
