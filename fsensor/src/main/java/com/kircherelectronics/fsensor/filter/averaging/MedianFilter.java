@@ -1,14 +1,12 @@
 package com.kircherelectronics.fsensor.filter.averaging;
 
-import android.util.Log;
-
 import org.apache.commons.math3.stat.StatUtils;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
 /*
- * Copyright 2017, Kircher Electronics, LLC
+ * Copyright 2018, Kircher Electronics, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
