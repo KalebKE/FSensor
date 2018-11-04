@@ -8,4 +8,4 @@
 
 ## Kalman Gyroscope Sensor
 
-[Gyroscope Sensor Useage](/documentation/KALMAN_GYROSCOPE_SENSOR.md) -> A calibrated, sensor fusion backed estimation of the devices orientation. Uses a Kalman filter in conjunction with the acceleration, magnetic and gyroscope sensors.
+[Kalman Gyroscope Sensor Useage](/documentation/KALMAN_GYROSCOPE_SENSOR.md) -> A calibrated, sensor fusion backed estimation of the devices orientation. Uses a Kalman filter in conjunction with the acceleration, magnetic and gyroscope sensors.
