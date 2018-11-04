@@ -6,7 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary.OrientationFusedComplimentary;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary.OrientationFusedComplementary;
 import com.kircherelectronics.fsensor.linearacceleration.LinearAcceleration;
 import com.kircherelectronics.fsensor.linearacceleration.LinearAccelerationFusion;
 import com.kircherelectronics.fsensor.sensor.FSensor;
@@ -30,8 +30,8 @@ import io.reactivex.subjects.PublishSubject;
  * limitations under the License.
  */
 
-public class ComplimentaryLinearAccelerationSensor implements FSensor {
-    private static final String TAG = ComplimentaryLinearAccelerationSensor.class.getSimpleName();
+public class ComplementaryLinearAccelerationSensor implements FSensor {
+    private static final String TAG = ComplementaryLinearAccelerationSensor.class.getSimpleName();
 
     private SensorManager sensorManager;
     private SimpleSensorListener listener;
@@ -48,13 +48,13 @@ public class ComplimentaryLinearAccelerationSensor implements FSensor {
     private float[] output = new float[4];
 
     private LinearAcceleration linearAccelerationFilterComplimentary;
-    private OrientationFusedComplimentary orientationFusionComplimentary;
+    private OrientationFusedComplementary orientationFusionComplimentary;
 
     private int sensorFrequency = SensorManager.SENSOR_DELAY_FASTEST;
 
     private PublishSubject<float[]> publishSubject;
 
-    public ComplimentaryLinearAccelerationSensor(Context context) {
+    public ComplementaryLinearAccelerationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.listener = new SimpleSensorListener();
         this.publishSubject = PublishSubject.create();
@@ -113,7 +113,7 @@ public class ComplimentaryLinearAccelerationSensor implements FSensor {
     }
 
     private void initializeFSensorFusions() {
-        orientationFusionComplimentary = new OrientationFusedComplimentary();
+        orientationFusionComplimentary = new OrientationFusedComplementary();
         linearAccelerationFilterComplimentary = new LinearAccelerationFusion(orientationFusionComplimentary);
     }
 

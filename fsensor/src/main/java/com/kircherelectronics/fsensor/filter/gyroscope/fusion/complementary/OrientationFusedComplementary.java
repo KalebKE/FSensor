@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary;
+package com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary;
 
 import android.util.Log;
 
@@ -9,8 +9,6 @@ import org.apache.commons.math3.complex.Quaternion;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
-
-import java.util.Arrays;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -82,18 +80,18 @@ import java.util.Arrays;
  * @author Kaleb
  *         http://developer.android.com/reference/android/hardware/SensorEvent.html#values
  */
-public class OrientationFusedComplimentary extends OrientationFused {
+public class OrientationFusedComplementary extends OrientationFused {
 
-    private static final String TAG = OrientationFusedComplimentary.class.getSimpleName();
+    private static final String TAG = OrientationFusedComplementary.class.getSimpleName();
 
     /**
      * Initialize a singleton instance.
      */
-    public OrientationFusedComplimentary() {
+    public OrientationFusedComplementary() {
         this(DEFAULT_TIME_CONSTANT);
     }
 
-    public OrientationFusedComplimentary(float timeConstant) {
+    public OrientationFusedComplementary(float timeConstant) {
         super(timeConstant);
     }
 

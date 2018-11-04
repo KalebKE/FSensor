@@ -3,7 +3,7 @@ package com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman;
 import android.util.Log;
 
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.OrientationFused;
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary.OrientationFusedComplimentary;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary.OrientationFusedComplementary;
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationKalmanFilter;
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationMeasurementModel;
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationProcessModel;
@@ -60,7 +60,7 @@ import java.util.Arrays;
 
 public class OrientationFusedKalman extends OrientationFused {
 
-    private static final String TAG = OrientationFusedComplimentary.class.getSimpleName();
+    private static final String TAG = OrientationFusedComplementary.class.getSimpleName();
 
     private RotationKalmanFilter kalmanFilter;
     private RotationProcessModel pm;

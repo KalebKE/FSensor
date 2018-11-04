@@ -6,7 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary.OrientationFusedComplimentary;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary.OrientationFusedComplementary;
 import com.kircherelectronics.fsensor.sensor.FSensor;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
@@ -28,8 +28,8 @@ import io.reactivex.subjects.PublishSubject;
  * limitations under the License.
  */
 
-public class ComplimentaryGyroscopeSensor implements FSensor {
-    private static final String TAG = ComplimentaryGyroscopeSensor.class.getSimpleName();
+public class ComplementaryGyroscopeSensor implements FSensor {
+    private static final String TAG = ComplementaryGyroscopeSensor.class.getSimpleName();
 
     private SensorManager sensorManager;
     private SimpleSensorListener listener;
@@ -44,13 +44,13 @@ public class ComplimentaryGyroscopeSensor implements FSensor {
     private float[] rotation = new float[3];
     private float[] output = new float[4];
 
-    private OrientationFusedComplimentary orientationFusionComplimentary;
+    private OrientationFusedComplementary orientationFusionComplimentary;
 
     private int sensorFrequency = SensorManager.SENSOR_DELAY_FASTEST;
 
     private PublishSubject<float[]> publishSubject;
 
-    public ComplimentaryGyroscopeSensor(Context context) {
+    public ComplementaryGyroscopeSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.listener = new SimpleSensorListener();
         this.publishSubject = PublishSubject.create();
@@ -109,7 +109,7 @@ public class ComplimentaryGyroscopeSensor implements FSensor {
     }
 
     private void initializeFSensorFusions() {
-        orientationFusionComplimentary = new OrientationFusedComplimentary();
+        orientationFusionComplimentary = new OrientationFusedComplementary();
     }
 
     private void processAcceleration(float[] rawAcceleration) {
