@@ -10,6 +10,8 @@ import com.kircherelectronics.fsensor.filter.gyroscope.OrientationGyroscope;
 import com.kircherelectronics.fsensor.sensor.FSensor;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
+import org.apache.commons.math3.complex.Quaternion;
+
 import io.reactivex.subjects.PublishSubject;
 
 /*
