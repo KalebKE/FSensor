@@ -38,8 +38,8 @@ dependencies {
 
 Simple examples of using FSensor can be found here:
 
-* [Gyroscope Useage](/documentation/GYROSCOPE_SENSOR.md)
-* [Usage](/documentation/USAGE.md)
+* [Rotation Sensor Usage](/documentation/ROTATION_SENSOR.md)
+* [Acceleration Sensor Usage](/documentation/USAGE.md)
 
 Full app usage examples of FSensor can be found here:
 
