@@ -1,14 +1,14 @@
 ## Acceleration Sensor
 
-[Acceleration Sensor Useage](/documentation/ACCELERATION_SENSOR.md.md) -> A simple, uncalibrated estimation of the devices acceleration.
+[Acceleration Sensor Useage](/documentation/ACCELERATION_SENSOR.md) -> A simple, uncalibrated estimation of the devices acceleration.
 
 ## Linear Acceleration Sensor
 
-[Linear Acceleration Sensor Useage](/documentation/LINEAR_ACCELERATION_SENSOR.md.md) -> A simple estimation of the devices linear acceleration provided by Android.
+[Linear Acceleration Sensor Useage](/documentation/LINEAR_ACCELERATION_SENSOR.md) -> A simple estimation of the devices linear acceleration provided by Android.
 
 ## Low Pass Linear Acceleration Sensor
 
-[Low Pass Linear Acceleration Sensor Useage](/documentation/LOW_PASS_LINEAR_ACCELERATION_SENSOR.md.md) -> A simple estimation of the devices linear acceleration based on a low-pass filter.
+[Low Pass Linear Acceleration Sensor Useage](/documentation/LOW_PASS_LINEAR_ACCELERATION_SENSOR.md) -> A simple estimation of the devices linear acceleration based on a low-pass filter.
 
 ## Complementary Linear Acceleration
 
