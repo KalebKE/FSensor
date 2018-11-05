@@ -38,7 +38,7 @@ dependencies {
 
 Simple examples of using FSensor can be found here:
 
-* [Rotation Sensor Usage](/documentation/ROTATION_SENSOR.md)
+* [Rotation Sensor Usage](/documentation/ROTATION_SENSORS.md)
 * [Acceleration Sensor Usage](/documentation/USAGE.md)
 
 Full app usage examples of FSensor can be found here:
