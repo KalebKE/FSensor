@@ -40,6 +40,7 @@ Simple examples of using FSensor can be found here:
 
 * [Rotation Sensor Usage](/documentation/ROTATION_SENSORS.md)
 * [Acceleration Sensor Usage](/documentation/ACCELERATION_SENSORS.md)
+* [Averaging Filters Usage](/documentation/AVERAGING_FILTERS.md)
 
 Full app usage examples of FSensor can be found here:
 
