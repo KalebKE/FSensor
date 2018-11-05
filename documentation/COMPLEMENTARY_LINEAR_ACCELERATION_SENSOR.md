@@ -76,7 +76,7 @@ public class ComplimentaryLinearAccelerationSensorLiveData extends LiveData<floa
 }
 ```
 
-## Low Pass Linear Acceleration Sensor
+## LinearAcceleration and OrientationFusedComplementary
 
 ComplementaryGyroscopeSensor.java is backed by OrientationFusedComplementary.java. OrientationFusedComplementary is the class that knows how to integrate the measurements from the devices Gyroscope sensor, produce an orientation from the acceleration and magnetric sensors and finally fuse the two orientation estimations together. It is the implementors responsibility to drive OrientationFusedComplementary with sensor data.
 
