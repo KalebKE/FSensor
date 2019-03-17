@@ -6,7 +6,7 @@ Android Sensor Filter and Fusion
 ## Introduction
 FSensor (FusionSensor) is an Android library that (hopefully) removes some/most of the complexity of using Androids orientation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
 
-* Provides device/sensor agnostic averaging filters in the of mean, median and low-pass varieties
+* Provides device/sensor agnostic averaging filters in the mean, median and low-pass varieties
 * Provides IMU sensor fusion backed estimations of device orientation in the complimentary and Kalman varieties
 * Provides estimations of linear acceleration (linear acceleration = acceleration - gravity) in the averaging filter and sensor fusion varieties
 
