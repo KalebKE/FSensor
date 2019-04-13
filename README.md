@@ -1,7 +1,7 @@
 # FSensor
 Android Sensor Filter and Fusion
 
-![Alt text](http://kircherelectronics.com.23.38-89-161.groveurl.com/wp-content/uploads/2017/12/FSensor.png "FSensor")
+![Alt text](http://kircherelectronics.com/wp-content/uploads/2017/12/FSensor.png "FSensor")
 
 ## Introduction
 FSensor (FusionSensor) is an Android library that (hopefully) removes some/most of the complexity of using Androids orientation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
@@ -115,7 +115,7 @@ Soft iron distortions manifest as radii that do not have a normalized unit lengt
 
 The algorithm can be visualized. The red cloud of dots represent the initial measurements as an ellipsoid with an offset. The green cloud of dots represent the red cloud of dots after being corrected by the algorithm with a center of (0,0,0) and a radii of (1,1,1).
 
-![Alt text](http://kircherelectronics.com.23.38-89-161.groveurl.com/wp-content/uploads/2018/03/fsensor_ellipsoid_fit.png "FSensor")
+![Alt text](http://kircherelectronics.com/wp-content/uploads/2018/03/fsensor_ellipsoid_fit.png "FSensor")
 
 ## Magnetic Tilt Compensation
 
