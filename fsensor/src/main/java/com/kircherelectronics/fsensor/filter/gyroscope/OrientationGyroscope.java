@@ -1,16 +1,10 @@
 package com.kircherelectronics.fsensor.filter.gyroscope;
 
-import android.util.Log;
-
 import com.kircherelectronics.fsensor.BaseFilter;
+import com.kircherelectronics.fsensor.util.angle.AngleUtils;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
-
-import java.util.Arrays;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -105,6 +99,18 @@ public class OrientationGyroscope extends BaseFilter {
 
     /**
      * Calculate the fused orientation of the device.
+     *
+     * Rotation is positive in the counterclockwise direction (right-hand rule). That is, an observer looking from some positive location on the x, y, or z axis at
+     * a device positioned on the origin would report positive rotation if the device appeared to be rotating counter clockwise. Note that this is the
+     * standard mathematical definition of positive rotation and does not agree with the aerospace definition of roll.
+     *
+     * See: https://source.android.com/devices/sensors/sensor-types#rotation_vector
+     *
+     * Returns a vector of size 3 ordered as:
+     * [0]X points east and is tangential to the ground.
+     * [1]Y points north and is tangential to the ground.
+     * [2]Z points towards the sky and is perpendicular to the ground.
+     *
      * @param gyroscope the gyroscope measurements.
      * @param timestamp the gyroscope timestamp
      * @return An orientation vector -> @link SensorManager#getOrientation(float[], float[])}
@@ -115,15 +121,7 @@ public class OrientationGyroscope extends BaseFilter {
             if (this.timestamp != 0) {
                 final float dT = (timestamp - this.timestamp) * NS2S;
                 rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
-
-                Rotation rotation = new Rotation(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(),
-                        rotationVectorGyroscope.getQ3(), true);
-
-                try {
-                    output = doubleToFloat(rotation.getAngles(RotationOrder.XYZ, RotationConvention.VECTOR_OPERATOR));
-                } catch(Exception e) {
-                    Log.d(TAG, "", e);
-                }
+                output = AngleUtils.getAngles(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(), rotationVectorGyroscope.getQ3());
             }
 
             this.timestamp = timestamp;
@@ -155,15 +153,5 @@ public class OrientationGyroscope extends BaseFilter {
 
     public boolean isBaseOrientationSet() {
         return rotationVectorGyroscope != null;
-    }
-
-    private static float[] doubleToFloat(double[] values) {
-        float[] f = new float[values.length];
-
-        for(int i = 0; i < f.length; i++){
-            f[i] = (float) values[i];
-        }
-
-        return f;
     }
 }

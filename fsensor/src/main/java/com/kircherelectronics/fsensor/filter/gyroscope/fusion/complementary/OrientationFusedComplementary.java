@@ -1,14 +1,10 @@
 package com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary;
 
-import android.util.Log;
-
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.OrientationFused;
+import com.kircherelectronics.fsensor.util.angle.AngleUtils;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -97,11 +93,21 @@ public class OrientationFusedComplementary extends OrientationFused {
 
     /**
      * Calculate the fused orientation of the device.
+     *
+     * Rotation is positive in the counterclockwise direction (right-hand rule). That is, an observer looking from some positive location on the x, y, or z axis at
+     * a device positioned on the origin would report positive rotation if the device appeared to be rotating counter clockwise. Note that this is the
+     * standard mathematical definition of positive rotation and does not agree with the aerospace definition of roll.
+     *
+     * See: https://source.android.com/devices/sensors/sensor-types#rotation_vector
+     *
+     * Returns a vector of size 3 ordered as:
+     * [0]X points east and is tangential to the ground.
+     * [1]Y points north and is tangential to the ground.
+     * [2]Z points towards the sky and is perpendicular to the ground.
+     *
      * @param gyroscope the gyroscope measurements.
      * @param timestamp the gyroscope timestamp
-     * @param acceleration the acceleration measurements
-     * @param magnetic the magnetic measurements
-     * @return the fused orientation estimation.
+     * @return An orientation vector -> @link SensorManager#getOrientation(float[], float[])}
      */
     public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic) {
         if (isBaseOrientationSet()) {
@@ -130,14 +136,7 @@ public class OrientationFusedComplementary extends OrientationFused {
                             (scaledRotationVectorAccelerationMagnetic);
                 }
 
-                Rotation rotation = new Rotation(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(),
-                        rotationVectorGyroscope.getQ3(), true);
-
-                try {
-                    output = doubleToFloat(rotation.getAngles(RotationOrder.XYZ, RotationConvention.VECTOR_OPERATOR));
-                } catch(Exception e) {
-                    Log.d(TAG, "", e);
-                }
+                output = AngleUtils.getAngles(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(), rotationVectorGyroscope.getQ3());
             }
 
             this.timestamp = timestamp;
@@ -146,15 +145,5 @@ public class OrientationFusedComplementary extends OrientationFused {
         } else {
             throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
         }
-    }
-
-    private static float[] doubleToFloat(double[] values) {
-        float[] f = new float[values.length];
-
-        for(int i = 0; i < f.length; i++){
-            f[i] = (float) values[i];
-        }
-
-        return f;
     }
 }
