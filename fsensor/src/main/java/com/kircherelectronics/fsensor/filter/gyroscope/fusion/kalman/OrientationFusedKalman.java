@@ -7,12 +7,10 @@ import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary.Orie
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationKalmanFilter;
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationMeasurementModel;
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationProcessModel;
+import com.kircherelectronics.fsensor.util.angle.AngleUtils;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 
 import java.util.Arrays;
 
@@ -63,8 +61,6 @@ public class OrientationFusedKalman extends OrientationFused {
     private static final String TAG = OrientationFusedComplementary.class.getSimpleName();
 
     private RotationKalmanFilter kalmanFilter;
-    private RotationProcessModel pm;
-    private RotationMeasurementModel mm;
     private volatile boolean run;
     private volatile float dT;
     private volatile float[] output = new float[3];
@@ -78,11 +74,7 @@ public class OrientationFusedKalman extends OrientationFused {
 
     public OrientationFusedKalman(float timeConstant) {
         super(timeConstant);
-
-        pm = new RotationProcessModel();
-        mm = new RotationMeasurementModel();
-
-        kalmanFilter = new RotationKalmanFilter(pm, mm);
+        kalmanFilter = new RotationKalmanFilter(new RotationProcessModel(), new RotationMeasurementModel());
     }
 
     public void startFusion() {
@@ -124,6 +116,22 @@ public class OrientationFusedKalman extends OrientationFused {
         return output;
     }
 
+    /**
+     * Calculate the fused orientation of the device.
+     *
+     * Rotation is positive in the counterclockwise direction (right-hand rule). That is, an observer looking from some positive location on the x, y, or z axis at
+     * a device positioned on the origin would report positive rotation if the device appeared to be rotating counter clockwise. Note that this is the
+     * standard mathematical definition of positive rotation and does not agree with the aerospace definition of roll.
+     *
+     * See: https://source.android.com/devices/sensors/sensor-types#rotation_vector
+     *
+     * Returns a vector of size 3 ordered as:
+     * [0]X points east and is tangential to the ground.
+     * [1]Y points north and is tangential to the ground.
+     * [2]Z points towards the sky and is perpendicular to the ground.
+     *
+     * @return An orientation vector -> @link SensorManager#getOrientation(float[], float[])}
+     */
     private float[] calculate() {
         if (rotationVectorGyroscope != null && rotationOrientation != null && dT != 0) {
 
@@ -151,14 +159,7 @@ public class OrientationFusedKalman extends OrientationFused {
             rotationVectorGyroscope = new Quaternion(kalmanFilter.getStateEstimation()[3],
                     Arrays.copyOfRange(kalmanFilter.getStateEstimation(), 0, 3));
 
-            Rotation rotation = new Rotation(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(),
-                    rotationVectorGyroscope.getQ3(), true);
-
-            try {
-                output = doubleToFloat(rotation.getAngles(RotationOrder.XYZ, RotationConvention.VECTOR_OPERATOR));
-            } catch(Exception e) {
-                Log.d(TAG, "", e);
-            }
+            output = AngleUtils.getAngles(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(), rotationVectorGyroscope.getQ3());
 
             return output;
         }
@@ -190,15 +191,5 @@ public class OrientationFusedKalman extends OrientationFused {
         }  else {
             throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
         }
-    }
-
-    private static float[] doubleToFloat(double[] values) {
-        float[] f = new float[values.length];
-
-        for(int i = 0; i < f.length; i++){
-            f[i] = (float) values[i];
-        }
-
-        return f;
     }
 }
