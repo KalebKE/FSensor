@@ -26,9 +26,9 @@ In the module level build.gradle:
 
 ```
 dependencies {
-    implementation 'com.github.KalebKE:FSensor:v1.2.2'
+    implementation 'com.github.KalebKE:FSensor:v1.2.3'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
-    implementation 'io.reactivex.rxjava2:rxjava:2.x.x'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
 }
 ```
 
