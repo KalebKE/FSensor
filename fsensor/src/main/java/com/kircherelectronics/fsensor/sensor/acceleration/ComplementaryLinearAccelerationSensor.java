@@ -9,10 +9,9 @@ import android.hardware.SensorManager;
 import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary.OrientationFusedComplementary;
 import com.kircherelectronics.fsensor.linearacceleration.LinearAcceleration;
 import com.kircherelectronics.fsensor.linearacceleration.LinearAccelerationFusion;
+import com.kircherelectronics.fsensor.observer.SensorSubject;
 import com.kircherelectronics.fsensor.sensor.FSensor;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
-
-import io.reactivex.subjects.PublishSubject;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -38,9 +37,6 @@ public class ComplementaryLinearAccelerationSensor implements FSensor {
     private float startTime = 0;
     private int count = 0;
 
-    private boolean hasRotation = false;
-    private boolean hasMagnetic = false;
-
     private float[] magnetic = new float[3];
     private float[] rawAcceleration = new float[3];
     private float[] rotation = new float[3];
@@ -50,49 +46,91 @@ public class ComplementaryLinearAccelerationSensor implements FSensor {
     private LinearAcceleration linearAccelerationFilterComplimentary;
     private OrientationFusedComplementary orientationFusionComplimentary;
 
-    private int sensorFrequency = SensorManager.SENSOR_DELAY_FASTEST;
+    private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
+    private int sensorType = Sensor.TYPE_GYROSCOPE;
 
-    private PublishSubject<float[]> publishSubject;
+    private SensorSubject sensorSubject;
 
     public ComplementaryLinearAccelerationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.listener = new SimpleSensorListener();
-        this.publishSubject = PublishSubject.create();
+        this.sensorSubject = new SensorSubject();
         initializeFSensorFusions();
     }
 
+    /**
+     * Start the sensor.
+     */
     @Override
-    public PublishSubject<float[]> getPublishSubject() {
-        return publishSubject;
-    }
-
-    public void onStart() {
+    public void start() {
         startTime = 0;
         count = 0;
-        registerSensors(sensorFrequency);
+        registerSensors(sensorDelay);
     }
 
-    public void onStop() {
+    /**
+     * Stop the sensor.
+     */
+    @Override
+    public void stop() {
         unregisterSensors();
     }
 
-    public void setSensorFrequency(int sensorFrequency) {
-        this.sensorFrequency = sensorFrequency;
+    @Override
+    public void register(SensorSubject.SensorObserver sensorObserver) {
+        sensorSubject.register(sensorObserver);
     }
 
+    @Override
+    public void unregister(SensorSubject.SensorObserver sensorObserver) {
+        sensorSubject.unregister(sensorObserver);
+    }
+
+    /**
+     * Set the gyroscope sensor type.
+     * @param sensorType must be Sensor.TYPE_GYROSCOPE or Sensor.TYPE_GYROSCOPE_UNCALIBRATED
+     */
+    public void setSensorType(int sensorType) {
+        if(sensorType != Sensor.TYPE_GYROSCOPE && sensorType != Sensor.TYPE_GYROSCOPE_UNCALIBRATED) {
+            throw new IllegalStateException("Sensor Type must be Sensor.TYPE_GYROSCOPE or Sensor.TYPE_GYROSCOPE_UNCALIBRATED");
+        }
+
+        this.sensorType = sensorType;
+
+    }
+
+    /**
+     * Set the sensor frequency.
+     * @param sensorDelay Must be SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_DELAY_GAME, SensorManager.SENSOR_DELAY_NORMAL or SensorManager.SENSOR_DELAY_UI
+     */
+    public void setSensorDelay(int sensorDelay) {
+        if(sensorDelay != SensorManager.SENSOR_DELAY_FASTEST && sensorDelay != SensorManager.SENSOR_DELAY_GAME && sensorDelay != SensorManager.SENSOR_DELAY_NORMAL && sensorDelay != SensorManager.SENSOR_DELAY_UI) {
+            throw new IllegalStateException("Sensor Frequency must be SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_DELAY_GAME, SensorManager.SENSOR_DELAY_NORMAL or " +
+                    "SensorManager.SENSOR_DELAY_UI");
+        }
+        this.sensorDelay = sensorDelay;
+    }
+
+    /**
+     * The filter coefficient.
+     *
+     * @param timeConstant A floating point value between 0 and 1. Exclusive of 0, inclusive of 1.
+     */
     public void setFSensorComplimentaryLinearAccelerationTimeConstant(float timeConstant) {
         orientationFusionComplimentary.setTimeConstant(timeConstant);
     }
 
+    /**
+     * Reset the sensor.
+     */
     public void reset() {
-        onStop();
+        stop();
         magnetic = new float[3];
         acceleration = new float[3];
         rotation = new float[3];
         output = new float[4];
-        hasRotation = false;
-        hasMagnetic = false;
-        onStart();
+        listener.reset();
+        start();
     }
 
     private float calculateSensorFrequency() {
@@ -151,7 +189,7 @@ public class ComplementaryLinearAccelerationSensor implements FSensor {
 
         // Register for sensor updates.
         sensorManager.registerListener(listener,
-                sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED),
+                sensorManager.getDefaultSensor(sensorType),
                 sensorDelay);
 
     }
@@ -163,10 +201,18 @@ public class ComplementaryLinearAccelerationSensor implements FSensor {
     private void setOutput(float[] value) {
         System.arraycopy(value, 0, output, 0, value.length);
         output[3] = calculateSensorFrequency();
-        publishSubject.onNext(output);
+        sensorSubject.onNext(output);
     }
 
     private class SimpleSensorListener implements SensorEventListener {
+
+        private boolean hasRotation = false;
+        private boolean hasMagnetic = false;
+
+        private void reset() {
+            hasRotation = false;
+            hasMagnetic = false;
+        }
 
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -185,7 +231,7 @@ public class ComplementaryLinearAccelerationSensor implements FSensor {
             } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
                 processMagnetic(event.values);
                 hasMagnetic = true;
-            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE_UNCALIBRATED) {
+            } else if (event.sensor.getType() == sensorType) {
                 processRotation(event.values);
                 hasRotation = true;
             }

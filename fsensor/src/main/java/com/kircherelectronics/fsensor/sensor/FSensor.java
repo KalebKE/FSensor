@@ -1,6 +1,6 @@
 package com.kircherelectronics.fsensor.sensor;
 
-import io.reactivex.subjects.PublishSubject;
+import com.kircherelectronics.fsensor.observer.SensorSubject;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -19,5 +19,9 @@ import io.reactivex.subjects.PublishSubject;
  */
 
 public interface FSensor {
-    PublishSubject<float[]> getPublishSubject();
+    void register(SensorSubject.SensorObserver sensorObserver);
+    void unregister(SensorSubject.SensorObserver sensorObserver);
+
+    void start();
+    void stop();
 }
