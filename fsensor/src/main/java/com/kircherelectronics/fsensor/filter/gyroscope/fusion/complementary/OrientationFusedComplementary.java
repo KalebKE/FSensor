@@ -120,23 +120,22 @@ public class OrientationFusedComplementary extends OrientationFused {
                 Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic);
 
                 if(rotationVectorAccelerationMagnetic != null) {
-                    rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
+
+                    rotationVector  = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
 
                     // Apply the complementary fusedOrientation. // We multiply each rotation by their
                     // coefficients (scalar matrices)...
-                    Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply
-                            (oneMinusAlpha);
+                    Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply(oneMinusAlpha);
 
                     // Scale our quaternion for the gyroscope
-                    Quaternion scaledRotationVectorGyroscope = rotationVectorGyroscope.multiply(alpha);
+                    Quaternion scaledRotationVectorGyroscope = rotationVector.multiply(alpha);
 
-                    // ...and then add the two quaternions together.
+                    //...and then add the two quaternions together.
                     // output[0] = alpha * output[0] + (1 - alpha) * input[0];
-                    rotationVectorGyroscope = scaledRotationVectorGyroscope.add
-                            (scaledRotationVectorAccelerationMagnetic);
-                }
+                    Quaternion result = scaledRotationVectorGyroscope.add(scaledRotationVectorAccelerationMagnetic);
 
-                output = AngleUtils.getAngles(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(), rotationVectorGyroscope.getQ3());
+                    output = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
+                }
             }
 
             this.timestamp = timestamp;
