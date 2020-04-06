@@ -4,10 +4,10 @@ Android Sensor Filter and Fusion
 ![Alt text](http://kircherelectronics.com/wp-content/uploads/2017/12/FSensor.png "FSensor")
 
 ## Introduction
-FSensor (FusionSensor) is an Android library that (hopefully) removes some/most of the complexity of using Androids orientation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
+FSensor (FusionSensor) is an Android library that provides alternative, customizable implementations of SensorManager.getOrientaion() and getDefaultSensor(SENSOR_TYPE_ROTATION_VECTOR). It removes some/most of the complexity of using Androids orientation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
 
 * Provides device/sensor agnostic averaging filters in the mean, median and low-pass varieties
-* Provides IMU sensor fusion backed estimations of device orientation in the complimentary and Kalman varieties
+* Provides IMU sensor fusion backed estimations of device orientation in the complementary and Kalman varieties
 * Provides estimations of linear acceleration (linear acceleration = acceleration - gravity) in the averaging filter and sensor fusion varieties
 
 ## FSensor V2.x
@@ -71,23 +71,23 @@ FSensor uses a median filter designed to smooth the data points based on a time 
 
 ## Orientation Sensor Fusions
 
-FSensor offers two different estimations of rotation using IMU sensor fusions. These filters can be found in the *.filter.fusion* package. One fusion is based on a quaternion backed complimentary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
+FSensor offers two different estimations of rotation using IMU sensor fusions. These filters can be found in the *.filter.fusion* package. One fusion is based on a quaternion backed complementary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
 
 The gyroscope is used to measure the devices orientation. However, the gyroscope tends to drift due to round off errors and other factors. Most gyroscopes work by measuring very small vibrations in the earth's rotation, which means they really do not like external vibrations. Because of drift and external vibrations, the gyroscope has to be compensated with a second estimation of the devices orientation, which comes from the acceleration sensor and magnetic sensor. The acceleration sensor provides the pitch and roll estimations while the magnetic sensor provides the azimuth.
 
-### Quaternions Complimentary Filter
+### Quaternions Complementary Filter
 
-Quaternions offer an angle-axis solution to rotations which do not suffer from many of the singularies, including gimbal lock, that you will find with rotation matrices. Quaternions can also be scaled and applied to a complimentary filter. The quaternion complimentary filter is probably the most elegant, robust and accurate of the filters, although it can also be the most difficult to implement.
+Quaternions offer an angle-axis solution to rotations which do not suffer from many of the singularies, including gimbal lock, that you will find with rotation matrices. Quaternions can also be scaled and applied to a complementary filter. The quaternion complementary filter is probably the most elegant, robust and accurate of the filters, although it can also be the most difficult to implement.
 
 The complementary filter is a frequency domain filter. In its strictest sense, the definition of a complementary filter refers to the use of two or more transfer functions, which are mathematical complements of one another. Thus, if the data from one sensor is operated on by G(s), then the data from the other sensor is operated on by I-G(s), and the sum of the transfer functions is I, the identity matrix. In practice, it looks nearly identical to a low-pass filter, but uses two different sets of sensor measurements to produce what can be thought of as a weighted estimation.
 
- A complimentary filter is used to fuse the two orientation estimations (the gyroscope and acceleration/magnetic, respectively) together. It takes the form of gyro[0] = alpha * gyro[0] + (1 - alpha) * accel/magnetic[0]. Alpha is defined as alpha = timeConstant / (timeConstant + dt) where the time constant is the length of signals the filter should act on and dt is the sample period (1/frequency) of the sensor.
+ A complementary filter is used to fuse the two orientation estimations (the gyroscope and acceleration/magnetic, respectively) together. It takes the form of gyro[0] = alpha * gyro[0] + (1 - alpha) * accel/magnetic[0]. Alpha is defined as alpha = timeConstant / (timeConstant + dt) where the time constant is the length of signals the filter should act on and dt is the sample period (1/frequency) of the sensor.
  
  ### Quaternion Kalman Filter
  
-Quaternions offer an angle-axis solution to rotations which do not suffer from many of the singularities, including gimbal lock, that you will find with rotation matrices. Quaternions can also be scaled and applied to a complimentary filter. The quaternion complimentary filter is probably the most elegant, robust and accurate of the filters, although it can also be the most difficult to implement.
+Quaternions offer an angle-axis solution to rotations which do not suffer from many of the singularities, including gimbal lock, that you will find with rotation matrices. Quaternions can also be scaled and applied to a complementary filter. The quaternion complementary filter is probably the most elegant, robust and accurate of the filters, although it can also be the most difficult to implement.
 
-Kalman filtering, also known as linear quadratic estimation (LQE), is an algorithm that uses a series of measurements observed over time, containing noise (random variations) and other inaccuracies, and produces estimates of unknown variables that tend to be more precise than those based on a single measurement alone. More formally, the Kalman filter operates recursively on streams of noisy input data to produce a statistically optimal estimate of the underlying system state. Much like complimentary filters, Kalman filters require two sets of estimations, which we have from the gyroscope and acceleration/magnetic senor.
+Kalman filtering, also known as linear quadratic estimation (LQE), is an algorithm that uses a series of measurements observed over time, containing noise (random variations) and other inaccuracies, and produces estimates of unknown variables that tend to be more precise than those based on a single measurement alone. More formally, the Kalman filter operates recursively on streams of noisy input data to produce a statistically optimal estimate of the underlying system state. Much like complementary filters, Kalman filters require two sets of estimations, which we have from the gyroscope and acceleration/magnetic senor.
 
 ## Linear Acceleration
 
