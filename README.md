@@ -4,7 +4,7 @@ Android Sensor Filter and Fusion
 ![Alt text](http://kircherelectronics.com/wp-content/uploads/2017/12/FSensor.png "FSensor")
 
 ## Introduction
-FSensor (FusionSensor) is an Android library that provides alternative, customizable implementations of SensorManager.getOrientaion() and getDefaultSensor(SENSOR_TYPE_ROTATION_VECTOR). It removes some/most of the complexity of using Androids orientation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
+FSensor (FusionSensor) is an Android library that provides alternative, customizable implementations of SensorManager.getOrientation() and getDefaultSensor(SENSOR_TYPE_ROTATION_VECTOR). It removes some/most of the complexity of using Androids orientation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
 
 * Provides device/sensor agnostic averaging filters in the mean, median and low-pass varieties
 * Provides IMU sensor fusion backed estimations of device orientation in the complementary and Kalman varieties
@@ -13,7 +13,7 @@ FSensor (FusionSensor) is an Android library that provides alternative, customiz
 ## FSensor V2.x
 FSensor has some breaking API changes for v2.0. 
 
-* The output is returned in the format of SensorManager.getOrientation() so the sensors can be swapped directly with existing Android implementations.
+* The output is returned in the format of SensorManager.getOrientation() so the sensors can be swapped directly with existing Android implementations of SensorManager.getOrientation() and getDefaultSensor(SENSOR_TYPE_ROTATION_VECTOR).
 * RxJava has been removed as a dependency in favor of FSensor's own simple Observer known as SensorSubject.
 
 There is also a bug fix for the fused sensors where the 'handed-ness' of the Z-axis (azimuth) was reveresed and the order of rotation on the integrations wasn't correct. These issues have been resolved and corner case rotations should work as expected.
