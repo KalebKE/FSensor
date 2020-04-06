@@ -13,6 +13,7 @@ import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 import org.apache.commons.math3.complex.Quaternion;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -60,13 +61,15 @@ public class OrientationFusedKalman extends OrientationFused {
 
     private static final String TAG = OrientationFusedComplementary.class.getSimpleName();
 
-    private RotationKalmanFilter kalmanFilter;
-    private volatile boolean run;
+    private final RotationKalmanFilter kalmanFilter;
+    private final AtomicBoolean run;
     private volatile float dT;
     private volatile float[] output = new float[3];
     private Thread thread;
 
-    private volatile Quaternion rotationOrientation;
+    private volatile Quaternion rotationVectorAccelerationMagnetic;
+    private final double[] vectorGyroscope = new double[4];
+    private final double[] vectorAccelerationMagnetic = new double[4];
 
     public OrientationFusedKalman() {
         this(DEFAULT_TIME_CONSTANT);
@@ -74,24 +77,25 @@ public class OrientationFusedKalman extends OrientationFused {
 
     public OrientationFusedKalman(float timeConstant) {
         super(timeConstant);
+        run = new AtomicBoolean(false);
         kalmanFilter = new RotationKalmanFilter(new RotationProcessModel(), new RotationMeasurementModel());
     }
 
     public void startFusion() {
-        if (!run && thread == null) {
-            run = true;
+        if (!run.get() && thread == null) {
+            run.set(true);
 
             thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    while (run && !Thread.interrupted()) {
+                    while (run.get() && !Thread.interrupted()) {
 
-                        calculate();
+                        output = calculate();
 
                         try {
                             Thread.sleep(20);
                         } catch (InterruptedException e) {
-                            Log.e(TAG, "Kalman Thread Run", e);
+                            Log.e(TAG, "Kalman Thread", e);
                             Thread.currentThread().interrupt();
                         }
                     }
@@ -105,8 +109,8 @@ public class OrientationFusedKalman extends OrientationFused {
     }
 
     public void stopFusion() {
-        if (run && thread != null) {
-            run = false;
+        if (run.get() && thread != null) {
+            run.set(false);
             thread.interrupt();
             thread = null;
         }
@@ -133,21 +137,16 @@ public class OrientationFusedKalman extends OrientationFused {
      * @return An orientation vector -> @link SensorManager#getOrientation(float[], float[])}
      */
     private float[] calculate() {
-        if (rotationVectorGyroscope != null && rotationOrientation != null && dT != 0) {
+        if (rotationVector != null && rotationVectorAccelerationMagnetic != null && dT != 0) {
+            vectorGyroscope[0] = (float) rotationVector.getVectorPart()[0];
+            vectorGyroscope[1] = (float) rotationVector.getVectorPart()[1];
+            vectorGyroscope[2] = (float) rotationVector.getVectorPart()[2];
+            vectorGyroscope[3] = (float) rotationVector.getScalarPart();
 
-            double[] vectorGyroscope = new double[4];
-
-            vectorGyroscope[0] = (float) rotationVectorGyroscope.getVectorPart()[0];
-            vectorGyroscope[1] = (float) rotationVectorGyroscope.getVectorPart()[1];
-            vectorGyroscope[2] = (float) rotationVectorGyroscope.getVectorPart()[2];
-            vectorGyroscope[3] = (float) rotationVectorGyroscope.getScalarPart();
-
-            double[] vectorAccelerationMagnetic = new double[4];
-
-            vectorAccelerationMagnetic[0] = (float) rotationOrientation.getVectorPart()[0];
-            vectorAccelerationMagnetic[1] = (float) rotationOrientation.getVectorPart()[1];
-            vectorAccelerationMagnetic[2] = (float) rotationOrientation.getVectorPart()[2];
-            vectorAccelerationMagnetic[3] = (float) rotationOrientation.getScalarPart();
+            vectorAccelerationMagnetic[0] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[0];
+            vectorAccelerationMagnetic[1] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[1];
+            vectorAccelerationMagnetic[2] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[2];
+            vectorAccelerationMagnetic[3] = (float) rotationVectorAccelerationMagnetic.getScalarPart();
 
             // Apply the Kalman fusedOrientation... Note that the prediction and correction
             // inputs could be swapped, but the fusedOrientation is much more stable in this
@@ -156,15 +155,12 @@ public class OrientationFusedKalman extends OrientationFused {
             kalmanFilter.correct(vectorAccelerationMagnetic);
 
             // rotation estimation.
-            rotationVectorGyroscope = new Quaternion(kalmanFilter.getStateEstimation()[3],
-                    Arrays.copyOfRange(kalmanFilter.getStateEstimation(), 0, 3));
+            Quaternion result = new Quaternion(kalmanFilter.getStateEstimation()[3], Arrays.copyOfRange(kalmanFilter.getStateEstimation(), 0, 3));
 
-            output = AngleUtils.getAngles(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(), rotationVectorGyroscope.getQ3());
-
-            return output;
+            output = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
         }
 
-        return null;
+        return output;
     }
 
     /**
@@ -177,13 +173,12 @@ public class OrientationFusedKalman extends OrientationFused {
      * @return the fused orientation estimation.
      */
     public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic) {
-
         if(isBaseOrientationSet()) {
             if (this.timestamp != 0) {
                 dT = (timestamp - this.timestamp) * NS2S;
 
-                rotationOrientation = RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic);
-                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
+                rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic);
+                rotationVector = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
             }
             this.timestamp = timestamp;
 

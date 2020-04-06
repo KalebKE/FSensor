@@ -1,11 +1,9 @@
 package com.kircherelectronics.fsensor.util.rotation;
 
 import android.hardware.SensorManager;
+import android.renderscript.Matrix3f;
 
 import org.apache.commons.math3.complex.Quaternion;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 
 import java.util.Arrays;
 
@@ -85,34 +83,21 @@ public class RotationUtil {
     public static Quaternion getOrientationVectorFromAccelerationMagnetic(float[] acceleration, float[] magnetic) {
         float[] rotationMatrix = new float[9];
         if (SensorManager.getRotationMatrix(rotationMatrix, null, acceleration, magnetic)) {
-            float[] rv = new float[3];
-            SensorManager.getOrientation(rotationMatrix,rv);
-            // SensorManager.getOrientation() returns an orientation in Earth frame and that needs to be rotated into device frame so the reported angles
-            // are indexed with the orientation of the sensors
-            Rotation rotation = new Rotation(RotationOrder.XYZ, RotationConvention.VECTOR_OPERATOR, rv[1], -rv[2], rv[0]);
-            return new Quaternion(rotation.getQ0(), rotation.getQ1(),rotation.getQ2(),rotation.getQ3());
+            double[] rotation = getQuaternion(new Matrix3f(rotationMatrix));
+            return new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]);
         }
 
         return null;
     }
 
-    private static double[][] convertTo2DArray(float[] rotation) {
-        if (rotation.length != 9) {
-            throw new IllegalStateException("Length must be of 9! Length: " + rotation.length);
-        }
+    private static double[] getQuaternion(Matrix3f m1) {
+        double w = Math.sqrt(1.0 + m1.get(0,0) + m1.get(1,1) + m1.get(2,2)) / 2.0;
+        double w4 = (4.0 * w);
+        double x = (m1.get(2,1) - m1.get(1,2)) / w4 ;
+        double y = (m1.get(0,2) - m1.get(2,0)) / w4 ;
+        double z = (m1.get(1,0) - m1.get(0,1)) / w4 ;
 
-        double[][] rm = new double[3][3];
-
-        rm[0][0] = rotation[0];
-        rm[0][1] = rotation[1];
-        rm[0][2] = rotation[2];
-        rm[1][0] = rotation[3];
-        rm[1][1] = rotation[4];
-        rm[1][2] = rotation[5];
-        rm[2][0] = rotation[6];
-        rm[2][1] = rotation[7];
-        rm[2][2] = rotation[8];
-
-        return rm;
+        return new double[]{w,x,y,z};
     }
+
 }

@@ -37,7 +37,7 @@ public class MeanFilter extends AveragingFilter {
 
     private static final String tag = MeanFilter.class.getSimpleName();
 
-    private ArrayDeque<float[]> values;
+    private final ArrayDeque<float[]> values;
     private float[] output;
 
     /**

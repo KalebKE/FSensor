@@ -30,10 +30,9 @@ public abstract class LinearAcceleration {
 
     private static final String tag = LinearAcceleration.class.getSimpleName();
 
-    private float[] output = new float[]
-            {0, 0, 0};
+    private final float[] output = new float[]{0, 0, 0};
 
-    protected BaseFilter filter;
+    protected final BaseFilter filter;
 
     public LinearAcceleration(BaseFilter filter) {
         this.filter = filter;

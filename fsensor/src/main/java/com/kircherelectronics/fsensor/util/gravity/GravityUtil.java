@@ -1,9 +1,6 @@
 package com.kircherelectronics.fsensor.util.gravity;
 
 import android.hardware.SensorManager;
-import android.util.Log;
-
-import java.util.Arrays;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC

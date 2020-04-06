@@ -6,9 +6,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import com.kircherelectronics.fsensor.observer.SensorSubject;
 import com.kircherelectronics.fsensor.sensor.FSensor;
-
-import io.reactivex.subjects.PublishSubject;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -29,49 +28,64 @@ import io.reactivex.subjects.PublishSubject;
 public class AccelerationSensor implements FSensor {
     private static final String TAG = AccelerationSensor.class.getSimpleName();
 
-    private SensorManager sensorManager;
-    private SimpleSensorListener listener;
+    private final SensorManager sensorManager;
+    private final SimpleSensorListener listener;
     private float startTime = 0;
     private int count = 0;
 
     private float[] acceleration = new float[3];
     private float[] output = new float[4];
 
-    private int sensorFrequency = SensorManager.SENSOR_DELAY_FASTEST;
+    private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
 
-    private PublishSubject<float[]> publishSubject;
+    private final SensorSubject sensorSubject;
 
     public AccelerationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.listener = new SimpleSensorListener();
-        this.publishSubject = PublishSubject.create();
+        this.sensorSubject = new SensorSubject();
     }
 
     @Override
-    public PublishSubject<float[]> getPublishSubject() {
-        return publishSubject;
-    }
-
-    public void onStart() {
+    public void start() {
         startTime = 0;
         count = 0;
 
-        registerSensors(sensorFrequency);
+        registerSensors(sensorDelay);
     }
 
-    public void onStop() {
+    @Override
+    public void stop() {
         unregisterSensors();
     }
 
-    public void setSensorFrequency(int sensorFrequency) {
-        this.sensorFrequency = sensorFrequency;
+    @Override
+    public void register(SensorSubject.SensorObserver sensorObserver) {
+        sensorSubject.register(sensorObserver);
+    }
+
+    @Override
+    public void unregister(SensorSubject.SensorObserver sensorObserver) {
+        sensorSubject.unregister(sensorObserver);
+    }
+
+    /**
+     * Set the sensor frequency.
+     * @param sensorDelay Must be SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_DELAY_GAME, SensorManager.SENSOR_DELAY_NORMAL or SensorManager.SENSOR_DELAY_UI
+     */
+    public void setSensorDelay(int sensorDelay) {
+        if(sensorDelay != SensorManager.SENSOR_DELAY_FASTEST && sensorDelay != SensorManager.SENSOR_DELAY_GAME && sensorDelay != SensorManager.SENSOR_DELAY_NORMAL && sensorDelay != SensorManager.SENSOR_DELAY_UI) {
+            throw new IllegalStateException("Sensor Frequency must be SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_DELAY_GAME, SensorManager.SENSOR_DELAY_NORMAL or " +
+                    "SensorManager.SENSOR_DELAY_UI");
+        }
+        this.sensorDelay = sensorDelay;
     }
 
     public void reset() {
-        onStop();
+        stop();
         acceleration = new float[3];
         output = new float[4];
-        onStart();
+        start();
     }
 
     private float calculateSensorFrequency() {
@@ -109,7 +123,7 @@ public class AccelerationSensor implements FSensor {
     private void setOutput(float[] value) {
         System.arraycopy(value, 0, output, 0, value.length);
         output[3] = calculateSensorFrequency();
-        publishSubject.onNext(output);
+        sensorSubject.onNext(output);
     }
 
     private class SimpleSensorListener implements SensorEventListener {

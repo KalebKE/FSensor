@@ -36,9 +36,9 @@ public abstract class OrientationFused extends BaseFilter {
     // transfer functions (rotations from the gyroscope and
     // acceleration/magnetic, respectively).
     public float timeConstant;
-    protected Quaternion rotationVectorGyroscope;
+    protected Quaternion rotationVector;
     protected long timestamp = 0;
-    protected float[] output;
+    protected float[] output = new float[3];
 
     /**
      * Initialize a singleton instance.
@@ -49,7 +49,7 @@ public abstract class OrientationFused extends BaseFilter {
 
     public OrientationFused(float timeConstant) {
         this.timeConstant = timeConstant;
-        output = new float[3];
+
     }
 
     @Override
@@ -59,11 +59,11 @@ public abstract class OrientationFused extends BaseFilter {
 
     public void reset() {
         timestamp = 0;
-        rotationVectorGyroscope = null;
+        rotationVector = null;
     }
 
     public boolean isBaseOrientationSet() {
-        return rotationVectorGyroscope != null;
+        return rotationVector != null;
     }
 
     /**
@@ -87,6 +87,6 @@ public abstract class OrientationFused extends BaseFilter {
     public abstract float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic);
 
     public void setBaseOrientation(Quaternion baseOrientation) {
-            rotationVectorGyroscope = baseOrientation;
+        rotationVector = baseOrientation;
     }
 }
