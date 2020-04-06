@@ -28,8 +28,8 @@ import com.kircherelectronics.fsensor.sensor.FSensor;
 public class LinearAccelerationSensor implements FSensor {
     private static final String TAG = LinearAccelerationSensor.class.getSimpleName();
 
-    private SensorManager sensorManager;
-    private SimpleSensorListener listener;
+    private final SensorManager sensorManager;
+    private final SimpleSensorListener listener;
     private float startTime = 0;
     private int count = 0;
 
@@ -38,7 +38,7 @@ public class LinearAccelerationSensor implements FSensor {
 
     private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
 
-    private SensorSubject sensorSubject;
+    private final SensorSubject sensorSubject;
 
     public LinearAccelerationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);

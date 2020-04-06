@@ -61,15 +61,15 @@ public class OrientationFusedKalman extends OrientationFused {
 
     private static final String TAG = OrientationFusedComplementary.class.getSimpleName();
 
-    private RotationKalmanFilter kalmanFilter;
-    private AtomicBoolean run;
+    private final RotationKalmanFilter kalmanFilter;
+    private final AtomicBoolean run;
     private volatile float dT;
     private volatile float[] output = new float[3];
     private Thread thread;
 
     private volatile Quaternion rotationVectorAccelerationMagnetic;
-    private double[] vectorGyroscope = new double[4];
-    private double[] vectorAccelerationMagnetic = new double[4];
+    private final double[] vectorGyroscope = new double[4];
+    private final double[] vectorAccelerationMagnetic = new double[4];
 
     public OrientationFusedKalman() {
         this(DEFAULT_TIME_CONSTANT);

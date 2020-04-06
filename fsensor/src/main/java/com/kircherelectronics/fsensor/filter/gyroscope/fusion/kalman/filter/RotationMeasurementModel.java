@@ -21,7 +21,7 @@ import org.apache.commons.math3.linear.RealMatrix;
  */
 public class RotationMeasurementModel implements MeasurementModel
 {
-	private double noiseCoefficient  = 0.001;
+	private final double noiseCoefficient  = 0.001;
 	
 	/**
 	 * The measurement matrix, used to associate the measurement vector to the

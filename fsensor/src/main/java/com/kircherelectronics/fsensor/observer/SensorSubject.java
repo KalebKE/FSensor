@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SensorSubject {
-    private List<SensorObserver> observers = new ArrayList<>();
+    private final List<SensorObserver> observers = new ArrayList<>();
 
     public interface SensorObserver {
         void onSensorChanged(float[] values);

@@ -162,9 +162,7 @@ public class FitPoints {
         RealMatrix dtdi = solver.getInverse();
 
         // v = (( d' * d )^-1) * ( d' * ones.mapAddToSelf(1));
-        RealVector v = dtdi.operate(dtOnes);
-
-        return v;
+        return dtdi.operate(dtOnes);
     }
 
     /**
@@ -245,9 +243,7 @@ public class FitPoints {
         t.setSubMatrix(centerMatrix.getData(), 3, 0);
 
         // Translate to the offset.
-        RealMatrix r = t.multiply(a).multiply(t.transpose());
-
-        return r;
+        return t.multiply(a).multiply(t.transpose());
     }
 
     /**

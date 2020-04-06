@@ -31,8 +31,8 @@ public class GyroscopeSensor implements FSensor {
 
     private static final String TAG = GyroscopeSensor.class.getSimpleName();
 
-    private SensorManager sensorManager;
-    private SimpleSensorListener listener;
+    private final SensorManager sensorManager;
+    private final SimpleSensorListener listener;
     private float startTime = 0;
     private int count = 0;
 
@@ -46,7 +46,7 @@ public class GyroscopeSensor implements FSensor {
     private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
     private int sensorType = Sensor.TYPE_GYROSCOPE;
 
-    private SensorSubject sensorSubject;
+    private final SensorSubject sensorSubject;
 
     public GyroscopeSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);

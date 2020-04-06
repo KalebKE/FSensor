@@ -42,7 +42,7 @@ public class MedianFilter extends AveragingFilter {
     private static final String tag = MedianFilter.class
             .getSimpleName();
 
-    private ArrayDeque<float[]> values;
+    private final ArrayDeque<float[]> values;
     private float[] output;
 
 

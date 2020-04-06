@@ -31,8 +31,8 @@ import com.kircherelectronics.fsensor.sensor.FSensor;
 public class LowPassLinearAccelerationSensor implements FSensor {
     private static final String TAG = LowPassLinearAccelerationSensor.class.getSimpleName();
 
-    private SensorManager sensorManager;
-    private SimpleSensorListener listener;
+    private final SensorManager sensorManager;
+    private final SimpleSensorListener listener;
     private float startTime = 0;
     private int count = 0;
 
@@ -46,7 +46,7 @@ public class LowPassLinearAccelerationSensor implements FSensor {
 
     private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
 
-    private SensorSubject sensorSubject;
+    private final SensorSubject sensorSubject;
 
     public LowPassLinearAccelerationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -103,6 +103,7 @@ public class LowPassLinearAccelerationSensor implements FSensor {
     public void reset() {
         stop();
         acceleration = new float[3];
+        rawAcceleration = new float[3];
         output = new float[4];
         start();
     }

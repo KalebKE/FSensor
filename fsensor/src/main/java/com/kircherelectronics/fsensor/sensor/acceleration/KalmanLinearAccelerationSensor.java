@@ -32,8 +32,8 @@ import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 public class KalmanLinearAccelerationSensor implements FSensor {
     private static final String TAG = KalmanLinearAccelerationSensor.class.getSimpleName();
 
-    private SensorManager sensorManager;
-    private SimpleSensorListener listener;
+    private final SensorManager sensorManager;
+    private final SimpleSensorListener listener;
     private float startTime = 0;
     private int count = 0;
 
@@ -49,7 +49,7 @@ public class KalmanLinearAccelerationSensor implements FSensor {
     private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
     private int sensorType = Sensor.TYPE_GYROSCOPE;
 
-    private SensorSubject sensorSubject;
+    private final SensorSubject sensorSubject;
 
     public KalmanLinearAccelerationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -117,6 +117,7 @@ public class KalmanLinearAccelerationSensor implements FSensor {
         stop();
         magnetic = new float[3];
         acceleration = new float[3];
+        rawAcceleration = new float[3];
         rotation = new float[3];
         output = new float[4];
         listener.reset();
