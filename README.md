@@ -10,7 +10,7 @@ FSensor (FusionSensor) is an Android library that (hopefully) removes some/most 
 * Provides IMU sensor fusion backed estimations of device orientation in the complimentary and Kalman varieties
 * Provides estimations of linear acceleration (linear acceleration = acceleration - gravity) in the averaging filter and sensor fusion varieties
 
-# FSensor V2.x
+## FSensor V2.x
 FSensor has some breaking API changes for v2.0. 
 
 * The output is returned in the format of SensorManager.getOrientation() so the sensors can be swapped directly with existing Android implementations.
