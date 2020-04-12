@@ -141,7 +141,7 @@ public class FSensorExample extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        fSensor = new LowPassLinearAccelerationSensor(this);
+        fSensor = // Instantiate your FSensor here, i.e new LowPassLinearAccelerationSensor(this);
         fSensor.register(sensorObserver);
         fSensor.start();
     }
@@ -158,7 +158,10 @@ public class FSensorExample extends AppCompatActivity {
 
 Acceleration Explorer offers a number of different linear acceleration filters. These filters can be found in the *.linearacceleration* package. Linear acceleration is defined as linearAcceleration = (acceleration - gravity). An acceleration sensor is not capable of determining the difference between gravity/tilt and true linear acceleration. There is one standalone approach, a low-pass filter, and many sensor fusion based approaches. Acceleration Explorer offers implementations of all the common linear acceleration filters as well as the Android API implementation.
 
-*
+* fSensor = new AccelerationSensor(this);
+* fSensor = new LinearAccelerationSensor(this);
+* fSensor = new ComplementaryLinearAccelerationSensor(this);
+* fSensor = new KalmanLinearAccelerationSensor(this);
 
 ### Android Linear Acceleration
 
