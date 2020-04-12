@@ -107,9 +107,9 @@ FSensor offers two different estimations of rotation using IMU sensor fusions an
 * fSensor = new ComplementaryGyroscopeSensor(this);
 * fSensor = new KalmanGyroscopeSensor(this);
 
-Of the two fused sensors, the first is based on a quaternion backed complementary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
+The gyroscope is the underlying orientation sensor for all FSensor implementations. However, the gyroscope tends to drift due to round off errors and other factors. Most gyroscopes work by measuring very small vibrations in the earth's rotation, which means they really do not like external vibrations. Because of drift and external vibrations, the gyroscope has to be compensated with a second estimation of the devices orientation, which comes from the acceleration sensor and magnetic sensor. The acceleration sensor provides the pitch and roll estimations while the magnetic sensor provides the azimuth.
 
-The gyroscope is used to measure the devices orientation. However, the gyroscope tends to drift due to round off errors and other factors. Most gyroscopes work by measuring very small vibrations in the earth's rotation, which means they really do not like external vibrations. Because of drift and external vibrations, the gyroscope has to be compensated with a second estimation of the devices orientation, which comes from the acceleration sensor and magnetic sensor. The acceleration sensor provides the pitch and roll estimations while the magnetic sensor provides the azimuth.
+Of the two fused sensors back by the gyroscope, acceleration and magnetic sensors, the first is based on a quaternion backed complementary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
 
 ### Quaternions Complementary Filter
 
