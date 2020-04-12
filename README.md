@@ -126,8 +126,39 @@ Quaternions offer an angle-axis solution to rotations which do not suffer from m
 Kalman filtering, also known as linear quadratic estimation (LQE), is an algorithm that uses a series of measurements observed over time, containing noise (random variations) and other inaccuracies, and produces estimates of unknown variables that tend to be more precise than those based on a single measurement alone. More formally, the Kalman filter operates recursively on streams of noisy input data to produce a statistically optimal estimate of the underlying system state. Much like complementary filters, Kalman filters require two sets of estimations, which we have from the gyroscope and acceleration/magnetic senor.
 
 ## Linear Acceleration
+```java
+public class FSensorExample extends AppCompatActivity {
+
+    private FSensor fSensor;
+
+    private SensorSubject.SensorObserver sensorObserver = new SensorSubject.SensorObserver() {
+        @Override
+        public void onSensorChanged(float[] values) {
+            // Do interesting things here
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fSensor = new LowPassLinearAccelerationSensor(this);
+        fSensor.register(sensorObserver);
+        fSensor.start();
+    }
+
+    @Override
+    public void onPause() {
+        fSensor.unregister(sensorObserver);
+        fSensor.stop();
+
+        super.onPause();
+    }
+}
+```
 
 Acceleration Explorer offers a number of different linear acceleration filters. These filters can be found in the *.linearacceleration* package. Linear acceleration is defined as linearAcceleration = (acceleration - gravity). An acceleration sensor is not capable of determining the difference between gravity/tilt and true linear acceleration. There is one standalone approach, a low-pass filter, and many sensor fusion based approaches. Acceleration Explorer offers implementations of all the common linear acceleration filters as well as the Android API implementation.
+
+*
 
 ### Android Linear Acceleration
 
