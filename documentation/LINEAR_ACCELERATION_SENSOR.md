@@ -21,6 +21,7 @@ public class FSensorExample extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         fSensor = new AccelerationSensor(this);
+        ((AccelerationSensor)fSensor).setSensorType(Sensor.TYPE_LINEAR_ACCELERATION);
         fSensor.register(sensorObserver);
         fSensor.start();
     }
