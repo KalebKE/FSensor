@@ -24,4 +24,5 @@ public interface FSensor {
 
     void start();
     void stop();
+    void reset();
 }
