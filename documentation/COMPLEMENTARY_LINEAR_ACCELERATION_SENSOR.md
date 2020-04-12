@@ -14,7 +14,7 @@ The class ComplementaryGyroscopeSensor.java provides a ready to use implementati
 The class LowPassLinearAccelerationSensor.java provides a ready to use implementation. Measurements can be observered via RxJava PublishSubjects. Measurements are provided as **float[]{x, y, z, sensorFrequency}** in units of meters/sec and Hz, respectively. Here is an example of AccelerationSensor implemented in a LiveData object.
 
 ```java
-ublic class FSensorExample extends AppCompatActivity {
+public class FSensorExample extends AppCompatActivity {
 
     private FSensor fSensor;
 
@@ -28,7 +28,7 @@ ublic class FSensorExample extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        fSensor = new LowPassLinearAccelerationSensor(this);
+        fSensor = new ComplementaryLinearAccelerationSensor(this);
         fSensor.register(sensorObserver);
         fSensor.start();
     }
