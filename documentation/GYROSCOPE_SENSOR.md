@@ -6,41 +6,31 @@ The FSensor Gyroscope Sensor uses Android's Sensor.TYPE_GYROSCOPE. It simply int
 The class GyroscopeSensor.java provides a ready to use implementation. Measurements can be observered via RxJava PublishSubjects. Measurements are provided as **float[]{pitch, roll, azimuth, sensorFrequency}** in units of radians and Hz, respectively. Here is an example of GyroscopeSensor implemented in a LiveData object.
 
 ```java
-public class GyroscopeSensorLiveData extends LiveData<float[]> {
-    private GyroscopeSensor sensor;
-    private CompositeDisposable compositeDisposable;
+public class FSensorExample extends AppCompatActivity {
 
-    public GyroscopeSensorLiveData(Context context) {
-        this.sensor = new GyroscopeSensor(context);
+    private FSensor fSensor;
+
+    private SensorSubject.SensorObserver sensorObserver = new SensorSubject.SensorObserver() {
+        @Override
+        public void onSensorChanged(float[] values) {
+            // Do interesting things here
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fSensor = new GyroscopeSensor(this);
+        fSensor.register(sensorObserver);
+        fSensor.start();
     }
 
     @Override
-    protected void onActive() {
-        this.compositeDisposable = new CompositeDisposable();
-        this.sensor.getPublishSubject().subscribe(new Observer<float[]>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                compositeDisposable.add(d);
-            }
+    public void onPause() {
+        fSensor.unregister(sensorObserver);
+        fSensor.stop();
 
-            @Override
-            public void onNext(float[] values) {
-                setValue(values);
-            }
-
-            @Override
-            public void onError(Throwable e) {}
-
-            @Override
-            public void onComplete() {}
-        });
-        this.sensor.onStart();
-    }
-
-    @Override
-    protected void onInactive() {
-        this.compositeDisposable.dispose();
-        this.sensor.onStop();
+        super.onPause();
     }
 }
 ```
