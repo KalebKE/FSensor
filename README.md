@@ -55,7 +55,30 @@ Full app usage examples of FSensor can be found here:
 
 ## Averaging Filters
 
+```java
+private BaseFilter filter; 
+
+private void init() {
+  filter = new ... // LowPassFilter(), MeanFilter(), MedianFilter();
+  filter.setTimeConstant(0.18);
+}
+
+@Override
+public void onSensorChanged(SensorEvent event) {
+    // Could be any of the Android sensors
+    if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+      // Android reuses events, so you probably want a copy
+      System.arraycopy(event.values, 0, acceleration, 0, event.values.length);
+      filteredAcceleration = filter.filter(acceleration);
+    } 
+}
+```
+
 FSensor implements three of the most common smoothing filters, low-pass, mean and median filters. The averaging filters can be found in the *.filter.averaging* package. All the filters are user configurable based on the time constant in units of seconds. The larger the time constant is, the smoother the signal will be. However, latency also increases with the time constant. Because the filter coefficient is in the time domain, differences in sensor output frequencies have little effect on the performance of the filter. These filters should perform about the same across all devices regardless of the sensor frequency. FSensor is clever about providing an implementation where the time constant is agnostic to the output frequencies of the devices sensors which vary greatly by model and manufacturer.
+
+* filter = new LowPassFilter();
+* filter = new MeanFilter();
+* filter= new MedianFilter();
 
 ### Low-Pass Filter
 
