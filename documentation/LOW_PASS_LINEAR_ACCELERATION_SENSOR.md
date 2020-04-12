@@ -22,7 +22,7 @@ public class FSensorExample extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        fSensor = new AccelerationSensor(this);
+        fSensor = new LowPassLinearAccelerationSensor(this);
         fSensor.register(sensorObserver);
         fSensor.start();
     }
