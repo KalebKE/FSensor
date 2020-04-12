@@ -71,6 +71,36 @@ FSensor uses a median filter designed to smooth the data points based on a time 
 
 ## Orientation Sensor Fusions
 
+```java
+public class FSensorExample extends AppCompatActivity {
+
+    private FSensor fSensor;
+
+    private SensorSubject.SensorObserver sensorObserver = new SensorSubject.SensorObserver() {
+        @Override
+        public void onSensorChanged(float[] values) {
+            // Do interesting things here
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fSensor = // Instantiate your FSensor here, i.e new GyroscopeSensor(this);
+        fSensor.register(sensorObserver);
+        fSensor.start();
+    }
+
+    @Override
+    public void onPause() {
+        fSensor.unregister(sensorObserver);
+        fSensor.stop();
+
+        super.onPause();
+    }
+}
+```
+
 FSensor offers two different estimations of rotation using IMU sensor fusions. These filters can be found in the *.filter.fusion* package. One fusion is based on a quaternion backed complementary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
 
 The gyroscope is used to measure the devices orientation. However, the gyroscope tends to drift due to round off errors and other factors. Most gyroscopes work by measuring very small vibrations in the earth's rotation, which means they really do not like external vibrations. Because of drift and external vibrations, the gyroscope has to be compensated with a second estimation of the devices orientation, which comes from the acceleration sensor and magnetic sensor. The acceleration sensor provides the pitch and roll estimations while the magnetic sensor provides the azimuth.
