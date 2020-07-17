@@ -34,7 +34,7 @@ In the module level build.gradle:
 
 ```
 dependencies {
-    implementation 'com.github.KalebKE:FSensor:v2.1'
+    implementation 'com.github.KalebKE:FSensor:v2.x'
 }
 ```
 
