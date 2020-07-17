@@ -40,21 +40,24 @@ public class GravityUtil {
 
         float[] components = new float[3];
 
+        float pitch = orientation[1];
+        float roll = orientation[2];
+
         // Find the gravity component of the X-axis
         // = g*-cos(pitch)*sin(roll);
         components[0] = (float) -(gravity[0]
-                * -Math.cos(orientation[0]) * Math
-                .sin(orientation[1]));
+                * -Math.cos(pitch) * Math
+                .sin(roll));
 
         // Find the gravity component of the Y-axis
         // = g*-sin(pitch);
         components[1] = (float) (gravity[1] * -Math
-                .sin(orientation[0]));
+                .sin(pitch));
 
         // Find the gravity component of the Z-axis
         // = g*cos(pitch)*cos(roll);
         components[2] = (float) (gravity[2]
-                * Math.cos(orientation[0]) * Math.cos(orientation[1]));
+                * Math.cos(pitch) * Math.cos(roll));
 
         return components;
     }
