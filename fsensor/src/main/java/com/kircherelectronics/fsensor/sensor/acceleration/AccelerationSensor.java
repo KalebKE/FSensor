@@ -40,6 +40,8 @@ public class AccelerationSensor implements FSensor {
 
     private final SensorSubject sensorSubject;
 
+    private int sensorType = Sensor.TYPE_ACCELEROMETER;
+
     public AccelerationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.listener = new SimpleSensorListener();
@@ -67,6 +69,18 @@ public class AccelerationSensor implements FSensor {
     @Override
     public void unregister(SensorSubject.SensorObserver sensorObserver) {
         sensorSubject.unregister(sensorObserver);
+    }
+
+    /**
+     * Set the gyroscope sensor type.
+     * @param sensorType must be Sensor.TYPE_GYROSCOPE or Sensor.TYPE_GYROSCOPE_UNCALIBRATED
+     */
+    public void setSensorType(int sensorType) {
+        if(sensorType != Sensor.TYPE_ACCELEROMETER && sensorType != Sensor.TYPE_ACCELEROMETER_UNCALIBRATED && sensorType != Sensor.TYPE_LINEAR_ACCELERATION) {
+            throw new IllegalStateException("Sensor Type must be Sensor.TYPE_ACCELEROMETER or Sensor.TYPE_ACCELEROMETER_UNCALIBRATED or sensorType != Sensor.TYPE_LINEAR_ACCELERATION");
+        }
+
+        this.sensorType = sensorType;
     }
 
     /**
@@ -112,7 +126,7 @@ public class AccelerationSensor implements FSensor {
     private void registerSensors(int sensorDelay) {
         // Register for sensor updates.
         sensorManager.registerListener(listener, sensorManager
-                        .getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                        .getDefaultSensor(sensorType),
                 sensorDelay);
     }
 
@@ -130,7 +144,7 @@ public class AccelerationSensor implements FSensor {
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            if (event.sensor.getType() == sensorType) {
 
                 processAcceleration(event.values);
                 setOutput(acceleration);
