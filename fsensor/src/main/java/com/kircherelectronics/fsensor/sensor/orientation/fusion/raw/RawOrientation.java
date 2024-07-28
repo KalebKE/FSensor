@@ -1,6 +1,5 @@
-package com.kircherelectronics.fsensor.filter.gyroscope;
+package com.kircherelectronics.fsensor.sensor.orientation.fusion.raw;
 
-import com.kircherelectronics.fsensor.BaseFilter;
 import com.kircherelectronics.fsensor.util.angle.AngleUtils;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
@@ -76,9 +75,9 @@ import org.apache.commons.math3.complex.Quaternion;
  * @author Kaleb
  *         http://developer.android.com/reference/android/hardware/SensorEvent.html#values
  */
-public class OrientationGyroscope extends BaseFilter {
+public class RawOrientation {
 
-    private static final String TAG = OrientationGyroscope.class.getSimpleName();
+    private static final String TAG = RawOrientation.class.getSimpleName();
     private static final float NS2S = 1.0f / 1000000000.0f;
     private static final float EPSILON = 0.000000001f;
     private Quaternion rotationVectorGyroscope;
@@ -88,14 +87,10 @@ public class OrientationGyroscope extends BaseFilter {
     /**
      * Initialize a singleton instance.
      */
-    public OrientationGyroscope() {
+    public RawOrientation() {
         output = new float[3];
     }
 
-    @Override
-    public float[] getOutput() {
-        return output;
-    }
 
     /**
      * Calculate the fused orientation of the device.

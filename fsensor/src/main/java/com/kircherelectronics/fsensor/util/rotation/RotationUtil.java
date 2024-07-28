@@ -80,7 +80,7 @@ public class RotationUtil {
      * @param magnetic     the magnetic measurement.
      * @return
      */
-    public static Quaternion getOrientationVectorFromAccelerationMagnetic(float[] acceleration, float[] magnetic) {
+    public static Quaternion getOrientationVector(float[] acceleration, float[] magnetic) {
         float[] rotationMatrix = new float[9];
         if (SensorManager.getRotationMatrix(rotationMatrix, null, acceleration, magnetic)) {
             double[] rotation = getQuaternion(new Matrix3f(rotationMatrix));

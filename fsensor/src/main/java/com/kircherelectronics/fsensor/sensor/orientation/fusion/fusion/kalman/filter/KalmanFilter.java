@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter;
+package com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.filter;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -82,10 +82,7 @@ import org.apache.commons.math3.util.MathUtils;
  * @see MeasurementModel
  * @since 3.0
  */
-public class RotationKalmanFilter
-{
-	// Developer Note: I have modified the predict() method such that the
-	// transition matrix is not used and the stateEstimation is set directly.
+public class KalmanFilter {
 
 	/** The process model used by this filter instance. */
 	private final ProcessModel processModel;
@@ -125,8 +122,8 @@ public class RotationKalmanFilter
 	 * @throws MatrixDimensionMismatchException
 	 *             if the matrix dimensions do not fit together
 	 */
-	public RotationKalmanFilter(final ProcessModel process,
-			final MeasurementModel measurement) throws NullArgumentException,
+	public KalmanFilter(final ProcessModel process,
+						final MeasurementModel measurement) throws NullArgumentException,
             NonSquareMatrixException, DimensionMismatchException,
             MatrixDimensionMismatchException
 	{
@@ -303,14 +300,6 @@ public class RotationKalmanFilter
 	public RealMatrix getErrorCovarianceMatrix()
 	{
 		return errorCovariance.copy();
-	}
-
-	/**
-	 * Predict the internal state estimation one time step ahead.
-	 */
-	public void predict()
-	{
-		predict((RealVector) null);
 	}
 
 	/**

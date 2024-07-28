@@ -1,7 +1,7 @@
-package com.kircherelectronics.fsensor.filter.averaging;
+package com.kircherelectronics.fsensor.filter;
 
 /*
- * Copyright 2018, Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,45 @@ package com.kircherelectronics.fsensor.filter.averaging;
  * limitations under the License.
  */
 
-import com.kircherelectronics.fsensor.BaseFilter;
-
 /**
- * A base implementation of an averaging fusedOrientation.
+ * A base implementation of a sensor filter.
  *
- * Created by kaleb on 7/6/17.
+ * @author Kaleb Kircher
  */
 
-public abstract class AveragingFilter extends BaseFilter {
+public abstract class SensorFilter {
     public static float DEFAULT_TIME_CONSTANT = 0.18f;
 
-    protected float timeConstant;
-    protected long startTime;
-    protected long timestamp;
-    protected int count;
+    protected SensorFilter filter;
 
-    public AveragingFilter() {
-        this(DEFAULT_TIME_CONSTANT);
+    protected float timeConstant = DEFAULT_TIME_CONSTANT;
+    protected long startTime;
+
+    protected int count;
+    protected final float[] output = new float[3];
+
+    public SensorFilter() {}
+
+    public SensorFilter(SensorFilter filter) {
+        this.filter = filter;
     }
 
-    public AveragingFilter(float timeConstant) {
+    public SensorFilter(float timeConstant) {
         this.timeConstant = timeConstant;
-        reset();
+    }
+
+    public SensorFilter(SensorFilter filter, float timeConstant) {
+        this.timeConstant = timeConstant;
+        this.filter = filter;
     }
 
     public void reset() {
         startTime = 0;
-        timestamp = 0;
         count = 0;
+    }
+
+    public void setTimeConstant(float timeConstant) {
+        this.timeConstant = timeConstant;
     }
 
     public abstract float[] filter(float[] data);

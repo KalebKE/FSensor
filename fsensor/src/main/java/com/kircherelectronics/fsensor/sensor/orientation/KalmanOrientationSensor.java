@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.sensor.gyroscope;
+package com.kircherelectronics.fsensor.sensor.orientation;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -6,7 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.kircherelectronics.fsensor.filter.gyroscope.OrientationGyroscope;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.KalmanOrientation;
 import com.kircherelectronics.fsensor.observer.SensorSubject;
 import com.kircherelectronics.fsensor.sensor.FSensor;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
@@ -27,9 +27,8 @@ import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
  * limitations under the License.
  */
 
-public class GyroscopeSensor implements FSensor {
-
-    private static final String TAG = GyroscopeSensor.class.getSimpleName();
+public class KalmanOrientationSensor implements FSensor {
+    private static final String TAG = KalmanOrientationSensor.class.getSimpleName();
 
     private final SensorManager sensorManager;
     private final SimpleSensorListener listener;
@@ -41,14 +40,14 @@ public class GyroscopeSensor implements FSensor {
     private float[] rotation = new float[3];
     private float[] output = new float[4];
 
-    private OrientationGyroscope orientationGyroscope;
+    private KalmanOrientation orientationFusionKalman;
 
     private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
     private int sensorType = Sensor.TYPE_GYROSCOPE;
 
     private final SensorSubject sensorSubject;
 
-    public GyroscopeSensor(Context context) {
+    public KalmanOrientationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.listener = new SimpleSensorListener();
         this.sensorSubject = new SensorSubject();
@@ -63,6 +62,7 @@ public class GyroscopeSensor implements FSensor {
         startTime = 0;
         count = 0;
         registerSensors(sensorDelay);
+        orientationFusionKalman.startFusion();
     }
 
     /**
@@ -70,6 +70,7 @@ public class GyroscopeSensor implements FSensor {
      */
     @Override
     public void stop() {
+        orientationFusionKalman.stopFusion();
         unregisterSensors();
     }
 
@@ -107,9 +108,6 @@ public class GyroscopeSensor implements FSensor {
         this.sensorDelay = sensorDelay;
     }
 
-    /**
-     * Reset the sensor.
-     */
     public void reset() {
         stop();
         magnetic = new float[3];
@@ -138,7 +136,7 @@ public class GyroscopeSensor implements FSensor {
     }
 
     private void initializeFSensorFusions() {
-        orientationGyroscope = new OrientationGyroscope();
+        orientationFusionKalman = new KalmanOrientation();
     }
 
     private void processAcceleration(float[] rawAcceleration) {
@@ -155,7 +153,7 @@ public class GyroscopeSensor implements FSensor {
 
     private void registerSensors(int sensorDelay) {
 
-        orientationGyroscope.reset();
+        orientationFusionKalman.reset();
 
         // Register for sensor updates.
         sensorManager.registerListener(listener, sensorManager
@@ -205,12 +203,12 @@ public class GyroscopeSensor implements FSensor {
             } else if (event.sensor.getType() == sensorType) {
                 processRotation(event.values);
 
-                if (!orientationGyroscope.isBaseOrientationSet()) {
+                if (!orientationFusionKalman.isBaseOrientationSet()) {
                     if (hasAcceleration && hasMagnetic) {
-                        orientationGyroscope.setBaseOrientation(RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic));
+                        orientationFusionKalman.setBaseOrientation(RotationUtil.getOrientationVector(acceleration, magnetic));
                     }
                 } else {
-                    setOutput(orientationGyroscope.calculateOrientation(rotation, event.timestamp));
+                    setOutput(orientationFusionKalman.calculateFusedOrientation(rotation, event.timestamp, acceleration, magnetic));
                 }
             }
         }
@@ -220,5 +218,3 @@ public class GyroscopeSensor implements FSensor {
         }
     }
 }
-
-

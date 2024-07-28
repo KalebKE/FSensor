@@ -6,7 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.OrientationFusedKalman;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.KalmanOrientation;
 import com.kircherelectronics.fsensor.linearacceleration.LinearAcceleration;
 import com.kircherelectronics.fsensor.linearacceleration.LinearAccelerationFusion;
 import com.kircherelectronics.fsensor.observer.SensorSubject;
@@ -14,7 +14,7 @@ import com.kircherelectronics.fsensor.sensor.FSensor;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 /*
- * Copyright 2018, Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class KalmanLinearAccelerationSensor implements FSensor {
     private static final String TAG = KalmanLinearAccelerationSensor.class.getSimpleName();
 
     private final SensorManager sensorManager;
-    private final SimpleSensorListener listener;
+    private final SensorListener listener;
     private float startTime = 0;
     private int count = 0;
 
@@ -44,7 +44,7 @@ public class KalmanLinearAccelerationSensor implements FSensor {
     private float[] output = new float[4];
 
     private LinearAcceleration linearAccelerationFilterKalman;
-    private OrientationFusedKalman orientationFusionKalman;
+    private KalmanOrientation orientationFusionKalman;
 
     private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
     private int sensorType = Sensor.TYPE_GYROSCOPE;
@@ -53,7 +53,7 @@ public class KalmanLinearAccelerationSensor implements FSensor {
 
     public KalmanLinearAccelerationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        this.listener = new SimpleSensorListener();
+        this.listener = new SensorListener();
         this.sensorSubject = new SensorSubject();
         initializeFSensorFusions();
     }
@@ -142,7 +142,7 @@ public class KalmanLinearAccelerationSensor implements FSensor {
     }
 
     private void initializeFSensorFusions() {
-        orientationFusionKalman = new OrientationFusedKalman();
+        orientationFusionKalman = new KalmanOrientation();
         linearAccelerationFilterKalman = new LinearAccelerationFusion(orientationFusionKalman);
     }
 
@@ -193,7 +193,7 @@ public class KalmanLinearAccelerationSensor implements FSensor {
         sensorSubject.onNext(output);
     }
 
-    private class SimpleSensorListener implements SensorEventListener {
+    private class SensorListener implements SensorEventListener {
 
         private boolean hasRotation = false;
         private boolean hasMagnetic = false;
@@ -209,7 +209,7 @@ public class KalmanLinearAccelerationSensor implements FSensor {
                 processRawAcceleration(event.values);
                 if (!orientationFusionKalman.isBaseOrientationSet()) {
                     if (hasRotation && hasMagnetic) {
-                        orientationFusionKalman.setBaseOrientation(RotationUtil.getOrientationVectorFromAccelerationMagnetic(rawAcceleration, magnetic));
+                        orientationFusionKalman.setBaseOrientation(RotationUtil.getOrientationVector(rawAcceleration, magnetic));
                     }
                 } else {
                     orientationFusionKalman.calculateFusedOrientation(rotation, event.timestamp, rawAcceleration, magnetic);

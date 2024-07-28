@@ -1,4 +1,7 @@
-package com.kircherelectronics.fsensor;
+package com.kircherelectronics.fsensor.sensor;
+
+import android.hardware.Sensor;
+import android.support.annotation.NonNull;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -16,10 +19,19 @@ package com.kircherelectronics.fsensor;
  * limitations under the License.
  */
 
-/**
- * Created by kaleb on 4/1/18.
- */
+public class FSensorEvent {
+    public final float[] values;
 
-public abstract class BaseFilter {
-    public abstract float[] getOutput();
+    public Sensor sensor;
+
+    public int accuracy;
+
+    public long timestamp;
+
+    public FSensorEvent(@NonNull Sensor sensor, int accuracy, long timestamp, float[] values) {
+        this.sensor = sensor;
+        this.accuracy = accuracy;
+        this.timestamp = timestamp;
+        this.values = values;
+    }
 }

@@ -1,6 +1,5 @@
 package com.kircherelectronics.fsensor.sensor;
 
-import com.kircherelectronics.fsensor.observer.SensorSubject;
 
 /*
  * Copyright 2018, Kircher Electronics, LLC
@@ -19,10 +18,6 @@ import com.kircherelectronics.fsensor.observer.SensorSubject;
  */
 
 public interface FSensor {
-    void register(SensorSubject.SensorObserver sensorObserver);
-    void unregister(SensorSubject.SensorObserver sensorObserver);
-
-    void start();
-    void stop();
-    void reset();
+    void registerListener(FSensorEventListener sensorEventListener, int sensorDelay);
+    void unregisterListener(FSensorEventListener sensorEventListener);
 }

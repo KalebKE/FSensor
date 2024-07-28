@@ -1,10 +1,10 @@
-package com.kircherelectronics.fsensor.filter.averaging;
+package com.kircherelectronics.fsensor.filter;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
 /*
- * Copyright 2018, Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,11 @@ import java.util.Arrays;
  *
  * @author Kaleb
  */
-public class MeanFilter extends AveragingFilter {
+public class MeanFilter extends SensorFilter {
 
     private static final String tag = MeanFilter.class.getSimpleName();
 
-    private final ArrayDeque<float[]> values;
-    private float[] output;
+    private final ArrayDeque<float[]> values = new ArrayDeque<>();
 
     /**
      * Initialize a new MeanFilter object.
@@ -49,7 +48,6 @@ public class MeanFilter extends AveragingFilter {
 
     public MeanFilter(float timeConstant) {
         super(timeConstant);
-        values = new ArrayDeque<>();
     }
 
     /**
@@ -64,14 +62,12 @@ public class MeanFilter extends AveragingFilter {
             startTime = System.nanoTime();
         }
 
-        timestamp = System.nanoTime();
-
         // Find the sample period (between updates) and convert from
         // nanoseconds to seconds. Note that the sensor delivery rates can
         // individually vary by a relatively large time frame, so we use an
         // averaging technique with the number of sensor updates to
         // determine the delivery rate.
-        float hz = (count++ / ((timestamp - startTime) / 1000000000.0f));
+        float hz = (count++ / ((System.nanoTime() - startTime) / 1000000000.0f));
 
         int filterWindow = (int) Math.ceil(hz * timeConstant);
 
@@ -82,17 +78,12 @@ public class MeanFilter extends AveragingFilter {
         }
 
         if(!values.isEmpty()) {
-            output = getMean(values);
+            float[] mean = getMean(values);
+            System.arraycopy(mean, 0, output, 0, output.length);
         } else {
-            output = new float[data.length];
             System.arraycopy(data, 0, output, 0, data.length);
         }
 
-        return output;
-    }
-
-    @Override
-    public float[] getOutput() {
         return output;
     }
 
@@ -118,15 +109,8 @@ public class MeanFilter extends AveragingFilter {
         return mean;
     }
 
-    public void setTimeConstant(float timeConstant) {
-        this.timeConstant = timeConstant;
-    }
-
     public void reset() {
         super.reset();
-
-        if(values != null) {
-            this.values.clear();
-        }
+        this.values.clear();
     }
 }

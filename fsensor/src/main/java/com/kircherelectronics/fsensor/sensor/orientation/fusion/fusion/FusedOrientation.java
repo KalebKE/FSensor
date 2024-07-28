@@ -1,6 +1,4 @@
-package com.kircherelectronics.fsensor.filter.gyroscope.fusion;
-
-import com.kircherelectronics.fsensor.BaseFilter;
+package com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -25,12 +23,12 @@ import org.apache.commons.math3.complex.Quaternion;
  * Created by kaleb on 7/6/17.
  */
 
-public abstract class OrientationFused extends BaseFilter {
+public abstract class FusedOrientation {
 
     protected static final float EPSILON = 0.000000001f;
     // Nano-second to second conversion
     protected static final float NS2S = 1.0f / 1000000000.0f;
-    private static final String tag = OrientationFused.class.getSimpleName();
+    private static final String tag = FusedOrientation.class.getSimpleName();
     public static float DEFAULT_TIME_CONSTANT = 0.18f;
     // The coefficient for the fusedOrientation... 0.5 = means it is averaging the two
     // transfer functions (rotations from the gyroscope and
@@ -38,23 +36,18 @@ public abstract class OrientationFused extends BaseFilter {
     public float timeConstant;
     protected Quaternion rotationVector;
     protected long timestamp = 0;
-    protected float[] output = new float[3];
+    protected final float[] output = new float[3];
 
     /**
      * Initialize a singleton instance.
      */
-    public OrientationFused() {
+    public FusedOrientation() {
         this(DEFAULT_TIME_CONSTANT);
     }
 
-    public OrientationFused(float timeConstant) {
+    public FusedOrientation(float timeConstant) {
         this.timeConstant = timeConstant;
 
-    }
-
-    @Override
-    public float[] getOutput() {
-        return output;
     }
 
     public void reset() {

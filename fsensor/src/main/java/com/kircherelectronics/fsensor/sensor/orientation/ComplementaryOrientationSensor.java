@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.sensor.gyroscope;
+package com.kircherelectronics.fsensor.sensor.orientation;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -6,7 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary.OrientationFusedComplementary;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.complementary.ComplimentaryOrientation;
 import com.kircherelectronics.fsensor.observer.SensorSubject;
 import com.kircherelectronics.fsensor.sensor.FSensor;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
@@ -27,8 +27,8 @@ import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
  * limitations under the License.
  */
 
-public class ComplementaryGyroscopeSensor implements FSensor {
-    private static final String TAG = ComplementaryGyroscopeSensor.class.getSimpleName();
+public class ComplementaryOrientationSensor implements FSensor {
+    private static final String TAG = ComplementaryOrientationSensor.class.getSimpleName();
 
     private final SensorManager sensorManager;
     private final SimpleSensorListener listener;
@@ -40,14 +40,14 @@ public class ComplementaryGyroscopeSensor implements FSensor {
     private float[] rotation = new float[3];
     private float[] output = new float[4];
 
-    private OrientationFusedComplementary orientationFusionComplimentary;
+    private ComplimentaryOrientation orientationFusionComplimentary;
 
     private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
     private int sensorType = Sensor.TYPE_GYROSCOPE;
 
     private final SensorSubject sensorSubject;
 
-    public ComplementaryGyroscopeSensor(Context context) {
+    public ComplementaryOrientationSensor(Context context) {
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.listener = new SimpleSensorListener();
         this.sensorSubject = new SensorSubject();
@@ -138,7 +138,7 @@ public class ComplementaryGyroscopeSensor implements FSensor {
     }
 
     private void initializeFSensorFusions() {
-        orientationFusionComplimentary = new OrientationFusedComplementary();
+        orientationFusionComplimentary = new ComplimentaryOrientation();
     }
 
     private void processAcceleration(float[] rawAcceleration) {
@@ -206,7 +206,7 @@ public class ComplementaryGyroscopeSensor implements FSensor {
                 processRotation(event.values);
                 if (!orientationFusionComplimentary.isBaseOrientationSet()) {
                     if (hasAcceleration && hasMagnetic) {
-                        orientationFusionComplimentary.setBaseOrientation(RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic));
+                        orientationFusionComplimentary.setBaseOrientation(RotationUtil.getOrientationVector(acceleration, magnetic));
                     }
                 } else {
                     setValue(orientationFusionComplimentary.calculateFusedOrientation(rotation, event.timestamp, acceleration, magnetic));

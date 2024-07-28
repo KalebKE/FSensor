@@ -1,6 +1,6 @@
-package com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary;
+package com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.complementary;
 
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.OrientationFused;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.FusedOrientation;
 import com.kircherelectronics.fsensor.util.angle.AngleUtils;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
@@ -76,18 +76,18 @@ import org.apache.commons.math3.complex.Quaternion;
  * @author Kaleb
  *         http://developer.android.com/reference/android/hardware/SensorEvent.html#values
  */
-public class OrientationFusedComplementary extends OrientationFused {
+public class ComplimentaryOrientation extends FusedOrientation {
 
-    private static final String TAG = OrientationFusedComplementary.class.getSimpleName();
+    private static final String TAG = ComplimentaryOrientation.class.getSimpleName();
 
     /**
      * Initialize a singleton instance.
      */
-    public OrientationFusedComplementary() {
+    public ComplimentaryOrientation() {
         this(DEFAULT_TIME_CONSTANT);
     }
 
-    public OrientationFusedComplementary(float timeConstant) {
+    public ComplimentaryOrientation(float timeConstant) {
         super(timeConstant);
     }
 
@@ -117,11 +117,11 @@ public class OrientationFusedComplementary extends OrientationFused {
                 float alpha = timeConstant / (timeConstant + dT);
                 float oneMinusAlpha = (1.0f - alpha);
 
-                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic);
+                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(acceleration, magnetic);
 
                 if(rotationVectorAccelerationMagnetic != null) {
 
-                    rotationVector  = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
+                    rotationVector = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
 
                     // Apply the complementary fusedOrientation. // We multiply each rotation by their
                     // coefficients (scalar matrices)...
@@ -134,7 +134,8 @@ public class OrientationFusedComplementary extends OrientationFused {
                     // output[0] = alpha * output[0] + (1 - alpha) * input[0];
                     Quaternion result = scaledRotationVectorGyroscope.add(scaledRotationVectorAccelerationMagnetic);
 
-                    output = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
+                    float[] angles = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
+                    System.arraycopy(angles, 0, output, 0, angles.length);
                 }
             }
 

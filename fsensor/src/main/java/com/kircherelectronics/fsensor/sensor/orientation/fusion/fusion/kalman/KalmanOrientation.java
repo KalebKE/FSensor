@@ -1,12 +1,12 @@
-package com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman;
+package com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman;
 
 import android.util.Log;
 
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.OrientationFused;
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complementary.OrientationFusedComplementary;
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationKalmanFilter;
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationMeasurementModel;
-import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.filter.RotationProcessModel;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.FusedOrientation;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.complementary.ComplimentaryOrientation;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.filter.KalmanFilter;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.filter.RotationMeasurementModel;
+import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.filter.RotationProcessModel;
 import com.kircherelectronics.fsensor.util.angle.AngleUtils;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
@@ -57,11 +57,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by kaleb on 7/6/17.
  */
 
-public class OrientationFusedKalman extends OrientationFused {
+public class KalmanOrientation extends FusedOrientation {
 
-    private static final String TAG = OrientationFusedComplementary.class.getSimpleName();
+    private static final String TAG = ComplimentaryOrientation.class.getSimpleName();
 
-    private final RotationKalmanFilter kalmanFilter;
+    private final KalmanFilter kalmanFilter;
     private final AtomicBoolean run;
     private volatile float dT;
     private volatile float[] output = new float[3];
@@ -71,37 +71,34 @@ public class OrientationFusedKalman extends OrientationFused {
     private final double[] vectorGyroscope = new double[4];
     private final double[] vectorAccelerationMagnetic = new double[4];
 
-    public OrientationFusedKalman() {
+    public KalmanOrientation() {
         this(DEFAULT_TIME_CONSTANT);
     }
 
-    public OrientationFusedKalman(float timeConstant) {
+    public KalmanOrientation(float timeConstant) {
         super(timeConstant);
         run = new AtomicBoolean(false);
-        kalmanFilter = new RotationKalmanFilter(new RotationProcessModel(), new RotationMeasurementModel());
+        kalmanFilter = new KalmanFilter(new RotationProcessModel(), new RotationMeasurementModel());
     }
 
     public void startFusion() {
         if (!run.get() && thread == null) {
             run.set(true);
 
-            thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (run.get() && !Thread.interrupted()) {
+            thread = new Thread(() -> {
+                while (run.get() && !Thread.interrupted()) {
 
-                        output = calculate();
+                    output = calculate();
 
-                        try {
-                            Thread.sleep(20);
-                        } catch (InterruptedException e) {
-                            Log.e(TAG, "Kalman Thread", e);
-                            Thread.currentThread().interrupt();
-                        }
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "Kalman Thread", e);
+                        Thread.currentThread().interrupt();
                     }
-
-                    Thread.currentThread().interrupt();
                 }
+
+                Thread.currentThread().interrupt();
             });
 
             thread.start();
@@ -177,7 +174,7 @@ public class OrientationFusedKalman extends OrientationFused {
             if (this.timestamp != 0) {
                 dT = (timestamp - this.timestamp) * NS2S;
 
-                rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic);
+                rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(acceleration, magnetic);
                 rotationVector = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
             }
             this.timestamp = timestamp;

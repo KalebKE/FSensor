@@ -1,19 +1,21 @@
 package com.kircherelectronics.fsensor.sensor.acceleration;
 
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.support.annotation.NonNull;
 
-import com.kircherelectronics.fsensor.filter.averaging.LowPassFilter;
-import com.kircherelectronics.fsensor.linearacceleration.LinearAcceleration;
-import com.kircherelectronics.fsensor.linearacceleration.LinearAccelerationAveraging;
-import com.kircherelectronics.fsensor.observer.SensorSubject;
+import com.kircherelectronics.fsensor.filter.LowPassFilter;
 import com.kircherelectronics.fsensor.sensor.FSensor;
+import com.kircherelectronics.fsensor.sensor.FSensorEvent;
+import com.kircherelectronics.fsensor.sensor.FSensorEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
- * Copyright 2018, Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,155 +34,70 @@ public class LowPassLinearAccelerationSensor implements FSensor {
     private static final String TAG = LowPassLinearAccelerationSensor.class.getSimpleName();
 
     private final SensorManager sensorManager;
-    private final SimpleSensorListener listener;
-    private float startTime = 0;
-    private int count = 0;
 
-    private float[] rawAcceleration = new float[3];
-    private float[] acceleration = new float[3];
-    private float[] output = new float[4];
+    private final float[] output = new float[3];
 
-    private LinearAcceleration linearAccelerationFilterLpf;
+    private final List<FSensorEventListener> fSensorEventListeners = new ArrayList<>();
+    private final SensorEventListener sensorEventListener = new SensorListener();
+    private final LowPassFilter lowPassFilter;
 
-    private LowPassFilter lpfGravity;
-
-    private int sensorDelay = SensorManager.SENSOR_DELAY_FASTEST;
-
-    private final SensorSubject sensorSubject;
-
-    public LowPassLinearAccelerationSensor(Context context) {
-        this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        this.listener = new SimpleSensorListener();
-        this.sensorSubject = new SensorSubject();
-        initializeFSensorFusions();
+    public LowPassLinearAccelerationSensor(@NonNull SensorManager sensorManager) {
+        this.sensorManager = sensorManager;
+        this.lowPassFilter = new LowPassFilter();
     }
 
-    /**
-     * Stop the sensor.
-     */
-    @Override
-    public void start() {
-        startTime = 0;
-        count = 0;
-
-        registerSensors(sensorDelay);
-    }
-
-    /**
-     * Stop the sensor.
-     */
-    @Override
-    public void stop() {
-        unregisterSensors();
+    public LowPassLinearAccelerationSensor(@NonNull SensorManager sensorManager, @NonNull LowPassFilter lowPassFilter) {
+        this.sensorManager = sensorManager;
+        this.lowPassFilter = lowPassFilter;
     }
 
     @Override
-    public void register(SensorSubject.SensorObserver sensorObserver) {
-        sensorSubject.register(sensorObserver);
-    }
-
-    @Override
-    public void unregister(SensorSubject.SensorObserver sensorObserver) {
-        sensorSubject.unregister(sensorObserver);
-    }
-
-    /**
-     * Set the sensor frequency.
-     * @param sensorDelay Must be SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_DELAY_GAME, SensorManager.SENSOR_DELAY_NORMAL or SensorManager.SENSOR_DELAY_UI
-     */
-    public void setSensorDelay(int sensorDelay) {
-        if(sensorDelay != SensorManager.SENSOR_DELAY_FASTEST && sensorDelay != SensorManager.SENSOR_DELAY_GAME && sensorDelay != SensorManager.SENSOR_DELAY_NORMAL && sensorDelay != SensorManager.SENSOR_DELAY_UI) {
-            throw new IllegalStateException("Sensor Frequency must be SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_DELAY_GAME, SensorManager.SENSOR_DELAY_NORMAL or " +
-                    "SensorManager.SENSOR_DELAY_UI");
-        }
-        this.sensorDelay = sensorDelay;
-    }
-
-    public void setFSensorLpfLinearAccelerationTimeConstant(float timeConstant) {
-        lpfGravity.setTimeConstant(timeConstant);
-    }
-
-    public void reset() {
-        stop();
-        acceleration = new float[3];
-        rawAcceleration = new float[3];
-        output = new float[4];
-        start();
-    }
-
-    private float calculateSensorFrequency() {
-        // Initialize the start time.
-        if (startTime == 0) {
-            startTime = System.nanoTime();
+    public void registerListener(FSensorEventListener sensorEventListener, int sensorDelay) {
+        if(fSensorEventListeners.isEmpty()) {
+            registerSensors(sensorDelay);
         }
 
-        long timestamp = System.nanoTime();
-
-        // Find the sample period (between updates) and convert from
-        // nanoseconds to seconds. Note that the sensor delivery rates can
-        // individually vary by a relatively large time frame, so we use an
-        // averaging technique with the number of sensor updates to
-        // determine the delivery rate.
-
-        return (count++ / ((timestamp - startTime) / 1000000000.0f));
+        fSensorEventListeners.add(sensorEventListener);
     }
 
-    private float[] invert(float[] values) {
-        for (int i = 0; i < values.length; i++) {
-            values[i] = -values[i];
+    @Override
+    public void unregisterListener(FSensorEventListener sensorEventListener) {
+        this.fSensorEventListeners.remove(sensorEventListener);
+        if(fSensorEventListeners.isEmpty()) {
+            unregisterSensors();
         }
-
-        return values;
     }
 
-    private void initializeFSensorFusions() {
-        lpfGravity = new LowPassFilter();
-        linearAccelerationFilterLpf = new LinearAccelerationAveraging(lpfGravity);
-    }
-
-    private void processRawAcceleration(float[] rawAcceleration) {
-        System.arraycopy(rawAcceleration, 0, this.rawAcceleration, 0, this.rawAcceleration.length);
-    }
-
-    private void processAcceleration(float[] acceleration) {
-        System.arraycopy(acceleration, 0, this.acceleration, 0, this.acceleration.length);
+    private void calculateLinerAcceleration(float[] acceleration, float[] gravity) {
+        // Determine the linear acceleration
+        output[0] = acceleration[0] - gravity[0];
+        output[1] = acceleration[1] - gravity[1];
+        output[2] = acceleration[2] - gravity[2];
     }
 
     private void registerSensors(int sensorDelay) {
-
-        lpfGravity.reset();
-
         // Register for sensor updates.
-        sensorManager.registerListener(listener, sensorManager
-                        .getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                sensorDelay);
-
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), sensorDelay);
     }
 
     private void unregisterSensors() {
-        sensorManager.unregisterListener(listener);
+        sensorManager.unregisterListener(sensorEventListener);
     }
 
-    private void setOutput(float[] value) {
-        System.arraycopy(value, 0, output, 0, value.length);
-        output[3] = calculateSensorFrequency();
-        sensorSubject.onNext(output);
-    }
-
-    private class SimpleSensorListener implements SensorEventListener {
+    private class SensorListener implements SensorEventListener {
 
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                processRawAcceleration(event.values);
-                lpfGravity.filter(rawAcceleration);
-                processAcceleration(linearAccelerationFilterLpf.filter(rawAcceleration));
-                setOutput(acceleration);
+                calculateLinerAcceleration(event.values, lowPassFilter.filter(event.values));
+
+                for (FSensorEventListener fSensorEventListeners : fSensorEventListeners) {
+                    fSensorEventListeners.onSensorChanged(new FSensorEvent(event.sensor, event.accuracy, event.timestamp, output));
+                }
             }
         }
 
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        }
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
     }
 }

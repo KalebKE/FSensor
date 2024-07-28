@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.filter.averaging;
+package com.kircherelectronics.fsensor.filter;
 
 import org.apache.commons.math3.stat.StatUtils;
 
@@ -6,7 +6,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 
 /*
- * Copyright 2018, Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,12 @@ import java.util.Arrays;
  * @author Kaleb
  * @version %I%, %G%
  */
-public class MedianFilter extends AveragingFilter {
+public class MedianFilter extends SensorFilter {
 
     private static final String tag = MedianFilter.class
             .getSimpleName();
 
-    private final ArrayDeque<float[]> values;
-    private float[] output;
-
+    private final ArrayDeque<float[]> values = new ArrayDeque<>();;
 
     /**
      * Initialize a new MeanFilter object.
@@ -55,9 +53,6 @@ public class MedianFilter extends AveragingFilter {
 
     public MedianFilter(float timeConstant) {
         this.timeConstant = timeConstant;
-        this.values = new ArrayDeque<>();
-
-        reset();
     }
 
     /**
@@ -72,14 +67,12 @@ public class MedianFilter extends AveragingFilter {
             startTime = System.nanoTime();
         }
 
-        timestamp = System.nanoTime();
-
         // Find the sample period (between updates) and convert from
         // nanoseconds to seconds. Note that the sensor delivery rates can
         // individually vary by a relatively large time frame, so we use an
         // averaging technique with the number of sensor updates to
         // determine the delivery rate.
-        float hz = (count++ / ((timestamp - startTime) / 1000000000.0f));
+        float hz = (count++ / ((System.nanoTime() - startTime) / 1000000000.0f));
 
         int filterWindow = (int) Math.ceil(hz * timeConstant);
 
@@ -90,17 +83,19 @@ public class MedianFilter extends AveragingFilter {
         }
 
         if(!values.isEmpty()) {
-            output = getMean(values);
+            float[] median = getMedian(values);
+            System.arraycopy(median, 0, output, 0, output.length);
         } else {
-            output = new float[data.length];
             System.arraycopy(data, 0, output, 0, data.length);
         }
 
-        return output;
-    }
+        if(filter != null) {
+            float[] filteredOutput = filter.filter(output);
+            output[0] = filteredOutput[0];
+            output[1] = filteredOutput[1];
+            output[2] = filteredOutput[2];
+        }
 
-    @Override
-    public float[] getOutput() {
         return output;
     }
 
@@ -110,7 +105,7 @@ public class MedianFilter extends AveragingFilter {
      * @param data the data set.
      * @return the mean of the data set.
      */
-    private float[] getMean(ArrayDeque<float[]> data) {
+    private float[] getMedian(ArrayDeque<float[]> data) {
         float[] mean = new float[data.getFirst().length];
 
         double[][] values = new double[data.getFirst().length][data.size()];
@@ -128,10 +123,6 @@ public class MedianFilter extends AveragingFilter {
         }
 
         return mean;
-    }
-
-    public void setTimeConstant(float timeConstant) {
-        this.timeConstant = timeConstant;
     }
 
     public void reset() {
