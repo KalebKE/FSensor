@@ -1,12 +1,22 @@
-package com.kircherelectronics.fsensor.sensor.orientation.fusion.raw;
+package com.kircherelectronics.fsensor.orientation.raw;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
+import com.kircherelectronics.fsensor.filter.LowPassFilter;
+import com.kircherelectronics.fsensor.orientation.Orientation;
+import com.kircherelectronics.fsensor.sensor.FSensorEvent;
+import com.kircherelectronics.fsensor.sensor.FSensorEventListener;
 import com.kircherelectronics.fsensor.util.angle.AngleUtils;
+import com.kircherelectronics.fsensor.util.gravity.GravityUtil;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
 
 /*
- * Copyright 2018, Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,80 +83,49 @@ import org.apache.commons.math3.complex.Quaternion;
  * signals.
  *
  * @author Kaleb
- *         http://developer.android.com/reference/android/hardware/SensorEvent.html#values
  */
-public class RawOrientation {
-
-    private static final String TAG = RawOrientation.class.getSimpleName();
-    private static final float NS2S = 1.0f / 1000000000.0f;
-    private static final float EPSILON = 0.000000001f;
-    private Quaternion rotationVectorGyroscope;
-    private float[] output;
-    private long timestamp = 0;
+public class AccelerationOrientation implements Orientation {
+    private final float[] rotation = new float[3];
+    private final SensorEventListener sensorEventListener = new SensorListener();
+    private final SensorManager sensorManager;
+    private final LowPassFilter lowPassFilter;
 
     /**
      * Initialize a singleton instance.
      */
-    public RawOrientation() {
-        output = new float[3];
+    public AccelerationOrientation(SensorManager sensorManager, LowPassFilter lowPassFilter) {
+        this.sensorManager = sensorManager;
+        this.lowPassFilter = lowPassFilter;
     }
 
+    @Override
+    public void start(int sensorDelay) {
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), sensorDelay);
+    }
 
-    /**
-     * Calculate the fused orientation of the device.
-     *
-     * Rotation is positive in the counterclockwise direction (right-hand rule). That is, an observer looking from some positive location on the x, y, or z axis at
-     * a device positioned on the origin would report positive rotation if the device appeared to be rotating counter clockwise. Note that this is the
-     * standard mathematical definition of positive rotation and does not agree with the aerospace definition of roll.
-     *
-     * See: https://source.android.com/devices/sensors/sensor-types#rotation_vector
-     *
-     * Returns a vector of size 3 ordered as:
-     * [0]X points east and is tangential to the ground.
-     * [1]Y points north and is tangential to the ground.
-     * [2]Z points towards the sky and is perpendicular to the ground.
-     *
-     * @param gyroscope the gyroscope measurements.
-     * @param timestamp the gyroscope timestamp
-     * @return An orientation vector -> @link SensorManager#getOrientation(float[], float[])}
-     */
-    public float[] calculateOrientation(float[] gyroscope, long timestamp) {
-        if (isBaseOrientationSet()) {
+    @Override
+    public void stop() {
+        sensorManager.unregisterListener(sensorEventListener);
+    }
 
-            if (this.timestamp != 0) {
-                final float dT = (timestamp - this.timestamp) * NS2S;
-                rotationVectorGyroscope = RotationUtil.integrateGyroscopeRotation(rotationVectorGyroscope, gyroscope, dT, EPSILON);
-                output = AngleUtils.getAngles(rotationVectorGyroscope.getQ0(), rotationVectorGyroscope.getQ1(), rotationVectorGyroscope.getQ2(), rotationVectorGyroscope.getQ3());
+    @Override
+    public float[] getOrientation() {
+        return rotation;
+    }
+
+    private class SensorListener implements SensorEventListener {
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+               float[] rotation = GravityUtil.getOrientationFromGravity(lowPassFilter.filter(event.values));
+                AccelerationOrientation.this.rotation[0] = rotation[0];
+                AccelerationOrientation.this.rotation[1] = rotation[1];
+                AccelerationOrientation.this.rotation[2] = rotation[2];
             }
-
-            this.timestamp = timestamp;
-
-            return output;
-        } else {
-            throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
         }
-    }
 
-    /**
-     * Set the base orientation (frame of reference) to which all subsequent rotations will be applied.
-     * <p>
-     * To initialize to an arbitrary local frame of reference pass in the Identity Quaternion. This will initialize the base orientation as the orientation the device is
-     * currently in and all subsequent rotations will be relative to this orientation.
-     * <p>
-     * To initialize to an absolute frame of reference (like Earth frame) the devices orientation must be determine from other sensors (such as the acceleration and magnetic
-     * sensors).
-     * @param baseOrientation The base orientation to which all subsequent rotations will be applied.
-     */
-    public void setBaseOrientation(Quaternion baseOrientation) {
-        rotationVectorGyroscope = baseOrientation;
-    }
-
-    public void reset() {
-        rotationVectorGyroscope = null;
-        timestamp = 0;
-    }
-
-    public boolean isBaseOrientationSet() {
-        return rotationVectorGyroscope != null;
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
     }
 }

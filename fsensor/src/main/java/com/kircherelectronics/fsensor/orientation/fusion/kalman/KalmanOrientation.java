@@ -1,12 +1,12 @@
-package com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman;
+package com.kircherelectronics.fsensor.orientation.fusion.kalman;
 
 import android.util.Log;
 
-import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.FusedOrientation;
-import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.complementary.ComplimentaryOrientation;
-import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.filter.KalmanFilter;
-import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.filter.RotationMeasurementModel;
-import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.filter.RotationProcessModel;
+import com.kircherelectronics.fsensor.orientation.fusion.complementary.ComplimentaryOrientation;
+import com.kircherelectronics.fsensor.orientation.fusion.kalman.filter.KalmanFilter;
+import com.kircherelectronics.fsensor.orientation.fusion.kalman.filter.RotationProcessModel;
+import com.kircherelectronics.fsensor.orientation.fusion.FusedOrientation;
+import com.kircherelectronics.fsensor.orientation.fusion.kalman.filter.RotationMeasurementModel;
 import com.kircherelectronics.fsensor.util.angle.AngleUtils;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 

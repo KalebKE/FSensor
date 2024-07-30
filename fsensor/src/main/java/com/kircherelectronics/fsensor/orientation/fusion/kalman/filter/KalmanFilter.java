@@ -1,4 +1,4 @@
-package com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.kalman.filter;
+package com.kircherelectronics.fsensor.orientation.fusion.kalman.filter;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

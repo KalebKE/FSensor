@@ -1,13 +1,18 @@
-package com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.complementary;
+package com.kircherelectronics.fsensor.orientation.raw;
 
-import com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion.FusedOrientation;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
+import com.kircherelectronics.fsensor.orientation.Orientation;
 import com.kircherelectronics.fsensor.util.angle.AngleUtils;
 import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
 
 /*
- * Copyright 2018, Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,32 +79,60 @@ import org.apache.commons.math3.complex.Quaternion;
  * signals.
  *
  * @author Kaleb
- *         http://developer.android.com/reference/android/hardware/SensorEvent.html#values
  */
-public class ComplimentaryOrientation extends FusedOrientation {
-
-    private static final String TAG = ComplimentaryOrientation.class.getSimpleName();
+public class GyroscopeOrientation implements Orientation {
+    private static final float NS2S = 1.0f / 1000000000.0f;
+    private static final float EPSILON = 0.000000001f;
+    private Quaternion rotationQuaternion = Quaternion.IDENTITY;
+    private final float[] rotation = new float[3];
+    private final SensorEventListener sensorEventListener = new SensorListener();
+    private long timestamp = 0;
+    private final SensorManager sensorManager;
 
     /**
      * Initialize a singleton instance.
      */
-    public ComplimentaryOrientation() {
-        this(DEFAULT_TIME_CONSTANT);
+    public GyroscopeOrientation(SensorManager sensorManager) {
+        this.sensorManager = sensorManager;
     }
 
-    public ComplimentaryOrientation(float timeConstant) {
-        super(timeConstant);
+    @Override
+    public void start(int sensorDelay) {
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), sensorDelay);
+    }
+
+    @Override
+    public void stop() {
+        sensorManager.unregisterListener(sensorEventListener);
+    }
+
+    @Override
+    public float[] getOrientation() {
+        return rotation;
+    }
+
+    /**
+     * Set the base orientation (frame of reference) to which all subsequent rotations will be applied.
+     * <p>
+     * To initialize to an arbitrary local frame of reference pass in the Identity Quaternion. This will initialize the base orientation as the orientation the device is
+     * currently in and all subsequent rotations will be relative to this orientation.
+     * <p>
+     * To initialize to an absolute frame of reference (like Earth frame) the devices orientation must be determine from other sensors (such as the acceleration and magnetic
+     * sensors).
+     *
+     * @param baseOrientation The base orientation to which all subsequent rotations will be applied.
+     */
+    public void setBaseOrientation(Quaternion baseOrientation) {
+        rotationQuaternion = baseOrientation;
     }
 
     /**
      * Calculate the fused orientation of the device.
-     *
+     * <p>
      * Rotation is positive in the counterclockwise direction (right-hand rule). That is, an observer looking from some positive location on the x, y, or z axis at
      * a device positioned on the origin would report positive rotation if the device appeared to be rotating counter clockwise. Note that this is the
      * standard mathematical definition of positive rotation and does not agree with the aerospace definition of roll.
-     *
-     * See: https://source.android.com/devices/sensors/sensor-types#rotation_vector
-     *
+     * <p>
      * Returns a vector of size 3 ordered as:
      * [0]X points east and is tangential to the ground.
      * [1]Y points north and is tangential to the ground.
@@ -109,41 +142,31 @@ public class ComplimentaryOrientation extends FusedOrientation {
      * @param timestamp the gyroscope timestamp
      * @return An orientation vector -> @link SensorManager#getOrientation(float[], float[])}
      */
-    public float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic) {
-        if (isBaseOrientationSet()) {
-            if (this.timestamp != 0) {
-                final float dT = (timestamp - this.timestamp) * NS2S;
+    public void calculateOrientation(float[] gyroscope, long timestamp) {
+        float[] angles;
+        if (this.timestamp != 0) {
+            final float dT = (timestamp - this.timestamp) * NS2S;
+            rotationQuaternion = RotationUtil.integrateGyroscopeRotation(rotationQuaternion, gyroscope, dT, EPSILON);
+            angles = AngleUtils.getAngles(rotationQuaternion.getQ0(), rotationQuaternion.getQ1(), rotationQuaternion.getQ2(), rotationQuaternion.getQ3());
 
-                float alpha = timeConstant / (timeConstant + dT);
-                float oneMinusAlpha = (1.0f - alpha);
+            rotation[0] = angles[0];
+            rotation[1] = angles[1];
+            rotation[2] = angles[2];
+        }
 
-                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(acceleration, magnetic);
+        this.timestamp = timestamp;
+    }
 
-                if(rotationVectorAccelerationMagnetic != null) {
-
-                    rotationVector = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
-
-                    // Apply the complementary fusedOrientation. // We multiply each rotation by their
-                    // coefficients (scalar matrices)...
-                    Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply(oneMinusAlpha);
-
-                    // Scale our quaternion for the gyroscope
-                    Quaternion scaledRotationVectorGyroscope = rotationVector.multiply(alpha);
-
-                    //...and then add the two quaternions together.
-                    // output[0] = alpha * output[0] + (1 - alpha) * input[0];
-                    Quaternion result = scaledRotationVectorGyroscope.add(scaledRotationVectorAccelerationMagnetic);
-
-                    float[] angles = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
-                    System.arraycopy(angles, 0, output, 0, angles.length);
-                }
+    private class SensorListener implements SensorEventListener {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+                calculateOrientation(event.values, event.timestamp);
             }
+        }
 
-            this.timestamp = timestamp;
-
-            return output;
-        } else {
-            throw new IllegalStateException("You must call setBaseOrientation() before calling calculateFusedOrientation()!");
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
     }
 }

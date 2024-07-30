@@ -1,4 +1,6 @@
-package com.kircherelectronics.fsensor.sensor.orientation.fusion.fusion;
+package com.kircherelectronics.fsensor.orientation.fusion;
+
+import com.kircherelectronics.fsensor.orientation.Orientation;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -23,7 +25,7 @@ import org.apache.commons.math3.complex.Quaternion;
  * Created by kaleb on 7/6/17.
  */
 
-public abstract class FusedOrientation {
+public abstract class FusedOrientation implements Orientation {
 
     protected static final float EPSILON = 0.000000001f;
     // Nano-second to second conversion
@@ -36,7 +38,7 @@ public abstract class FusedOrientation {
     public float timeConstant;
     protected Quaternion rotationVector;
     protected long timestamp = 0;
-    protected final float[] output = new float[3];
+    protected final float[] rotation = new float[3];
 
     /**
      * Initialize a singleton instance.
@@ -68,16 +70,6 @@ public abstract class FusedOrientation {
     public void setTimeConstant(float timeConstant) {
         this.timeConstant = timeConstant;
     }
-
-    /**
-     * Calculate the fused orientation of the device.
-     * @param gyroscope the gyroscope measurements.
-     * @param timestamp the gyroscope timestamp
-     * @param acceleration the acceleration measurements
-     * @param magnetic the magnetic measurements
-     * @return the fused orientation estimation.
-     */
-    public abstract float[] calculateFusedOrientation(float[] gyroscope, long timestamp, float[] acceleration, float[] magnetic);
 
     public void setBaseOrientation(Quaternion baseOrientation) {
         rotationVector = baseOrientation;
