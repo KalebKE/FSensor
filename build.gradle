@@ -15,8 +15,6 @@ buildscript {
     }
 }
 
-plugins {}
-
 allprojects {
     repositories {
         maven { url "https://maven.google.com" }
