@@ -3,6 +3,7 @@ package com.tracqi.fsensorapp.fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import com.tracqi.fsensorapp.R;
 import com.tracqi.fsensorapp.gauge.GaugeRotation;
 import com.tracqi.fsensorapp.preference.Preferences;
 import com.tracqi.fsensorapp.viewmodel.FSensorViewModel;
+
+import java.util.Arrays;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +54,18 @@ public class RotationGaugeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ViewModelProvider viewModelProvider = new ViewModelProvider(requireActivity());
+        FSensorViewModel model = viewModelProvider.get(FSensorViewModel.class);
+
+        if(Preferences.getPrefFSensorLpfLinearAccelerationEnabled(getContext())){
+            model.getLowPassOrientationSensorLiveData().observe(this, floats -> rotation = floats);
+        } else if(Preferences.getPrefFSensorComplimentaryLinearAccelerationEnabled(getContext())) {
+            model.getComplimentaryOrientationSensorLiveData().observe(this, floats -> rotation = floats);
+        } else if(Preferences.getPrefFSensorKalmanLinearAccelerationEnabled(getContext())) {
+            model.getKalmanOrientationSensorLiveData().observe(this, floats -> rotation = floats);
+        }
+
         handler = new Handler(Looper.getMainLooper());
         runnable = new Runnable()
         {
@@ -80,24 +95,11 @@ public class RotationGaugeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        initViewModel();
+        Log.d("RotationGaugeFragment", "onResume");
         handler.post(runnable);
     }
 
     private void updateRotationGauge() {
         gaugeRotation.updateRotation(rotation);
-    }
-
-    private void initViewModel() {
-        ViewModelProvider viewModelProvider = new ViewModelProvider(requireActivity());
-        FSensorViewModel model = viewModelProvider.get(FSensorViewModel.class);
-
-       if(Preferences.getPrefFSensorLpfLinearAccelerationEnabled(getContext())){
-            model.getLowPassOrientationSensorLiveData().observe(this, floats -> rotation = floats);
-        } else if(Preferences.getPrefFSensorComplimentaryLinearAccelerationEnabled(getContext())) {
-            model.getComplimentaryOrientationSensorLiveData().observe(this, floats -> rotation = floats);
-        } else if(Preferences.getPrefFSensorKalmanLinearAccelerationEnabled(getContext())) {
-            model.getKalmanOrientationSensorLiveData().observe(this, floats -> rotation = floats);
-        }
     }
 }

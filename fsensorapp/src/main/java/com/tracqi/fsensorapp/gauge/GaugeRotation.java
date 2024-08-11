@@ -54,7 +54,7 @@ public final class GaugeRotation extends View {
     private Bitmap mutableBitmap;
 
     // Keep track of the rotation of the device
-    private float[] rotation = new float[3];
+    private final float[] rotation = new float[3];
 
     // Rectangle to draw the rim of the gauge
     private RectF rimRect;

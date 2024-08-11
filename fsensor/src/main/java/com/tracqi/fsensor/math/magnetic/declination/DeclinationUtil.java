@@ -1,4 +1,4 @@
-package com.tracqi.fsensor.util.magnetic.declination;
+package com.tracqi.fsensor.math.magnetic.declination;
 
 import android.hardware.GeomagneticField;
 import android.location.Location;

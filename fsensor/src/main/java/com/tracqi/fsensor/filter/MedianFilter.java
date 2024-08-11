@@ -89,13 +89,6 @@ public class MedianFilter extends SensorFilter {
             System.arraycopy(data, 0, output, 0, data.length);
         }
 
-        if(filter != null) {
-            float[] filteredOutput = filter.filter(output);
-            output[0] = filteredOutput[0];
-            output[1] = filteredOutput[1];
-            output[2] = filteredOutput[2];
-        }
-
         return output;
     }
 
@@ -127,9 +120,6 @@ public class MedianFilter extends SensorFilter {
 
     public void reset() {
         super.reset();
-
-        if(values != null) {
-            this.values.clear();
-        }
+        this.values.clear();
     }
 }

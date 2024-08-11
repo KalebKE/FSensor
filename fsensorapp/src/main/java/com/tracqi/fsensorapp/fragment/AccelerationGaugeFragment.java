@@ -51,6 +51,17 @@ public class AccelerationGaugeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ViewModelProvider viewModelProvider = new ViewModelProvider(requireActivity());
+        FSensorViewModel model = viewModelProvider.get(FSensorViewModel.class);
+
+        if(Preferences.getPrefFSensorLpfLinearAccelerationEnabled(getContext())){
+            model.getLowPassLinearAccelerationSensorLiveData().observe(this, floats -> acceleration = floats);
+        } else if(Preferences.getPrefFSensorComplimentaryLinearAccelerationEnabled(getContext())) {
+            model.getComplimentaryLinearAccelerationSensorLiveData().observe(this, floats -> acceleration = floats);
+        } else if(Preferences.getPrefFSensorKalmanLinearAccelerationEnabled(getContext())) {
+            model.getKalmanLinearAccelerationSensorLiveData().observe(this, floats -> acceleration = floats);
+        }
+
         handler = new Handler(Looper.getMainLooper());
         runnable = new Runnable()
         {
@@ -81,26 +92,10 @@ public class AccelerationGaugeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        initViewModel();
-
         handler.post(runnable);
     }
 
     private void updateAccelerationGauge() {
         gaugeAcceleration.updatePoint(acceleration[0], acceleration[1]);
-    }
-
-    private void initViewModel() {
-        ViewModelProvider viewModelProvider = new ViewModelProvider(requireActivity());
-        FSensorViewModel model = viewModelProvider.get(FSensorViewModel.class);
-
-        if(Preferences.getPrefFSensorLpfLinearAccelerationEnabled(getContext())){
-            model.getLowPassLinearAccelerationSensorLiveData().observe(this, floats -> acceleration = floats);
-        } else if(Preferences.getPrefFSensorComplimentaryLinearAccelerationEnabled(getContext())) {
-            model.getComplimentaryLinearAccelerationSensorLiveData().observe(this, floats -> acceleration = floats);
-        } else if(Preferences.getPrefFSensorKalmanLinearAccelerationEnabled(getContext())) {
-            model.getKalmanLinearAccelerationSensorLiveData().observe(this, floats -> acceleration = floats);
-        }
     }
 }

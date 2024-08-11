@@ -1,4 +1,4 @@
-package com.tracqi.fsensor.util.offset;
+package com.tracqi.fsensor.math.offset;
 
 import android.util.Log;
 

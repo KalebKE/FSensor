@@ -1,4 +1,4 @@
-package com.tracqi.fsensor.util.angle;
+package com.tracqi.fsensor.math.angle;
 
 import android.util.Log;
 

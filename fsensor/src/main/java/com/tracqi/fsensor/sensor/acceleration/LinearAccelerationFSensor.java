@@ -6,6 +6,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import com.tracqi.fsensor.math.gravity.GravityUtil;
 import com.tracqi.fsensor.orientation.Orientation;
 import com.tracqi.fsensor.sensor.BaseFSensor;
 import com.tracqi.fsensor.sensor.FSensorEvent;
@@ -44,6 +45,9 @@ public abstract class LinearAccelerationFSensor extends BaseFSensor {
     }
 
     private void calculateLinerAcceleration(float[] acceleration, float[] gravity) {
+//        Log.d(TAG, "Acceleration: " + Arrays.toString(acceleration));
+//        Log.d(TAG, "Gravity: " + Arrays.toString(gravity));
+
         // Determine the linear acceleration
         output[0] = acceleration[0] - gravity[0];
         output[1] = acceleration[1] - gravity[1];
@@ -54,7 +58,7 @@ public abstract class LinearAccelerationFSensor extends BaseFSensor {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                calculateLinerAcceleration(event.values, orientation.getOrientation());
+                calculateLinerAcceleration(event.values, GravityUtil.getGravityFromOrientation(orientation.getOrientation()));
 
                 for (FSensorEventListener sensorEventListener : fSensorEventListeners) {
                     sensorEventListener.onSensorChanged(new FSensorEvent(event.sensor, event.accuracy, event.timestamp, output));

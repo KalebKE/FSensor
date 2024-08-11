@@ -63,13 +63,6 @@ public class LowPassFilter extends SensorFilter {
         output[1] = alpha * output[1] + oneMinusAlpha * values[1];
         output[2] = alpha * output[2] + oneMinusAlpha * values[2];
 
-        if(filter != null) {
-            float[] filteredOutput = filter.filter(output);
-            output[0] = filteredOutput[0];
-            output[1] = filteredOutput[1];
-            output[2] = filteredOutput[2];
-        }
-
         return output;
     }
 }

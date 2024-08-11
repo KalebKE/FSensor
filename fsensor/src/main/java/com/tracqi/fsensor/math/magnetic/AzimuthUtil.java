@@ -1,4 +1,4 @@
-package com.tracqi.fsensor.util.offset;
+package com.tracqi.fsensor.math.magnetic;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -17,28 +17,21 @@ package com.tracqi.fsensor.util.offset;
  */
 
 /**
- * A representation of a three space point with double precision.
- * 
- * @author Kaleb
- * @version 1.0
- * 
+ * A helper class for
+ * Created by kaleb on 3/18/18.
  */
-public class ThreeSpacePoint
-{
-	public double x;
-	public double y;
-	public double z;
+public class AzimuthUtil {
 
-	/**
-	 * Instantiate a new object.
-	 * @param x the point on the x-axis
-	 * @param y the point on the y-axis
-	 * @param z the point on the z-axis
-	 */
-	public ThreeSpacePoint(double x, double y, double z)
-	{
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
+    /**
+     * Get the azimuth from a magnetic sensor.
+     * @param magnetic The magnetic measurements.
+     * @return The azimuth in units of degrees with range: 0 < range <= 360.
+     */
+    public static float getAzimuth(float[] magnetic) {
+        float azimuth = (int) Math.toDegrees(Math.atan2(magnetic[0], magnetic[1]));
+
+        // Adjust the range: 0 < range <= 360 (from: -180 < range <=
+        // 180)
+        return (azimuth + 360) % 360;
+    }
 }

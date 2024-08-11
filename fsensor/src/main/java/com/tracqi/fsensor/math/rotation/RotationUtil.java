@@ -1,4 +1,4 @@
-package com.tracqi.fsensor.util.rotation;
+package com.tracqi.fsensor.math.rotation;
 
 import android.hardware.SensorManager;
 import android.renderscript.Matrix3f;
@@ -42,8 +42,7 @@ public class RotationUtil {
      */
     public static Quaternion integrateGyroscopeRotation(Quaternion previousRotationVector, float[] rateOfRotation, float dt, float epsilon) {
         // Calculate the angular speed of the sample
-        float magnitude = (float) Math.sqrt(Math.pow(rateOfRotation[0], 2)
-                + Math.pow(rateOfRotation[1], 2) + Math.pow(rateOfRotation[2], 2));
+        float magnitude = (float) Math.sqrt(Math.pow(rateOfRotation[0], 2) + Math.pow(rateOfRotation[1], 2) + Math.pow(rateOfRotation[2], 2));
 
         // Normalize the rotation vector if it's big enough to get the axis
         if (magnitude > epsilon) {
@@ -69,8 +68,7 @@ public class RotationUtil {
 
         // Since it is a unit quaternion, we can just multiply the old rotation
         // by the new rotation delta to integrate the rotation.
-        return previousRotationVector.multiply(new Quaternion(deltaVector[3], Arrays.copyOfRange(
-                deltaVector, 0, 3)));
+        return previousRotationVector.multiply(new Quaternion(deltaVector[3], Arrays.copyOfRange(deltaVector, 0, 3)));
     }
 
     /**

@@ -4,10 +4,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.tracqi.fsensor.filter.LowPassFilter;
 import com.tracqi.fsensor.orientation.Orientation;
-import com.tracqi.fsensor.util.gravity.GravityUtil;
+import com.tracqi.fsensor.math.gravity.GravityUtil;
+
+import java.util.Arrays;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC

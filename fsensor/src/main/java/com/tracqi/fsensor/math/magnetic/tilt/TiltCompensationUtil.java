@@ -1,4 +1,4 @@
-package com.tracqi.fsensor.util.magnetic.tilt;
+package com.tracqi.fsensor.math.magnetic.tilt;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC

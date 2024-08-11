@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="frequency">
+        <item>Normal (Slow)</item>
+        <item>Game (Medium)</item>
+        <item>Fastest (Fast)</item>
+    </string-array>
+    
+    <string-array name="frequencyValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+</resources>

@@ -6,8 +6,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 import com.tracqi.fsensor.orientation.Orientation;
-import com.tracqi.fsensor.util.angle.AngleUtils;
-import com.tracqi.fsensor.util.rotation.RotationUtil;
+import com.tracqi.fsensor.math.angle.AngleUtils;
+import com.tracqi.fsensor.math.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
 

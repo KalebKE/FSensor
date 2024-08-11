@@ -1,4 +1,7 @@
-package com.tracqi.fsensor.util.magnetic;
+package com.tracqi.fsensor.math.offset;
+
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -15,23 +18,23 @@ package com.tracqi.fsensor.util.magnetic;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * A helper class for
+ * Represents a field calibration.
  * Created by kaleb on 3/18/18.
  */
-public class AzimuthUtil {
+public class Calibration {
+    public final RealMatrix scalar;
+    public final RealVector offset;
 
     /**
-     * Get the azimuth from a magnetic sensor.
-     * @param magnetic The magnetic measurements.
-     * @return The azimuth in units of degrees with range: 0 < range <= 360.
+     * Create an instance.
+     *
+     * @param scalar The scalar of the calibration.
+     * @param offset The offset of the calibration.
      */
-    public static float getAzimuth(float[] magnetic) {
-        float azimuth = (int) Math.toDegrees(Math.atan2(magnetic[0], magnetic[1]));
-
-        // Adjust the range: 0 < range <= 360 (from: -180 < range <=
-        // 180)
-        return (azimuth + 360) % 360;
+    public Calibration(RealMatrix scalar, RealVector offset) {
+        this.scalar = scalar;
+        this.offset = offset;
     }
+
 }

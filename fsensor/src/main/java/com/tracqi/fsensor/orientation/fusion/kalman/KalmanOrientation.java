@@ -10,8 +10,8 @@ import com.tracqi.fsensor.orientation.fusion.kalman.filter.KalmanFilter;
 import com.tracqi.fsensor.orientation.fusion.kalman.filter.RotationProcessModel;
 import com.tracqi.fsensor.orientation.fusion.FusedOrientation;
 import com.tracqi.fsensor.orientation.fusion.kalman.filter.RotationMeasurementModel;
-import com.tracqi.fsensor.util.angle.AngleUtils;
-import com.tracqi.fsensor.util.rotation.RotationUtil;
+import com.tracqi.fsensor.math.angle.AngleUtils;
+import com.tracqi.fsensor.math.rotation.RotationUtil;
 
 import org.apache.commons.math3.complex.Quaternion;
 import org.apache.commons.math3.filter.MeasurementModel;

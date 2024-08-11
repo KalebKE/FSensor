@@ -4,7 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 
 
+import com.tracqi.fsensorapp.fragment.GaugesFragment;
+import com.tracqi.fsensorapp.fragment.PreferencesFragment;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 /*
  * AccelerationExplorer
@@ -36,5 +41,15 @@ public class MainActivity extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_main);
+        // Create new fragment and transaction
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setReorderingAllowed(true);
+
+        // Replace whatever is in the fragment_container view with this fragment
+        transaction.replace(R.id.container, GaugesFragment.class, null);
+
+        // Commit the transaction
+        transaction.commit();
     }
 }

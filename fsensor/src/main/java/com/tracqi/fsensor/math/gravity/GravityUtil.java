@@ -1,6 +1,9 @@
-package com.tracqi.fsensor.util.gravity;
+package com.tracqi.fsensor.math.gravity;
 
 import android.hardware.SensorManager;
+import android.util.Log;
+
+import java.util.Arrays;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -34,8 +37,8 @@ public class GravityUtil {
 
         float[] components = new float[3];
 
-        float pitch = orientation[1];
-        float roll = orientation[2];
+        float pitch = orientation[0];
+        float roll = orientation[1];
 
         // Find the gravity component of the X-axis
         // = g*-cos(pitch)*sin(roll);
@@ -60,10 +63,8 @@ public class GravityUtil {
      *          orientation[2] = azimuth, rotation around the Z axis
      */
     public static float[] getOrientationFromGravity(float[] gravity) {
-        float pitch = (float) Math.asin(gravity[0] / SensorManager.GRAVITY_EARTH);
-        float roll = (float) Math.atan(-gravity[1] / gravity[2]);
-
+        float pitch = (float) Math.atan(-gravity[1] / gravity[2]);
+        float roll = (float) Math.asin(gravity[0] / SensorManager.GRAVITY_EARTH);
         return new float[] {pitch, roll, 0};
     }
-
 }

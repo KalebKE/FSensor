@@ -1,7 +1,4 @@
-package com.tracqi.fsensor.util.offset;
-
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
+package com.tracqi.fsensor.math.offset;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -18,23 +15,30 @@ import org.apache.commons.math3.linear.RealVector;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
- * Represents a field calibration.
- * Created by kaleb on 3/18/18.
+ * A representation of a three space point with double precision.
+ * 
+ * @author Kaleb
+ * @version 1.0
+ * 
  */
-public class Calibration {
-    public final RealMatrix scalar;
-    public final RealVector offset;
+public class ThreeSpacePoint
+{
+	public double x;
+	public double y;
+	public double z;
 
-    /**
-     * Create an instance.
-     *
-     * @param scalar The scalar of the calibration.
-     * @param offset The offset of the calibration.
-     */
-    public Calibration(RealMatrix scalar, RealVector offset) {
-        this.scalar = scalar;
-        this.offset = offset;
-    }
-
+	/**
+	 * Instantiate a new object.
+	 * @param x the point on the x-axis
+	 * @param y the point on the y-axis
+	 * @param z the point on the z-axis
+	 */
+	public ThreeSpacePoint(double x, double y, double z)
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
 }

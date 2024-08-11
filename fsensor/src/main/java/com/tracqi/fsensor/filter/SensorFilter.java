@@ -25,8 +25,6 @@ package com.tracqi.fsensor.filter;
 public abstract class SensorFilter {
     public static float DEFAULT_TIME_CONSTANT = 0.18f;
 
-    protected SensorFilter filter;
-
     protected float timeConstant = DEFAULT_TIME_CONSTANT;
     protected long startTime;
 
@@ -35,17 +33,8 @@ public abstract class SensorFilter {
 
     public SensorFilter() {}
 
-    public SensorFilter(SensorFilter filter) {
-        this.filter = filter;
-    }
-
     public SensorFilter(float timeConstant) {
         this.timeConstant = timeConstant;
-    }
-
-    public SensorFilter(SensorFilter filter, float timeConstant) {
-        this.timeConstant = timeConstant;
-        this.filter = filter;
     }
 
     public void reset() {
