@@ -34,11 +34,12 @@ public class GravityUtil {
      * @return The gravity components of the orientation.
      */
     public static float[] getGravityFromOrientation(float[] orientation) {
+       // Log.d("GravityUtil", "Orientation: " + Arrays.toString(orientation));
 
         float[] components = new float[3];
 
-        float pitch = orientation[0];
-        float roll = orientation[1];
+        float pitch = orientation[1];
+        float roll = orientation[2];
 
         // Find the gravity component of the X-axis
         // = g*-cos(pitch)*sin(roll);
@@ -65,6 +66,6 @@ public class GravityUtil {
     public static float[] getOrientationFromGravity(float[] gravity) {
         float pitch = (float) Math.atan(-gravity[1] / gravity[2]);
         float roll = (float) Math.asin(gravity[0] / SensorManager.GRAVITY_EARTH);
-        return new float[] {pitch, roll, 0};
+        return new float[] {0, pitch, roll};
     }
 }

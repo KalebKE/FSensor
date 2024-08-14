@@ -2,6 +2,7 @@ package com.tracqi.fsensor.math.rotation;
 
 import android.hardware.SensorManager;
 import android.renderscript.Matrix3f;
+import android.util.Log;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -81,6 +82,8 @@ public class RotationUtil {
     public static Quaternion getOrientationVector(float[] acceleration, float[] magnetic) {
         float[] rotationMatrix = new float[9];
         if (SensorManager.getRotationMatrix(rotationMatrix, null, acceleration, magnetic)) {
+            float[] orientation = new float[3];
+            SensorManager.getOrientation(rotationMatrix, orientation);
             double[] rotation = getQuaternion(new Matrix3f(rotationMatrix));
             return new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]);
         }

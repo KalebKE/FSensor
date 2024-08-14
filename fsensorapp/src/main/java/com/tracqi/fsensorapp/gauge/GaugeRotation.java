@@ -53,6 +53,10 @@ public final class GaugeRotation extends View {
     private Bitmap skyBitmap;
     private Bitmap mutableBitmap;
 
+    private Canvas faceCanvas;
+
+    private Canvas mutableCanvas;
+
     // Keep track of the rotation of the device
     private final float[] rotation = new float[3];
 
@@ -141,12 +145,10 @@ public final class GaugeRotation extends View {
         float rimSize = 0.02f;
 
         faceBackgroundRect = new RectF();
-        faceBackgroundRect.set(rimRect.left + rimSize, rimRect.top + rimSize,
-                rimRect.right - rimSize, rimRect.bottom - rimSize);
+        faceBackgroundRect.set(rimRect.left, rimRect.top, rimRect.right, rimRect.bottom);
 
         skyBackgroundRect = new RectF();
-        skyBackgroundRect.set(rimRect.left + rimSize, rimRect.top + rimSize,
-                rimRect.right - rimSize, rimRect.bottom - rimSize);
+        skyBackgroundRect.set(rimRect.left + rimSize, rimRect.top + rimSize, rimRect.right - rimSize, rimRect.bottom - rimSize);
 
         skyPaint = new Paint();
         skyPaint.setAntiAlias(true);
@@ -198,6 +200,8 @@ public final class GaugeRotation extends View {
         canvas.drawOval(rimRect, rimPaint);
     }
 
+
+
     /**
      * Draw the gauge face.
      *
@@ -207,53 +211,43 @@ public final class GaugeRotation extends View {
 
         float halfHeight = ((rimRect.top - rimRect.bottom)/2);
 
-        float top = rimRect.top - halfHeight + (rotation[0]*halfHeight);
+        float top = rimRect.top - halfHeight + (rotation[1]*halfHeight);
 
         if(rimRect.left <= rimRect.right && top <= rimRect.bottom) {
             // free the old bitmap
-            if (faceBitmap != null) {
-                faceBitmap.recycle();
+            if (faceBitmap == null) {
+                faceBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+                faceCanvas = new Canvas(faceBitmap);
             }
 
-            if (skyBitmap != null) {
-                skyBitmap.recycle();
+            if (skyBitmap == null) {
+                skyBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
             }
 
-            if (mutableBitmap != null) {
-                mutableBitmap.recycle();
+            if (mutableBitmap == null) {
+                mutableBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+                mutableCanvas = new Canvas(mutableBitmap);
             }
 
             skyPaint.setFilterBitmap(false);
 
-            faceBitmap = Bitmap.createBitmap(getWidth(), getHeight(),
-                    Bitmap.Config.ARGB_8888);
-            skyBitmap = Bitmap.createBitmap(getWidth(), getHeight(),
-                    Bitmap.Config.ARGB_8888);
-            mutableBitmap = Bitmap.createBitmap(getWidth(), getHeight(),
-                    Bitmap.Config.ARGB_8888);
+            skyBitmap.eraseColor(Color.TRANSPARENT);
 
-            Canvas faceCanvas = new Canvas(faceBitmap);
             Canvas skyCanvas = new Canvas(skyBitmap);
-            Canvas mutableCanvas = new Canvas(mutableBitmap);
+
             float scale = (float) getWidth();
             faceCanvas.scale(scale, scale);
             skyCanvas.scale(scale, scale);
 
-            faceBackgroundRect.set(rimRect.left, rimRect.top, rimRect.right,
-                    rimRect.bottom);
-
-
-            skyBackgroundRect.set(rimRect.left, top, rimRect.right,
-                    rimRect.bottom);
+            skyBackgroundRect.set(rimRect.left, top, rimRect.right, rimRect.bottom);
 
             faceCanvas.drawArc(faceBackgroundRect, 0, 360, true, skyPaint);
             skyCanvas.drawRect(skyBackgroundRect, skyPaint);
 
-            float angle = (float) -Math.toDegrees(rotation[1]);
+            float angle = (float) -Math.toDegrees(rotation[2]);
 
             canvas.save();
-            canvas.rotate(angle, faceBitmap.getWidth() / 2f,
-                    faceBitmap.getHeight() / 2f);
+            canvas.rotate(angle, faceBitmap.getWidth() / 2f, faceBitmap.getHeight() / 2f);
 
             mutableCanvas.drawBitmap(faceBitmap, 0, 0, skyPaint);
             skyPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));

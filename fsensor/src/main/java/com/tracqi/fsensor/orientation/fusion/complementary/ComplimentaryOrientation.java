@@ -192,7 +192,6 @@ public class ComplimentaryOrientation extends FusedOrientation {
                     Quaternion result = scaledRotationVectorGyroscope.add(scaledRotationVectorAccelerationMagnetic);
 
                     float[] angles = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
-                    Log.d(TAG, Arrays.toString(angles));
                     System.arraycopy(angles, 0, this.output, 0, angles.length);
                 }
             }

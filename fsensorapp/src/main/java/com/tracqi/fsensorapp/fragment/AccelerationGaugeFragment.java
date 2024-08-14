@@ -4,6 +4,7 @@ package com.tracqi.fsensorapp.fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +60,7 @@ public class AccelerationGaugeFragment extends Fragment {
         } else if(Preferences.getPrefFSensorComplimentaryLinearAccelerationEnabled(getContext())) {
             model.getComplimentaryLinearAccelerationSensorLiveData().observe(this, floats -> acceleration = floats);
         } else if(Preferences.getPrefFSensorKalmanLinearAccelerationEnabled(getContext())) {
+            Log.d("AccelerationGaugeFragment", "Kalman");
             model.getKalmanLinearAccelerationSensorLiveData().observe(this, floats -> acceleration = floats);
         }
 
