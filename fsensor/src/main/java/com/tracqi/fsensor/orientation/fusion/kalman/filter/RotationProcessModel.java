@@ -22,101 +22,107 @@ import org.apache.commons.math3.linear.RealVector;
  * limitations under the License.
  */
 
-public class RotationProcessModel implements ProcessModel
-{
-	/**
-	 * The state transition matrix, used to advance the internal state
-	 * estimation each time-step.
-	 */
-	private RealMatrix stateTransitionMatrix;
+public class RotationProcessModel implements ProcessModel {
+    /**
+     * The state transition matrix, used to advance the internal state
+     * estimation each time-step.
+     */
+    private final RealMatrix stateTransitionMatrix;
 
-	/** The process noise covariance matrix. */
-	private RealMatrix processNoiseCovMatrix;
+    /**
+     * The process noise covariance matrix.
+     */
+    private final RealMatrix processNoiseCovMatrix;
 
-	/** The initial state estimation of the observed process. */
-	private RealVector initialStateEstimateVector;
+    /**
+     * The initial state estimation of the observed process.
+     */
+    private final RealVector initialStateEstimateVector;
 
-	/** The initial error covariance matrix of the observed process. */
-	private RealMatrix initialErrorCovMatrix;
+    /**
+     * The initial error covariance matrix of the observed process.
+     */
+    private final RealMatrix initialErrorCovMatrix;
 
-	/** The initial error covariance matrix of the observed process. */
-	private RealMatrix controlMatrix;
+    /**
+     * The initial error covariance matrix of the observed process.
+     */
+    private final RealMatrix controlMatrix;
 
-	public RotationProcessModel()
-	{
-		super();
+    public RotationProcessModel() {
+        super();
 
-		// A = stateTransitionMatrix
-		stateTransitionMatrix = new Array2DRowRealMatrix(new double[][]
-		{
-		{ 1, 0, 0, 0 },
-		{ 0, 1, 0, 0 },
-		{ 0, 0, 1, 0 },
-		{ 0, 0, 0, 1 } });
+        // A = stateTransitionMatrix
+        stateTransitionMatrix = new Array2DRowRealMatrix(new double[][]
+                {
+                        {1, 0, 0, 0},
+                        {0, 1, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 0, 0, 1}});
 
-		// B = stateTransitionMatrix
-		controlMatrix = new Array2DRowRealMatrix(new double[][]
-		{
-		{ 1, 0, 0, 0 },
-		{ 0, 1, 0, 0 },
-		{ 0, 0, 1, 0 },
-		{ 0, 0, 0, 1 } });
+        // B = stateTransitionMatrix
+        controlMatrix = new Array2DRowRealMatrix(new double[][]
+                {
+                        {1, 0, 0, 0},
+                        {0, 1, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 0, 0, 1}});
 
-		// Q = processNoiseCovMatrix
-		processNoiseCovMatrix = new Array2DRowRealMatrix(new double[][]
-		{
-		{ 1, 0, 0, 0 },
-		{ 0, 1, 0, 0 },
-		{ 0, 0, 1, 0 },
-		{ 0, 0, 0, 1 } });
+        // Q = processNoiseCovMatrix
+        processNoiseCovMatrix = new Array2DRowRealMatrix(new double[][]
+                {
+                        {0.01, 0, 0, 0},
+                        {0, 0.01, 0, 0},
+                        {0, 0, 0.01, 0},
+                        {0, 0, 0, 0.01}});
 
-		// xP = initialStateEstimateVector
-		initialStateEstimateVector = new ArrayRealVector(new double[]
-		{ 0, 0, 0, 0 });
+        // xP = initialStateEstimateVector
+        initialStateEstimateVector = new ArrayRealVector(new double[]
+                {0, 0, 0, 0});
 
-		// P0 = initialErrorCovMatrix;
-		initialErrorCovMatrix = new Array2DRowRealMatrix(new double[][]
-		{
-		{ 0.1, 0, 0, 0 },
-		{ 0, 0.1, 0, 0 },
-		{ 0, 0, 0.1, 0 },
-		{ 0, 0, 0, 0.1 } });
-	}
+        // P0 = initialErrorCovMatrix;
+        initialErrorCovMatrix = new Array2DRowRealMatrix(new double[][]
+                {
+                        {0.1, 0, 0, 0},
+                        {0, 0.1, 0, 0},
+                        {0, 0, 0.1, 0},
+                        {0, 0, 0, 0.1}});
+    }
 
-	/** {@inheritDoc} */
-	public RealMatrix getStateTransitionMatrix()
-	{
-		stateTransitionMatrix = new Array2DRowRealMatrix(new double[][]
-		{
-		{ 1, 0, 0, 0 },
-		{ 0, 1, 0, 0 },
-		{ 0, 0, 1, 0 },
-		{ 0, 0, 0, 1 } });
+    /**
+     * {@inheritDoc}
+     */
+    public RealMatrix getStateTransitionMatrix() {
 
-		return stateTransitionMatrix;
-	}
 
-	/** {@inheritDoc} */
-	public RealMatrix getControlMatrix()
-	{
-		return controlMatrix;
-	}
+        return stateTransitionMatrix;
+    }
 
-	/** {@inheritDoc} */
-	public RealMatrix getProcessNoise()
-	{
-		return processNoiseCovMatrix;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public RealMatrix getControlMatrix() {
+        return controlMatrix;
+    }
 
-	/** {@inheritDoc} */
-	public RealVector getInitialStateEstimate()
-	{
-		return initialStateEstimateVector;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public RealMatrix getProcessNoise() {
+        return processNoiseCovMatrix;
+    }
 
-	/** {@inheritDoc} */
-	public RealMatrix getInitialErrorCovariance()
-	{
-		return initialErrorCovMatrix;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public RealVector getInitialStateEstimate() {
+        return initialStateEstimateVector;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public RealMatrix getInitialErrorCovariance() {
+        return initialErrorCovMatrix;
+    }
 }

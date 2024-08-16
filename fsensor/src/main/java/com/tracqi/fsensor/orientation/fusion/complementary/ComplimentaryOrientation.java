@@ -6,6 +6,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import com.tracqi.fsensor.math.gravity.GravityUtil;
 import com.tracqi.fsensor.orientation.fusion.FusedOrientation;
 import com.tracqi.fsensor.math.angle.AngleUtils;
 import com.tracqi.fsensor.math.rotation.RotationUtil;
@@ -148,6 +149,7 @@ public class ComplimentaryOrientation extends FusedOrientation {
         System.arraycopy(rotation, 0, this.rotation, 0, this.rotation.length);
     }
 
+
     /**
      * Calculate the fused orientation of the device.
      * <p>
@@ -174,7 +176,20 @@ public class ComplimentaryOrientation extends FusedOrientation {
                 float alpha = timeConstant / (timeConstant + dT);
                 float oneMinusAlpha = (1.0f - alpha);
 
-                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(acceleration, magnetic);
+                // Get last known orientation
+                float[] orientation = AngleUtils.getAngles(rotationVector.getQ0(), rotationVector.getQ1(), rotationVector.getQ2(), rotationVector.getQ3());
+
+                // Calculate the gravity vector from the orientation
+                float[] gravity = GravityUtil.getGravityFromOrientation(orientation);
+
+                for(int i = 0; i < gravity.length; i++) {
+                    // Apply acceleration sensor
+                    // output[0] = alpha * output[0] + (1 - alpha) * input[0];
+                    gravity[i] = alpha * gravity[i] + oneMinusAlpha * acceleration[i];
+                }
+
+                // Get orientation from acceleration and magnetic
+                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(gravity, magnetic);
 
                 if (rotationVectorAccelerationMagnetic != null) {
 

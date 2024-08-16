@@ -4,7 +4,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
+import com.tracqi.fsensor.math.gravity.GravityUtil;
 import com.tracqi.fsensor.orientation.fusion.complementary.ComplimentaryOrientation;
 import com.tracqi.fsensor.orientation.fusion.kalman.filter.KalmanFilter;
 import com.tracqi.fsensor.orientation.fusion.kalman.filter.RotationProcessModel;
@@ -140,32 +142,50 @@ public class KalmanOrientation extends FusedOrientation {
         if (isBaseOrientationSet()) {
             if (this.timestamp != 0) {
                 dT = (timestamp - this.timestamp) * NS2S;
+                float timeConstant = 0.075f;
+                float alpha = timeConstant / (timeConstant + dT);
+                float oneMinusAlpha = (1.0f - alpha);
 
-                rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(acceleration, magnetic);
-                rotationVector = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
+                // Get last known orientation
+                float[] orientation = AngleUtils.getAngles(rotationVector.getQ0(), rotationVector.getQ1(), rotationVector.getQ2(), rotationVector.getQ3());
 
-                vectorGyroscope[0] = (float) rotationVector.getVectorPart()[0];
-                vectorGyroscope[1] = (float) rotationVector.getVectorPart()[1];
-                vectorGyroscope[2] = (float) rotationVector.getVectorPart()[2];
-                vectorGyroscope[3] = (float) rotationVector.getScalarPart();
+                // Calculate the gravity vector from the orientation
+                float[] gravity = GravityUtil.getGravityFromOrientation(orientation);
 
-                vectorAccelerationMagnetic[0] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[0];
-                vectorAccelerationMagnetic[1] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[1];
-                vectorAccelerationMagnetic[2] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[2];
-                vectorAccelerationMagnetic[3] = (float) rotationVectorAccelerationMagnetic.getScalarPart();
+                for(int i = 0; i < gravity.length; i++) {
+                    // Apply acceleration sensor
+                    // output[0] = alpha * output[0] + (1 - alpha) * input[0];
+                    gravity[i] = alpha * gravity[i] + oneMinusAlpha * acceleration[i];
+                }
 
-                // Apply the Kalman fusedOrientation... Note that the prediction and correction
-                // inputs could be swapped, but the fusedOrientation is much more stable in this
-                // configuration.
-                kalmanFilter.predict(vectorGyroscope);
-                kalmanFilter.correct(vectorAccelerationMagnetic);
+                rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(gravity, magnetic);
 
-                // rotation estimation.
-                Quaternion result = new Quaternion(kalmanFilter.getStateEstimation()[3], Arrays.copyOfRange(kalmanFilter.getStateEstimation(), 0, 3));
+                if(rotationVectorAccelerationMagnetic != null) {
+                    rotationVector = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
 
-                float[] angles = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
+                    vectorGyroscope[0] = (float) rotationVector.getVectorPart()[0];
+                    vectorGyroscope[1] = (float) rotationVector.getVectorPart()[1];
+                    vectorGyroscope[2] = (float) rotationVector.getVectorPart()[2];
+                    vectorGyroscope[3] = (float) rotationVector.getScalarPart();
 
-                System.arraycopy(angles, 0, this.output, 0, angles.length);
+                    vectorAccelerationMagnetic[0] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[0];
+                    vectorAccelerationMagnetic[1] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[1];
+                    vectorAccelerationMagnetic[2] = (float) rotationVectorAccelerationMagnetic.getVectorPart()[2];
+                    vectorAccelerationMagnetic[3] = (float) rotationVectorAccelerationMagnetic.getScalarPart();
+
+                    // Apply the Kalman fusedOrientation... Note that the prediction and correction
+                    // inputs could be swapped, but the fusedOrientation is much more stable in this
+                    // configuration.
+                    kalmanFilter.predict(vectorGyroscope);
+                    kalmanFilter.correct(vectorAccelerationMagnetic);
+
+                    // rotation estimation.
+                    Quaternion result = new Quaternion(kalmanFilter.getStateEstimation()[3], Arrays.copyOfRange(kalmanFilter.getStateEstimation(), 0, 3));
+
+                    float[] angles = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
+
+                    System.arraycopy(angles, 0, this.output, 0, angles.length);
+                }
             }
             this.timestamp = timestamp;
         } else {

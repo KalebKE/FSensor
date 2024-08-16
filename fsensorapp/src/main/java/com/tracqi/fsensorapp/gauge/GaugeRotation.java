@@ -200,8 +200,6 @@ public final class GaugeRotation extends View {
         canvas.drawOval(rimRect, rimPaint);
     }
 
-
-
     /**
      * Draw the gauge face.
      *
