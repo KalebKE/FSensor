@@ -4,10 +4,10 @@ Android Sensor Filter and Fusion
 ![Alt text](http://kircherelectronics.com.23.38-89-161.groveurl.com/wp-content/uploads/2017/12/FSensor.png "FSensor")
 
 ## Introduction
-FSensor (FusionSensor) is an Android library that (hopefully) removes some/most of the complexity of using Androids orientation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
+FSensor (FusionSensor) is an Android library that (hopefully) removes some/most of the complexity of using Androids rotation sensors (Acceleration, Magnetic and Gyroscope). FSensor expands greatly on the "out-of-the-box" sensor implementations provided by Android allowing you to customize sensor filters and fusions for your specific needs, or just add default filters on what Android already provides. 
 
 * Provides device/sensor agnostic averaging filters in the of mean, median and low-pass varieties
-* Provides IMU sensor fusion backed estimations of device orientation in the complimentary and Kalman varieties
+* Provides IMU sensor fusion backed estimations of device rotation in the complimentary and Kalman varieties
 * Provides estimations of linear acceleration (linear acceleration = acceleration - gravity) in the averaging filter and sensor fusion varieties
 
 ## Get FSensor
@@ -61,9 +61,9 @@ FSensor uses a median filter designed to smooth the data points based on a time 
 
 ## Orientation Sensor Fusions
 
-FSensor offers two different estimations of rotation using IMU sensor fusions. These filters can be found in the *.filter.fusion* package. One fusion is based on a quaternion backed complimentary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices orientation relative to world space coordinates.
+FSensor offers two different estimations of rotation using IMU sensor fusions. These filters can be found in the *.filter.fusion* package. One fusion is based on a quaternion backed complimentary filter and the second fusion is based on a quaternion backed Kalman filter. Both fusions use the acceleration sensor, magnetic sensor and gyroscope sensor to provide an estimation the devices rotation relative to world space coordinates.
 
-The gyroscope is used to measure the devices orientation. However, the gyroscope tends to drift due to round off errors and other factors. Most gyroscopes work by measuring very small vibrations in the earth's rotation, which means they really do not like external vibrations. Because of drift and external vibrations, the gyroscope has to be compensated with a second estimation of the devices orientation, which comes from the acceleration sensor and magnetic sensor. The acceleration sensor provides the pitch and roll estimations while the magnetic sensor provides the azimuth.
+The gyroscope is used to measure the devices rotation. However, the gyroscope tends to drift due to round off errors and other factors. Most gyroscopes work by measuring very small vibrations in the earth's rotation, which means they really do not like external vibrations. Because of drift and external vibrations, the gyroscope has to be compensated with a second estimation of the devices rotation, which comes from the acceleration sensor and magnetic sensor. The acceleration sensor provides the pitch and roll estimations while the magnetic sensor provides the azimuth.
 
 ### Quaternions Complimentary Filter
 
@@ -71,7 +71,7 @@ Quaternions offer an angle-axis solution to rotations which do not suffer from m
 
 The complementary filter is a frequency domain filter. In its strictest sense, the definition of a complementary filter refers to the use of two or more transfer functions, which are mathematical complements of one another. Thus, if the data from one sensor is operated on by G(s), then the data from the other sensor is operated on by I-G(s), and the sum of the transfer functions is I, the identity matrix. In practice, it looks nearly identical to a low-pass filter, but uses two different sets of sensor measurements to produce what can be thought of as a weighted estimation.
 
- A complimentary filter is used to fuse the two orientation estimations (the gyroscope and acceleration/magnetic, respectively) together. It takes the form of gyro[0] = alpha * gyro[0] + (1 - alpha) * accel/magnetic[0]. Alpha is defined as alpha = timeConstant / (timeConstant + dt) where the time constant is the length of signals the filter should act on and dt is the sample period (1/frequency) of the sensor.
+ A complimentary filter is used to fuse the two rotation estimations (the gyroscope and acceleration/magnetic, respectively) together. It takes the form of gyro[0] = alpha * gyro[0] + (1 - alpha) * accel/magnetic[0]. Alpha is defined as alpha = timeConstant / (timeConstant + dt) where the time constant is the length of signals the filter should act on and dt is the sample period (1/frequency) of the sensor.
  
  ### Quaternion Kalman Filter
  
@@ -93,7 +93,7 @@ The most simple linear acceleration filter is based on a low-pass filter. It has
 
 ### IMU Sensor Fusion Linear Acceleration
 
-Calculating the gravity components of a normalized orientation is trivial, so FSensor can use the IMU orientation fusions to provide an estimation of linear acceleration that is far more customizable than what Android provides alone.
+Calculating the gravity components of a normalized rotation is trivial, so FSensor can use the IMU rotation fusions to provide an estimation of linear acceleration that is far more customizable than what Android provides alone.
 
 ## Sensor Offset Calibration
 

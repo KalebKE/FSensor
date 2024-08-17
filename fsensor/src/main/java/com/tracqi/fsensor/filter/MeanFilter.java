@@ -1,5 +1,7 @@
 package com.tracqi.fsensor.filter;
 
+import android.util.Log;
+
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
@@ -107,10 +109,5 @@ public class MeanFilter extends SensorFilter {
         }
 
         return mean;
-    }
-
-    public void reset() {
-        super.reset();
-        this.values.clear();
     }
 }

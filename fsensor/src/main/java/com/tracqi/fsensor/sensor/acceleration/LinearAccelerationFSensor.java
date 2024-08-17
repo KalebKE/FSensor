@@ -4,15 +4,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 
-import com.tracqi.fsensor.math.gravity.GravityUtil;
-import com.tracqi.fsensor.orientation.Orientation;
+import com.tracqi.fsensor.math.gravity.Gravity;
+import com.tracqi.fsensor.rotation.Rotation;
 import com.tracqi.fsensor.sensor.BaseFSensor;
 import com.tracqi.fsensor.sensor.FSensorEvent;
 import com.tracqi.fsensor.sensor.FSensorEventListener;
-
-import java.util.Arrays;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -35,8 +32,8 @@ public abstract class LinearAccelerationFSensor extends BaseFSensor {
 
     private final SensorEventListener sensorEventListener = new SensorListener();
 
-    public LinearAccelerationFSensor(SensorManager sensorManager, Orientation orientation) {
-        super(sensorManager, orientation);
+    public LinearAccelerationFSensor(SensorManager sensorManager, Rotation rotation) {
+        super(sensorManager, rotation);
     }
 
     @Override
@@ -58,7 +55,7 @@ public abstract class LinearAccelerationFSensor extends BaseFSensor {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                calculateLinerAcceleration(event.values, GravityUtil.getGravityFromOrientation(orientation.getOrientation()));
+                calculateLinerAcceleration(event.values, Gravity.getGravityFromOrientation(rotation.getOrientation()));
 
                 for (FSensorEventListener sensorEventListener : fSensorEventListeners) {
                     sensorEventListener.onSensorChanged(new FSensorEvent(event.sensor, event.accuracy, event.timestamp, output));

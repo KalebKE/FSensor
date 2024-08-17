@@ -1,15 +1,13 @@
-package com.tracqi.fsensor.orientation.raw;
+package com.tracqi.fsensor.rotation.raw;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.tracqi.fsensor.orientation.Orientation;
-import com.tracqi.fsensor.math.angle.AngleUtils;
-import com.tracqi.fsensor.math.rotation.RotationUtil;
-
-import org.apache.commons.math3.complex.Quaternion;
+import com.tracqi.fsensor.filter.LowPassFilter;
+import com.tracqi.fsensor.rotation.Rotation;
+import com.tracqi.fsensor.math.gravity.Gravity;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -80,25 +78,23 @@ import org.apache.commons.math3.complex.Quaternion;
  *
  * @author Kaleb
  */
-public class GyroscopeOrientation implements Orientation {
-    private static final float NS2S = 1.0f / 1000000000.0f;
-    private static final float EPSILON = 0.000000001f;
-    private Quaternion rotationQuaternion = Quaternion.IDENTITY;
+public class AccelerationRotation implements Rotation {
     private final float[] rotation = new float[3];
     private final SensorEventListener sensorEventListener = new SensorListener();
-    private long timestamp = 0;
     private final SensorManager sensorManager;
+    private final LowPassFilter lowPassFilter;
 
     /**
      * Initialize a singleton instance.
      */
-    public GyroscopeOrientation(SensorManager sensorManager) {
+    public AccelerationRotation(SensorManager sensorManager, LowPassFilter lowPassFilter) {
         this.sensorManager = sensorManager;
+        this.lowPassFilter = lowPassFilter;
     }
 
     @Override
     public void start(int sensorDelay) {
-        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), sensorDelay);
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), sensorDelay);
     }
 
     @Override
@@ -111,61 +107,19 @@ public class GyroscopeOrientation implements Orientation {
         return rotation;
     }
 
-    /**
-     * Set the base orientation (frame of reference) to which all subsequent rotations will be applied.
-     * <p>
-     * To initialize to an arbitrary local frame of reference pass in the Identity Quaternion. This will initialize the base orientation as the orientation the device is
-     * currently in and all subsequent rotations will be relative to this orientation.
-     * <p>
-     * To initialize to an absolute frame of reference (like Earth frame) the devices orientation must be determine from other sensors (such as the acceleration and magnetic
-     * sensors).
-     *
-     * @param baseOrientation The base orientation to which all subsequent rotations will be applied.
-     */
-    public void setBaseOrientation(Quaternion baseOrientation) {
-        rotationQuaternion = baseOrientation;
-    }
-
-    /**
-     * Calculate the fused orientation of the device.
-     * <p>
-     * Rotation is positive in the counterclockwise direction (right-hand rule). That is, an observer looking from some positive location on the x, y, or z axis at
-     * a device positioned on the origin would report positive rotation if the device appeared to be rotating counter clockwise. Note that this is the
-     * standard mathematical definition of positive rotation and does not agree with the aerospace definition of roll.
-     * <p>
-     * Returns a vector of size 3 ordered as:
-     * [0]X points east and is tangential to the ground.
-     * [1]Y points north and is tangential to the ground.
-     * [2]Z points towards the sky and is perpendicular to the ground.
-     *
-     * @param gyroscope the gyroscope measurements.
-     * @param timestamp the gyroscope timestamp
-     */
-    private void calculateOrientation(float[] gyroscope, long timestamp) {
-        float[] angles;
-        if (this.timestamp != 0) {
-            final float dT = (timestamp - this.timestamp) * NS2S;
-            rotationQuaternion = RotationUtil.integrateGyroscopeRotation(rotationQuaternion, gyroscope, dT, EPSILON);
-            angles = AngleUtils.getAngles(rotationQuaternion.getQ0(), rotationQuaternion.getQ1(), rotationQuaternion.getQ2(), rotationQuaternion.getQ3());
-
-            rotation[0] = angles[0];
-            rotation[1] = angles[1];
-            rotation[2] = angles[2];
-        }
-
-        this.timestamp = timestamp;
-    }
-
     private class SensorListener implements SensorEventListener {
+
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                calculateOrientation(event.values, event.timestamp);
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+               float[] rotation = Gravity.getOrientationFromGravity(lowPassFilter.filter(event.values));
+                AccelerationRotation.this.rotation[0] = rotation[0];
+                AccelerationRotation.this.rotation[1] = rotation[1];
+                AccelerationRotation.this.rotation[2] = rotation[2];
             }
         }
 
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        }
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
     }
 }

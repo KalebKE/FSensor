@@ -18,7 +18,7 @@ package com.tracqi.fsensor.sensor.orientation;
 
 import android.hardware.SensorManager;
 
-import com.tracqi.fsensor.orientation.fusion.kalman.KalmanOrientation;
+import com.tracqi.fsensor.rotation.fusion.kalman.KalmanRotation;
 
 import org.apache.commons.math3.filter.MeasurementModel;
 import org.apache.commons.math3.filter.ProcessModel;
@@ -27,10 +27,10 @@ public class KalmanOrientationFSensor extends OrientationFSensor {
     private static final String TAG = KalmanOrientationFSensor.class.getSimpleName();
 
     public KalmanOrientationFSensor(SensorManager sensorManager) {
-        super(sensorManager, new KalmanOrientation(sensorManager));
+        super(sensorManager, new KalmanRotation(sensorManager));
     }
 
     public KalmanOrientationFSensor(SensorManager sensorManager, ProcessModel processModel, MeasurementModel measurementModel) {
-        super(sensorManager, new KalmanOrientation(sensorManager, processModel, measurementModel));
+        super(sensorManager, new KalmanRotation(sensorManager, processModel, measurementModel));
     }
 }

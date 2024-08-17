@@ -24,7 +24,7 @@ import android.location.Location;
  *
  * Created by kaleb on 3/18/18.
  */
-public class DeclinationUtil {
+public class Declination {
 
     private GeomagneticField geoMagField;
 
@@ -32,7 +32,7 @@ public class DeclinationUtil {
      * Default constructor.
      * @param location The location to use for the compensation.
      */
-    public DeclinationUtil(Location location) {
+    public Declination(Location location) {
         setGeomagneticField(location);
     }
 

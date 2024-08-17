@@ -1,6 +1,6 @@
-package com.tracqi.fsensor.orientation.fusion;
+package com.tracqi.fsensor.rotation.fusion;
 
-import com.tracqi.fsensor.orientation.Orientation;
+import com.tracqi.fsensor.rotation.Rotation;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -25,7 +25,7 @@ import org.apache.commons.math3.complex.Quaternion;
  * Created by kaleb on 7/6/17.
  */
 
-public abstract class FusedOrientation implements Orientation {
+public abstract class FusedRotation implements Rotation {
 
     protected static final float EPSILON = 0.000000001f;
     // Nano-second to second conversion

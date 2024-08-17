@@ -37,11 +37,6 @@ public abstract class SensorFilter {
         this.timeConstant = timeConstant;
     }
 
-    public void reset() {
-        startTime = 0;
-        count = 0;
-    }
-
     public void setTimeConstant(float timeConstant) {
         this.timeConstant = timeConstant;
     }

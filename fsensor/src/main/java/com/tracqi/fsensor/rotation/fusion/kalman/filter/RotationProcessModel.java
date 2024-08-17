@@ -1,4 +1,4 @@
-package com.tracqi.fsensor.orientation.fusion.kalman.filter;
+package com.tracqi.fsensor.rotation.fusion.kalman.filter;
 
 import org.apache.commons.math3.filter.ProcessModel;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;

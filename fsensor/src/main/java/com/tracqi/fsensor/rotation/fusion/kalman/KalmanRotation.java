@@ -1,19 +1,18 @@
-package com.tracqi.fsensor.orientation.fusion.kalman;
+package com.tracqi.fsensor.rotation.fusion.kalman;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 
-import com.tracqi.fsensor.math.gravity.GravityUtil;
-import com.tracqi.fsensor.orientation.fusion.complementary.ComplimentaryOrientation;
-import com.tracqi.fsensor.orientation.fusion.kalman.filter.KalmanFilter;
-import com.tracqi.fsensor.orientation.fusion.kalman.filter.RotationProcessModel;
-import com.tracqi.fsensor.orientation.fusion.FusedOrientation;
-import com.tracqi.fsensor.orientation.fusion.kalman.filter.RotationMeasurementModel;
-import com.tracqi.fsensor.math.angle.AngleUtils;
-import com.tracqi.fsensor.math.rotation.RotationUtil;
+import com.tracqi.fsensor.math.gravity.Gravity;
+import com.tracqi.fsensor.rotation.fusion.FusedRotation;
+import com.tracqi.fsensor.rotation.fusion.complementary.ComplimentaryRotation;
+import com.tracqi.fsensor.rotation.fusion.kalman.filter.KalmanFilter;
+import com.tracqi.fsensor.rotation.fusion.kalman.filter.RotationProcessModel;
+import com.tracqi.fsensor.rotation.fusion.kalman.filter.RotationMeasurementModel;
+import com.tracqi.fsensor.math.angle.Angles;
+import com.tracqi.fsensor.math.rotation.Rotation;
 
 import org.apache.commons.math3.complex.Quaternion;
 import org.apache.commons.math3.filter.MeasurementModel;
@@ -63,9 +62,9 @@ import java.util.Arrays;
  * Created by kaleb on 7/6/17.
  */
 
-public class KalmanOrientation extends FusedOrientation {
+public class KalmanRotation extends FusedRotation {
 
-    private static final String TAG = ComplimentaryOrientation.class.getSimpleName();
+    private static final String TAG = ComplimentaryRotation.class.getSimpleName();
 
     private final SensorManager sensorManager;
     private final SensorEventListener sensorEventListener = new SensorListener();
@@ -89,12 +88,12 @@ public class KalmanOrientation extends FusedOrientation {
     private final double[] vectorAccelerationMagnetic = new double[4];
 
 
-    public KalmanOrientation(SensorManager sensorManager) {
+    public KalmanRotation(SensorManager sensorManager) {
         this.sensorManager = sensorManager;
         this.kalmanFilter = new KalmanFilter(new RotationProcessModel(), new RotationMeasurementModel());
     }
 
-    public KalmanOrientation(SensorManager sensorManager, ProcessModel processModel, MeasurementModel measurementModel) {
+    public KalmanRotation(SensorManager sensorManager, ProcessModel processModel, MeasurementModel measurementModel) {
         this.sensorManager = sensorManager;
         this.kalmanFilter = new KalmanFilter(processModel, measurementModel);
     }
@@ -147,10 +146,10 @@ public class KalmanOrientation extends FusedOrientation {
                 float oneMinusAlpha = (1.0f - alpha);
 
                 // Get last known orientation
-                float[] orientation = AngleUtils.getAngles(rotationVector.getQ0(), rotationVector.getQ1(), rotationVector.getQ2(), rotationVector.getQ3());
+                float[] orientation = Angles.getAngles(rotationVector.getQ0(), rotationVector.getQ1(), rotationVector.getQ2(), rotationVector.getQ3());
 
                 // Calculate the gravity vector from the orientation
-                float[] gravity = GravityUtil.getGravityFromOrientation(orientation);
+                float[] gravity = Gravity.getGravityFromOrientation(orientation);
 
                 for(int i = 0; i < gravity.length; i++) {
                     // Apply acceleration sensor
@@ -158,10 +157,10 @@ public class KalmanOrientation extends FusedOrientation {
                     gravity[i] = alpha * gravity[i] + oneMinusAlpha * acceleration[i];
                 }
 
-                rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(gravity, magnetic);
+                rotationVectorAccelerationMagnetic = Rotation.getOrientationVector(gravity, magnetic);
 
                 if(rotationVectorAccelerationMagnetic != null) {
-                    rotationVector = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
+                    rotationVector = Rotation.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
 
                     vectorGyroscope[0] = (float) rotationVector.getVectorPart()[0];
                     vectorGyroscope[1] = (float) rotationVector.getVectorPart()[1];
@@ -182,7 +181,7 @@ public class KalmanOrientation extends FusedOrientation {
                     // rotation estimation.
                     Quaternion result = new Quaternion(kalmanFilter.getStateEstimation()[3], Arrays.copyOfRange(kalmanFilter.getStateEstimation(), 0, 3));
 
-                    float[] angles = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
+                    float[] angles = Angles.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
 
                     System.arraycopy(angles, 0, this.output, 0, angles.length);
                 }
@@ -218,7 +217,7 @@ public class KalmanOrientation extends FusedOrientation {
                 hasMagnetic = false;
 
                 if (!isBaseOrientationSet()) {
-                    setBaseOrientation(RotationUtil.getOrientationVector(acceleration, magnetic));
+                    setBaseOrientation(Rotation.getOrientationVector(acceleration, magnetic));
                 } else {
                     calculateFusedOrientation(rotation, rotationTimestamp, acceleration, magnetic);
                 }

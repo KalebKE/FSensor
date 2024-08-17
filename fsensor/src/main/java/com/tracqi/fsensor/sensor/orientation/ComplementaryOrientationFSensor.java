@@ -2,7 +2,7 @@ package com.tracqi.fsensor.sensor.orientation;
 
 import android.hardware.SensorManager;
 
-import com.tracqi.fsensor.orientation.fusion.complementary.ComplimentaryOrientation;
+import com.tracqi.fsensor.rotation.fusion.complementary.ComplimentaryRotation;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -24,11 +24,11 @@ public class ComplementaryOrientationFSensor extends OrientationFSensor {
     private static final String TAG = KalmanOrientationFSensor.class.getSimpleName();
 
     public ComplementaryOrientationFSensor(SensorManager sensorManager) {
-        super(sensorManager, new ComplimentaryOrientation(sensorManager));
+        super(sensorManager, new ComplimentaryRotation(sensorManager));
     }
 
     public ComplementaryOrientationFSensor(SensorManager sensorManager, float timeConstant) {
-        super(sensorManager, new ComplimentaryOrientation(sensorManager, timeConstant));
+        super(sensorManager, new ComplimentaryRotation(sensorManager, timeConstant));
     }
 }
 

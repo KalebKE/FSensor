@@ -1,9 +1,6 @@
 package com.tracqi.fsensor.math.gravity;
 
 import android.hardware.SensorManager;
-import android.util.Log;
-
-import java.util.Arrays;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -24,7 +21,7 @@ import java.util.Arrays;
 /**
  * Created by kaleb on 7/6/17.
  */
-public class GravityUtil {
+public class Gravity {
     /**
      * Assumes a positive, counter-clockwise, right-handed rotation
      * orientation[0] = pitch, rotation around the X axis.

@@ -20,7 +20,7 @@ package com.tracqi.fsensor.math.magnetic.tilt;
  * Providers helpers to compensate for the tilt of a magnetic sensor.
  * Created by kaleb on 3/18/18.
  */
-public class TiltCompensationUtil {
+public class TiltCompensation {
 
     /**
      * Get the rotation vector based on the tilt of the acceleration sensor.

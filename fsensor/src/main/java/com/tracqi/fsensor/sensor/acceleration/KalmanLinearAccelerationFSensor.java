@@ -1,7 +1,7 @@
 package com.tracqi.fsensor.sensor.acceleration;
 
 import android.hardware.SensorManager;
-import com.tracqi.fsensor.orientation.fusion.kalman.KalmanOrientation;
+import com.tracqi.fsensor.rotation.fusion.kalman.KalmanRotation;
 
 import org.apache.commons.math3.filter.MeasurementModel;
 import org.apache.commons.math3.filter.ProcessModel;
@@ -25,10 +25,10 @@ public class KalmanLinearAccelerationFSensor extends LinearAccelerationFSensor {
     private static final String TAG = KalmanLinearAccelerationFSensor.class.getSimpleName();
 
     public KalmanLinearAccelerationFSensor(SensorManager sensorManager) {
-        super(sensorManager, new KalmanOrientation(sensorManager));
+        super(sensorManager, new KalmanRotation(sensorManager));
     }
 
     public KalmanLinearAccelerationFSensor(SensorManager sensorManager, ProcessModel processModel, MeasurementModel measurementModel) {
-        super(sensorManager, new KalmanOrientation(sensorManager, processModel, measurementModel));
+        super(sensorManager, new KalmanRotation(sensorManager, processModel, measurementModel));
     }
 }

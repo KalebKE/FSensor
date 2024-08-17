@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.tracqi.fsensor.sensor.FSensorEventListener;
 import com.tracqi.fsensorapp.R;
 import com.tracqi.fsensorapp.gauge.GaugeRotation;
 import com.tracqi.fsensorapp.preference.Preferences;
@@ -20,17 +21,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-
-
 /*
- * AccelerationExplorer
- * Copyright 2018 Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,20 +49,16 @@ public class RotationGaugeFragment extends Fragment {
 
     private float[] rotation = new float[3];
 
+    private  FSensorViewModel viewModel;
+
+    private final FSensorEventListener sensorEventListener = fSensorEvent -> rotation = fSensorEvent.values();
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ViewModelProvider viewModelProvider = new ViewModelProvider(requireActivity());
-        FSensorViewModel model = viewModelProvider.get(FSensorViewModel.class);
-
-        if(Preferences.getPrefFSensorLpfLinearAccelerationEnabled(getContext())){
-            model.getLowPassOrientationSensorLiveData().observe(this, floats -> rotation = floats);
-        } else if(Preferences.getPrefFSensorComplimentaryLinearAccelerationEnabled(getContext())) {
-            model.getComplimentaryOrientationSensorLiveData().observe(this, floats -> rotation = floats);
-        } else if(Preferences.getPrefFSensorKalmanLinearAccelerationEnabled(getContext())) {
-            model.getKalmanOrientationSensorLiveData().observe(this, floats -> rotation = floats);
-        }
+        viewModel = viewModelProvider.get(FSensorViewModel.class);
 
         handler = new Handler(Looper.getMainLooper());
         runnable = new Runnable()
@@ -88,6 +82,7 @@ public class RotationGaugeFragment extends Fragment {
 
     @Override
     public void onPause() {
+        viewModel.unregisterRotationSensorListener(sensorEventListener);
         handler.removeCallbacks(runnable);
         super.onPause();
     }
@@ -95,7 +90,7 @@ public class RotationGaugeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("RotationGaugeFragment", "onResume");
+        viewModel.registerRotationSensorListener(sensorEventListener);
         handler.post(runnable);
     }
 

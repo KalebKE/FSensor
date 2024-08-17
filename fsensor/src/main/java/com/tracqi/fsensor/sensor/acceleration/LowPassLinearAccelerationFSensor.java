@@ -3,7 +3,7 @@ package com.tracqi.fsensor.sensor.acceleration;
 import android.hardware.SensorManager;
 
 import com.tracqi.fsensor.filter.LowPassFilter;
-import com.tracqi.fsensor.orientation.raw.AccelerationOrientation;
+import com.tracqi.fsensor.rotation.raw.AccelerationRotation;
 
 import androidx.annotation.NonNull;
 /*
@@ -24,10 +24,10 @@ import androidx.annotation.NonNull;
 
 public class LowPassLinearAccelerationFSensor extends LinearAccelerationFSensor {
     public LowPassLinearAccelerationFSensor(@NonNull SensorManager sensorManager) {
-        super(sensorManager, new AccelerationOrientation(sensorManager, new LowPassFilter()));
+        super(sensorManager, new AccelerationRotation(sensorManager, new LowPassFilter()));
     }
 
     public LowPassLinearAccelerationFSensor(@NonNull SensorManager sensorManager, @NonNull LowPassFilter lowPassFilter) {
-        super(sensorManager, new AccelerationOrientation(sensorManager, lowPassFilter));
+        super(sensorManager, new AccelerationRotation(sensorManager, lowPassFilter));
     }
 }

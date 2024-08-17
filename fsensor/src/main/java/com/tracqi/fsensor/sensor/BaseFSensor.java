@@ -4,7 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.tracqi.fsensor.orientation.Orientation;
+import com.tracqi.fsensor.rotation.Rotation;
 import com.tracqi.fsensor.sensor.acceleration.ComplementaryLinearAccelerationFSensor;
 
 import java.util.ArrayList;
@@ -32,20 +32,20 @@ public abstract class BaseFSensor implements FSensor {
     protected final SensorManager sensorManager;
     protected final List<FSensorEventListener> fSensorEventListeners = new ArrayList<>();
 
-    protected final Orientation orientation;
+    protected final Rotation rotation;
 
     protected final float[] output = new float[3];
 
-    public BaseFSensor(SensorManager sensorManager, Orientation orientation) {
+    public BaseFSensor(SensorManager sensorManager, Rotation rotation) {
         this.sensorManager = sensorManager;
-        this.orientation = orientation;
+        this.rotation = rotation;
     }
 
     @Override
     public void registerListener(FSensorEventListener sensorEventListener, int sensorDelay) {
         if (fSensorEventListeners.isEmpty()) {
             registerSensors(sensorDelay);
-            orientation.start(sensorDelay);
+            rotation.start(sensorDelay);
         }
 
         fSensorEventListeners.add(sensorEventListener);
@@ -56,7 +56,7 @@ public abstract class BaseFSensor implements FSensor {
         this.fSensorEventListeners.remove(sensorEventListener);
         if (fSensorEventListeners.isEmpty()) {
             unregisterSensors();
-            orientation.stop();
+            rotation.stop();
         }
     }
 

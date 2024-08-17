@@ -5,7 +5,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.tracqi.fsensor.orientation.Orientation;
+import com.tracqi.fsensor.rotation.Rotation;
 import com.tracqi.fsensor.sensor.BaseFSensor;
 import com.tracqi.fsensor.sensor.FSensorEvent;
 import com.tracqi.fsensor.sensor.FSensorEventListener;
@@ -31,8 +31,8 @@ public class OrientationFSensor extends BaseFSensor {
     private static final String TAG = ComplementaryLinearAccelerationFSensor.class.getSimpleName();
     private final SensorEventListener sensorEventListener = new SensorListener();
 
-    public OrientationFSensor(SensorManager sensorManager, Orientation orientation) {
-        super(sensorManager, orientation);
+    public OrientationFSensor(SensorManager sensorManager, Rotation rotation) {
+        super(sensorManager, rotation);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class OrientationFSensor extends BaseFSensor {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                System.arraycopy(orientation.getOrientation(), 0, output, 0, event.values.length);
+                System.arraycopy(rotation.getOrientation(), 0, output, 0, event.values.length);
 
                 for (FSensorEventListener sensorEventListener : fSensorEventListeners) {
                     sensorEventListener.onSensorChanged(new FSensorEvent(event.sensor, event.accuracy, event.timestamp, output));

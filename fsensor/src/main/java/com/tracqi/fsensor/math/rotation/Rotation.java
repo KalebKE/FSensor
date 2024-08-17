@@ -2,7 +2,6 @@ package com.tracqi.fsensor.math.rotation;
 
 import android.hardware.SensorManager;
 import android.renderscript.Matrix3f;
-import android.util.Log;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -28,7 +27,7 @@ import java.util.Arrays;
  * Created by kaleb on 4/1/18.
  */
 
-public class RotationUtil {
+public class Rotation {
 
     /**
      * Calculates a rotation vector from the gyroscope angular speed values.

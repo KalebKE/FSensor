@@ -1,4 +1,4 @@
-package com.tracqi.fsensor.orientation.fusion.kalman.filter;
+package com.tracqi.fsensor.rotation.fusion.kalman.filter;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

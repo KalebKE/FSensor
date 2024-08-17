@@ -1,7 +1,7 @@
 package com.tracqi.fsensor.sensor.orientation;
 
 import android.hardware.SensorManager;
-import com.tracqi.fsensor.orientation.raw.GyroscopeOrientation;
+import com.tracqi.fsensor.rotation.raw.GyroscopeRotation;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -26,11 +26,11 @@ public class GyroscopeOrientationFSensor extends OrientationFSensor {
     private static final String TAG = KalmanOrientationFSensor.class.getSimpleName();
 
     public GyroscopeOrientationFSensor(SensorManager sensorManager) {
-        super(sensorManager, new GyroscopeOrientation(sensorManager));
+        super(sensorManager, new GyroscopeRotation(sensorManager));
     }
 
     public void setBaseOrientation(Quaternion baseOrientation) {
-        ((GyroscopeOrientation) orientation).setBaseOrientation(baseOrientation);
+        ((GyroscopeRotation) rotation).setBaseOrientation(baseOrientation);
     }
 }
 

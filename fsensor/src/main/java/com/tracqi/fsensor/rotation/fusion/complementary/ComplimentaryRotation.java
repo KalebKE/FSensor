@@ -1,19 +1,16 @@
-package com.tracqi.fsensor.orientation.fusion.complementary;
+package com.tracqi.fsensor.rotation.fusion.complementary;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 
-import com.tracqi.fsensor.math.gravity.GravityUtil;
-import com.tracqi.fsensor.orientation.fusion.FusedOrientation;
-import com.tracqi.fsensor.math.angle.AngleUtils;
-import com.tracqi.fsensor.math.rotation.RotationUtil;
+import com.tracqi.fsensor.math.gravity.Gravity;
+import com.tracqi.fsensor.rotation.fusion.FusedRotation;
+import com.tracqi.fsensor.math.angle.Angles;
+import com.tracqi.fsensor.math.rotation.Rotation;
 
 import org.apache.commons.math3.complex.Quaternion;
-
-import java.util.Arrays;
 
 /*
  * Copyright 2024, Tracqi Technology, LLC
@@ -84,9 +81,9 @@ import java.util.Arrays;
  *
  * @author Kaleb
  */
-public class ComplimentaryOrientation extends FusedOrientation {
+public class ComplimentaryRotation extends FusedRotation {
 
-    private static final String TAG = ComplimentaryOrientation.class.getSimpleName();
+    private static final String TAG = ComplimentaryRotation.class.getSimpleName();
 
     private static final float DEFAULT_TIME_CONSTANT = 0.18f;
 
@@ -111,11 +108,11 @@ public class ComplimentaryOrientation extends FusedOrientation {
     /**
      * Initialize a singleton instance.
      */
-    public ComplimentaryOrientation(SensorManager sensorManager) {
+    public ComplimentaryRotation(SensorManager sensorManager) {
         this.sensorManager = sensorManager;
     }
 
-    public ComplimentaryOrientation(SensorManager sensorManager, float timeConstant) {
+    public ComplimentaryRotation(SensorManager sensorManager, float timeConstant) {
         this.sensorManager = sensorManager;
         this.timeConstant = timeConstant;
     }
@@ -177,10 +174,10 @@ public class ComplimentaryOrientation extends FusedOrientation {
                 float oneMinusAlpha = (1.0f - alpha);
 
                 // Get last known orientation
-                float[] orientation = AngleUtils.getAngles(rotationVector.getQ0(), rotationVector.getQ1(), rotationVector.getQ2(), rotationVector.getQ3());
+                float[] orientation = Angles.getAngles(rotationVector.getQ0(), rotationVector.getQ1(), rotationVector.getQ2(), rotationVector.getQ3());
 
                 // Calculate the gravity vector from the orientation
-                float[] gravity = GravityUtil.getGravityFromOrientation(orientation);
+                float[] gravity = Gravity.getGravityFromOrientation(orientation);
 
                 for(int i = 0; i < gravity.length; i++) {
                     // Apply acceleration sensor
@@ -189,11 +186,11 @@ public class ComplimentaryOrientation extends FusedOrientation {
                 }
 
                 // Get orientation from acceleration and magnetic
-                Quaternion rotationVectorAccelerationMagnetic = RotationUtil.getOrientationVector(gravity, magnetic);
+                Quaternion rotationVectorAccelerationMagnetic = Rotation.getOrientationVector(gravity, magnetic);
 
                 if (rotationVectorAccelerationMagnetic != null) {
 
-                    rotationVector = RotationUtil.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
+                    rotationVector = Rotation.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
 
                     // Apply the complementary fusedOrientation. // We multiply each rotation by their
                     // coefficients (scalar matrices)...
@@ -206,7 +203,7 @@ public class ComplimentaryOrientation extends FusedOrientation {
                     // output[0] = alpha * output[0] + (1 - alpha) * input[0];
                     Quaternion result = scaledRotationVectorGyroscope.add(scaledRotationVectorAccelerationMagnetic);
 
-                    float[] angles = AngleUtils.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
+                    float[] angles = Angles.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
                     System.arraycopy(angles, 0, this.output, 0, angles.length);
                 }
             }
@@ -242,7 +239,7 @@ public class ComplimentaryOrientation extends FusedOrientation {
                 hasMagnetic = false;
 
                 if (!isBaseOrientationSet()) {
-                    setBaseOrientation(RotationUtil.getOrientationVector(acceleration, magnetic));
+                    setBaseOrientation(Rotation.getOrientationVector(acceleration, magnetic));
                 } else {
                     calculateFusedOrientation(rotation, rotationTimestamp, acceleration, magnetic);
                 }

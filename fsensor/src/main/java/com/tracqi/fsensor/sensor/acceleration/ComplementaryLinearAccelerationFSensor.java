@@ -1,7 +1,7 @@
 package com.tracqi.fsensor.sensor.acceleration;
 
 import android.hardware.SensorManager;
-import com.tracqi.fsensor.orientation.fusion.complementary.ComplimentaryOrientation;
+import com.tracqi.fsensor.rotation.fusion.complementary.ComplimentaryRotation;
 
 
 /*
@@ -24,10 +24,10 @@ public class ComplementaryLinearAccelerationFSensor extends LinearAccelerationFS
     private static final String TAG = KalmanLinearAccelerationFSensor.class.getSimpleName();
 
     public ComplementaryLinearAccelerationFSensor(SensorManager sensorManager) {
-        super(sensorManager, new ComplimentaryOrientation(sensorManager));
+        super(sensorManager, new ComplimentaryRotation(sensorManager));
     }
 
     public ComplementaryLinearAccelerationFSensor(SensorManager sensorManager, float timeConstant) {
-        super(sensorManager, new ComplimentaryOrientation(sensorManager, timeConstant));
+        super(sensorManager, new ComplimentaryRotation(sensorManager, timeConstant));
     }
 }

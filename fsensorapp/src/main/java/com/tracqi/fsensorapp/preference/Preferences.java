@@ -1,14 +1,13 @@
 package com.tracqi.fsensorapp.preference;
 
 /*
- * AccelerationExplorer
- * Copyright 2018 Kircher Electronics, LLC
+ * Copyright 2024, Tracqi Technology, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,6 +41,16 @@ public class Preferences
 
 	public static final String FSENSOR_LPF_LINEAR_ACCEL_TIME_CONSTANT_KEY = "lpf_linear_accel_time_constant_preference";
 	public static final String FSENSOR_COMPLIMENTARY_LINEAR_ACCEL_TIME_CONSTANT_KEY = "complimentary_fusion_time_constant_preference";
+
+	public static void registerPreferenceChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		prefs.registerOnSharedPreferenceChangeListener(listener);
+	}
+
+	public static void unregisterPreferenceChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		prefs.unregisterOnSharedPreferenceChangeListener(listener);
+	}
 
 	public static boolean getPrefFSensorLpfLinearAccelerationEnabled(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

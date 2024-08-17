@@ -18,8 +18,8 @@ import android.util.Log;
  * limitations under the License.
  */
 
-public class AngleUtils {
-    private static final String TAG = AngleUtils.class.getSimpleName();
+public class Angles {
+    private static final String TAG = Angles.class.getSimpleName();
 
     /**
      * https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm

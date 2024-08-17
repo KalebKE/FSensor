@@ -117,9 +117,4 @@ public class MedianFilter extends SensorFilter {
 
         return mean;
     }
-
-    public void reset() {
-        super.reset();
-        this.values.clear();
-    }
 }
