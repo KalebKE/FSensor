@@ -1,89 +1,85 @@
-package com.tracqi.fsensorapp.gauge;
+package com.tracqi.fsensorapp.gauge
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.RectF;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-
-import com.tracqi.fsensorapp.R;
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.RectF
+import android.util.AttributeSet
+import android.util.Log
+import android.view.View
+import com.tracqi.fsensorapp.R
+import com.tracqi.fsensorapp.gauge.GaugeRotation
+import kotlin.math.min
 
 /*
- * Copyright 2024, Tracqi Technology, LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+* Copyright 2024, Tracqi Technology, LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 /**
  * Draws an analog gauge for displaying rotation measurements in three-space
  * from device sensors.
  *
  * @author Kaleb
  */
-public final class GaugeRotation extends View {
-
-    private static final String TAG = GaugeRotation.class.getSimpleName();
-
+class GaugeRotation : View {
     // drawing tools
-    private RectF rimOuterRect;
-    private Paint rimOuterPaint;
+    private var rimOuterRect: RectF? = null
+    private var rimOuterPaint: Paint? = null
 
     // Keep static bitmaps of the gauge so we only have to redraw if we have to
     // Static bitmap for the bezel of the gauge
-    private Bitmap bezelBitmap;
+    private var bezelBitmap: Bitmap? = null
+
     // Static bitmap for the face of the gauge
-    private Bitmap faceBitmap;
-    private Bitmap skyBitmap;
-    private Bitmap mutableBitmap;
+    private var faceBitmap: Bitmap? = null
+    private var skyBitmap: Bitmap? = null
+    private var mutableBitmap: Bitmap? = null
 
-    private Canvas faceCanvas;
+    private var faceCanvas: Canvas? = null
 
-    private Canvas mutableCanvas;
+    private var mutableCanvas: Canvas? = null
 
     // Keep track of the rotation of the device
-    private final float[] rotation = new float[3];
+    private val rotation = FloatArray(3)
 
     // Rectangle to draw the rim of the gauge
-    private RectF rimRect;
+    private var rimRect: RectF? = null
 
     // Rectangle to draw the sky section of the gauge face
-    private RectF faceBackgroundRect;
-    private RectF skyBackgroundRect;
+    private var faceBackgroundRect: RectF? = null
+    private var skyBackgroundRect: RectF? = null
 
     // Paint to draw the gauge bitmaps
-    private Paint backgroundPaint;
+    private var backgroundPaint: Paint? = null
 
     // Paint to draw the rim of the bezel
-    private Paint rimPaint;
+    private var rimPaint: Paint? = null
 
     // Paint to draw the sky portion of the gauge face
-    private Paint skyPaint;
+    private var skyPaint: Paint? = null
 
     /**
      * Create a new instance.
      *
      * @param context
      */
-    public GaugeRotation(Context context) {
-        super(context);
-
-        initDrawingTools();
+    constructor(context: Context?) : super(context) {
+        initDrawingTools()
     }
 
     /**
@@ -92,10 +88,8 @@ public final class GaugeRotation extends View {
      * @param context
      * @param attrs
      */
-    public GaugeRotation(Context context, AttributeSet attrs) {
-        super(context, attrs);
-
-        initDrawingTools();
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+        initDrawingTools()
     }
 
     /**
@@ -105,10 +99,8 @@ public final class GaugeRotation extends View {
      * @param attrs
      * @param defStyle
      */
-    public GaugeRotation(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-
-        initDrawingTools();
+    constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle) {
+        initDrawingTools()
     }
 
     /**
@@ -116,87 +108,85 @@ public final class GaugeRotation extends View {
      *
      * @param rotation
      */
-    public void updateRotation(float[] rotation) {
-        System.arraycopy(rotation, 0, this.rotation, 0, this.rotation.length);
-        this.invalidate();
+    fun updateRotation(rotation: FloatArray?) {
+        System.arraycopy(rotation, 0, this.rotation, 0, this.rotation.size)
+        this.invalidate()
     }
 
-    private void initDrawingTools() {
+    private fun initDrawingTools() {
         // Rectangle for the rim of the gauge bezel
-        rimRect = new RectF(0.12f, 0.12f, 0.88f, 0.88f);
+        rimRect = RectF(0.12f, 0.12f, 0.88f, 0.88f)
 
         // Paint for the rim of the gauge bezel
-        rimPaint = new Paint();
-        rimPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        rimPaint = Paint()
+        rimPaint!!.flags = Paint.ANTI_ALIAS_FLAG
         // The linear gradient is a bit skewed for realism
-        rimPaint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
+        rimPaint!!.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
 
-        float rimOuterSize = -0.04f;
-        rimOuterRect = new RectF();
-        rimOuterRect.set(rimRect.left + rimOuterSize, rimRect.top
-                + rimOuterSize, rimRect.right - rimOuterSize, rimRect.bottom
-                - rimOuterSize);
+        val rimOuterSize = -0.04f
+        rimOuterRect = RectF()
+        rimOuterRect!![rimRect!!.left + rimOuterSize, rimRect!!.top
+                + rimOuterSize, rimRect!!.right - rimOuterSize] = (rimRect!!.bottom
+                - rimOuterSize)
 
-        rimOuterPaint = new Paint();
-        rimOuterPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        rimOuterPaint.setColor(getContext().getColor(R.color.md_theme_outline));
+        rimOuterPaint = Paint()
+        rimOuterPaint!!.flags = Paint.ANTI_ALIAS_FLAG
+        rimOuterPaint!!.color = context.getColor(R.color.md_theme_outline)
 
-        float rimSize = 0.02f;
+        val rimSize = 0.02f
 
-        faceBackgroundRect = new RectF();
-        faceBackgroundRect.set(rimRect.left, rimRect.top, rimRect.right, rimRect.bottom);
+        faceBackgroundRect = RectF()
+        faceBackgroundRect!![rimRect!!.left, rimRect!!.top, rimRect!!.right] = rimRect!!.bottom
 
-        skyBackgroundRect = new RectF();
-        skyBackgroundRect.set(rimRect.left + rimSize, rimRect.top + rimSize, rimRect.right - rimSize, rimRect.bottom - rimSize);
+        skyBackgroundRect = RectF()
+        skyBackgroundRect!![rimRect!!.left + rimSize, rimRect!!.top + rimSize, rimRect!!.right - rimSize] = rimRect!!.bottom - rimSize
 
-        skyPaint = new Paint();
-        skyPaint.setAntiAlias(true);
-        skyPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        skyPaint.setColor(getContext().getColor(R.color.md_theme_primaryFixedDim));
+        skyPaint = Paint()
+        skyPaint!!.isAntiAlias = true
+        skyPaint!!.flags = Paint.ANTI_ALIAS_FLAG
+        skyPaint!!.color = context.getColor(R.color.md_theme_primaryFixedDim)
 
-        backgroundPaint = new Paint();
-        backgroundPaint.setFilterBitmap(true);
+        backgroundPaint = Paint()
+        backgroundPaint!!.isFilterBitmap = true
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val widthMode = MeasureSpec.getMode(widthMeasureSpec)
+        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
 
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
 
-        int chosenWidth = chooseDimension(widthMode, widthSize);
-        int chosenHeight = chooseDimension(heightMode, heightSize);
+        val chosenWidth = chooseDimension(widthMode, widthSize)
+        val chosenHeight = chooseDimension(heightMode, heightSize)
 
-        int chosenDimension = Math.min(chosenWidth, chosenHeight);
+        val chosenDimension = min(chosenWidth.toDouble(), chosenHeight.toDouble()).toInt()
 
-        setMeasuredDimension(chosenDimension, chosenDimension);
+        setMeasuredDimension(chosenDimension, chosenDimension)
     }
 
-    private int chooseDimension(int mode, int size) {
-        if (mode == MeasureSpec.AT_MOST || mode == MeasureSpec.EXACTLY) {
-            return size;
+    private fun chooseDimension(mode: Int, size: Int): Int {
+        return if (mode == MeasureSpec.AT_MOST || mode == MeasureSpec.EXACTLY) {
+            size
         } else { // (mode == MeasureSpec.UNSPECIFIED)
-            return getPreferredSize();
+            preferredSize
         }
     }
 
-    // in case there is no size specified
-    private int getPreferredSize() {
-        return 300;
-    }
+    private val preferredSize: Int
+        // in case there is no size specified
+        get() = 300
 
     /**
      * Draw the gauge rim.
      *
      * @param canvas
      */
-    private void drawRim(Canvas canvas) {
+    private fun drawRim(canvas: Canvas) {
         // First draw the most back rim
-        canvas.drawOval(rimOuterRect, rimOuterPaint);
+        canvas.drawOval(rimOuterRect!!, rimOuterPaint!!)
         // Then draw the small black line
-        canvas.drawOval(rimRect, rimPaint);
+        canvas.drawOval(rimRect!!, rimPaint!!)
     }
 
     /**
@@ -204,55 +194,54 @@ public final class GaugeRotation extends View {
      *
      * @param canvas
      */
-    private void drawFace(Canvas canvas) {
+    private fun drawFace(canvas: Canvas) {
+        val halfHeight = ((rimRect!!.top - rimRect!!.bottom) / 2)
 
-        float halfHeight = ((rimRect.top - rimRect.bottom)/2);
+        val top = rimRect!!.top - halfHeight + (rotation[1] * halfHeight)
 
-        float top = rimRect.top - halfHeight + (rotation[1]*halfHeight);
-
-        if(rimRect.left <= rimRect.right && top <= rimRect.bottom) {
+        if (rimRect!!.left <= rimRect!!.right && top <= rimRect!!.bottom) {
             // free the old bitmap
             if (faceBitmap == null) {
-                faceBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-                faceCanvas = new Canvas(faceBitmap);
+                faceBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                faceCanvas = Canvas(faceBitmap!!)
             }
 
             if (skyBitmap == null) {
-                skyBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+                skyBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             }
 
             if (mutableBitmap == null) {
-                mutableBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-                mutableCanvas = new Canvas(mutableBitmap);
+                mutableBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                mutableCanvas = Canvas(mutableBitmap!!)
             }
 
-            skyPaint.setFilterBitmap(false);
+            skyPaint!!.isFilterBitmap = false
 
-            skyBitmap.eraseColor(Color.TRANSPARENT);
+            skyBitmap!!.eraseColor(Color.TRANSPARENT)
 
-            Canvas skyCanvas = new Canvas(skyBitmap);
+            val skyCanvas = Canvas(skyBitmap!!)
 
-            float scale = (float) getWidth();
-            faceCanvas.scale(scale, scale);
-            skyCanvas.scale(scale, scale);
+            val scale = width.toFloat()
+            faceCanvas!!.scale(scale, scale)
+            skyCanvas.scale(scale, scale)
 
-            skyBackgroundRect.set(rimRect.left, top, rimRect.right, rimRect.bottom);
+            skyBackgroundRect!![rimRect!!.left, top, rimRect!!.right] = rimRect!!.bottom
 
-            faceCanvas.drawArc(faceBackgroundRect, 0, 360, true, skyPaint);
-            skyCanvas.drawRect(skyBackgroundRect, skyPaint);
+            faceCanvas!!.drawArc(faceBackgroundRect!!, 0f, 360f, true, skyPaint!!)
+            skyCanvas.drawRect(skyBackgroundRect!!, skyPaint!!)
 
-            float angle = (float) -Math.toDegrees(rotation[2]);
+            val angle = -Math.toDegrees(rotation[2].toDouble()).toFloat()
 
-            canvas.save();
-            canvas.rotate(angle, faceBitmap.getWidth() / 2f, faceBitmap.getHeight() / 2f);
+            canvas.save()
+            canvas.rotate(angle, faceBitmap!!.width / 2f, faceBitmap!!.height / 2f)
 
-            mutableCanvas.drawBitmap(faceBitmap, 0, 0, skyPaint);
-            skyPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
-            mutableCanvas.drawBitmap(skyBitmap, 0, 0, skyPaint);
-            skyPaint.setXfermode(null);
+            mutableCanvas!!.drawBitmap(faceBitmap!!, 0f, 0f, skyPaint)
+            skyPaint!!.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_IN))
+            mutableCanvas!!.drawBitmap(skyBitmap!!, 0f, 0f, skyPaint)
+            skyPaint!!.setXfermode(null)
 
-            canvas.drawBitmap(mutableBitmap, 0, 0, backgroundPaint);
-            canvas.restore();
+            canvas.drawBitmap(mutableBitmap!!, 0f, 0f, backgroundPaint)
+            canvas.restore()
         }
     }
 
@@ -261,19 +250,18 @@ public final class GaugeRotation extends View {
      *
      * @param canvas
      */
-    private void drawBezel(Canvas canvas) {
+    private fun drawBezel(canvas: Canvas) {
         if (bezelBitmap == null) {
-            Log.w(TAG, "Bezel not created");
+            Log.w(TAG, "Bezel not created")
         } else {
-            canvas.drawBitmap(bezelBitmap, 0, 0, backgroundPaint);
+            canvas.drawBitmap(bezelBitmap!!, 0f, 0f, backgroundPaint)
         }
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        Log.d(TAG, "Size changed to " + w + "x" + h);
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        Log.d(TAG, "Size changed to " + w + "x" + h)
 
-        regenerateBezel();
+        regenerateBezel()
     }
 
     /**
@@ -281,31 +269,33 @@ public final class GaugeRotation extends View {
      * of the screen has changed. The background will be cached and can be
      * reused without needing to redraw it.
      */
-    private void regenerateBezel() {
+    private fun regenerateBezel() {
         // free the old bitmap
         if (bezelBitmap != null) {
-            bezelBitmap.recycle();
+            bezelBitmap!!.recycle()
         }
 
-        bezelBitmap = Bitmap.createBitmap(getWidth(), getHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas bezelCanvas = new Canvas(bezelBitmap);
-        float scale = (float) getWidth();
-        bezelCanvas.scale(scale, scale);
+        bezelBitmap = Bitmap.createBitmap(width, height,
+                Bitmap.Config.ARGB_8888)
+        val bezelCanvas = Canvas(bezelBitmap!!)
+        val scale = width.toFloat()
+        bezelCanvas.scale(scale, scale)
 
-        drawRim(bezelCanvas);
+        drawRim(bezelCanvas)
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        drawBezel(canvas);
-        drawFace(canvas);
+    override fun onDraw(canvas: Canvas) {
+        drawBezel(canvas)
+        drawFace(canvas)
 
-        float scale = (float) getWidth();
-        canvas.save();
-        canvas.scale(scale, scale);
+        val scale = width.toFloat()
+        canvas.save()
+        canvas.scale(scale, scale)
 
-        canvas.restore();
+        canvas.restore()
     }
 
+    companion object {
+        private val TAG: String = GaugeRotation::class.java.simpleName
+    }
 }
