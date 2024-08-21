@@ -40,7 +40,7 @@ dependencies {
 
 The FSensor API is very similar to the Android Sensor API. 
 
-```
+```kotlin
 val sensorManager = getApplication<Application>().getSystemService(Context.SENSOR_SERVICE) as SensorManager
 var fSensor: FSensor? = ComplementaryLinearAccelerationFSensor(sensorManager, timeConstant)
 
