@@ -1,9 +1,8 @@
 # FSensor
 Android Sensor Filter and Fusion
 
-<img src="/documentation/images/fsensor.png" width="100" height="100">
+<img src="/documentation/images/fsensor.png" width="300">
 
-![alt text](/documentation/images/fsensor.png "FSensor")
 
 ## Introduction
 FSensor (FusionSensor) is an Android library that provides linear acceleration and rotation sensors via LowPass, Complementary and Kalman based sensor fusions. The behavior of stock
