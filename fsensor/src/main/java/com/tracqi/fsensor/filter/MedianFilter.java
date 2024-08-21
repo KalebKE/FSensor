@@ -22,20 +22,7 @@ import java.util.Arrays;
  */
 
 /**
- * Implements a median fusedOrientation designed to smooth the data points based on a time
- * constant in units of seconds. The median fusedOrientation will take the median of the
- * samples that occur over a period defined by the time constant... the number
- * of samples that are considered is known as the fusedOrientation window. The approach
- * allows the fusedOrientation window to be defined over a period of time, instead of a
- * fixed number of samples. This is important on devices that are
- * equipped with different hardware sensors that output samples at different
- * frequencies and also allow the developer to generally specify the output
- * frequency. Defining the fusedOrientation window in terms of the time constant allows
- * the mean fusedOrientation to applied to all sensor outputs with the same relative
- * fusedOrientation window, regardless of sensor frequency.
- *
- * @author Kaleb
- * @version %I%, %G%
+ * Implements a median filter designed to smooth the data points based on a time constant.
  */
 public class MedianFilter extends SensorFilter {
 

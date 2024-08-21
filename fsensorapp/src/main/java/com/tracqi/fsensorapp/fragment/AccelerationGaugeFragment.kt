@@ -30,13 +30,18 @@ import com.tracqi.fsensorapp.viewmodel.FSensorViewModel
 * limitations under the License.
 */
 class AccelerationGaugeFragment : Fragment() {
-    private var gaugeAcceleration: GaugeAcceleration? = null
-    private var handler: Handler? = null
-    private var runnable: Runnable? = null
+    private lateinit var gaugeAcceleration: GaugeAcceleration
+    private lateinit var handler: Handler
+    private val runnable = object : Runnable {
+        override fun run() {
+            updateAccelerationGauge()
+            handler.postDelayed(this, 20)
+        }
+    }
 
     private var acceleration = FloatArray(3)
 
-    private var viewModel: FSensorViewModel? = null
+    private lateinit var viewModel: FSensorViewModel
 
     private val sensorEventListener = FSensorEventListener { fSensorEvent: FSensorEvent -> acceleration = fSensorEvent.values }
 
@@ -44,15 +49,10 @@ class AccelerationGaugeFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         val viewModelProvider = ViewModelProvider(requireActivity())
-        viewModel = viewModelProvider.get(FSensorViewModel::class.java)
+        viewModel = viewModelProvider[FSensorViewModel::class.java]
 
         handler = Handler(Looper.getMainLooper())
-        runnable = object : Runnable {
-            override fun run() {
-                updateAccelerationGauge()
-                handler!!.postDelayed(this, 20)
-            }
-        }
+        runnable
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -64,18 +64,18 @@ class AccelerationGaugeFragment : Fragment() {
     }
 
     override fun onPause() {
-        viewModel!!.unregisterLinearAccelerationSensorListener(sensorEventListener)
-        handler!!.removeCallbacks(runnable!!)
+        viewModel.unregisterLinearAccelerationSensorListener(sensorEventListener)
+        handler.removeCallbacks(runnable)
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel!!.registerLinearAccelerationSensorListener(sensorEventListener)
-        handler!!.post(runnable!!)
+        viewModel.registerLinearAccelerationSensorListener(sensorEventListener)
+        handler.post(runnable)
     }
 
     private fun updateAccelerationGauge() {
-        gaugeAcceleration!!.updatePoint(acceleration[0], acceleration[1])
+        gaugeAcceleration.updatePoint(acceleration[0], acceleration[1])
     }
 }

@@ -54,7 +54,7 @@ class FSensorViewModel(application: Application?) : AndroidViewModel(application
         initFSensors()
         initFilters()
 
-        Preferences.registerPreferenceChangeListener(application, preferenceChangeListener)
+        Preferences.registerPreferenceChangeListener(application!!, preferenceChangeListener)
     }
 
     override fun onCleared() {

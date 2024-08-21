@@ -22,8 +22,6 @@ public class Angles {
     private static final String TAG = Angles.class.getSimpleName();
 
     /**
-     * https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
-     * https://developer.android.com/reference/android/hardware/SensorManager#getOrientation(float%5B%5D,%20float%5B%5D)
      *
      * The return format is the same as SensorManager.getOrientation()
      *

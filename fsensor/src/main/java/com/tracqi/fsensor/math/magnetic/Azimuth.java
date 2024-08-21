@@ -16,10 +16,6 @@ package com.tracqi.fsensor.math.magnetic;
  * limitations under the License.
  */
 
-/**
- * A helper class for
- * Created by kaleb on 3/18/18.
- */
 public class Azimuth {
 
     /**

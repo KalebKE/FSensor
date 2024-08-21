@@ -79,7 +79,6 @@ import org.apache.commons.math3.complex.Quaternion;
  * magnetic field sensor signals and high-pass filtering of the gyroscope
  * signals.
  *
- * @author Kaleb
  */
 public class ComplimentaryRotation extends FusedRotation {
 

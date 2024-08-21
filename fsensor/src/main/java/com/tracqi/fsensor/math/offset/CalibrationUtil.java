@@ -27,7 +27,6 @@ import org.apache.commons.math3.linear.RealVector;
  * Transforms the ellipsoid into a sphere with the offset vector = [0,0,0] and
  * the radii vector = [1,1,1].
  *
- * @author Kaleb
  */
 public class CalibrationUtil {
     private static final String TAG = CalibrationUtil.class.getSimpleName();

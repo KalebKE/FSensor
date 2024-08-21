@@ -24,17 +24,17 @@ import com.tracqi.fsensorapp.preference.Preferences
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-class PreferencesFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeListener, Preference.OnPreferenceClickListener {
-    private var fSensorLpfLinearAccel: SwitchPreferenceCompat? = null
-    private var fSensorComplimentaryLinearAccel: SwitchPreferenceCompat? = null
-    private var fSensorKalmanLinearAccel: SwitchPreferenceCompat? = null
+class PreferencesFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeListener {
+    private lateinit var fSensorLpfLinearAccel: SwitchPreferenceCompat
+    private lateinit var fSensorComplimentaryLinearAccel: SwitchPreferenceCompat
+    private lateinit var fSensorKalmanLinearAccel: SwitchPreferenceCompat
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preference_filter)
 
-        fSensorComplimentaryLinearAccel = findPreference(Preferences.FSENSOR_COMPLIMENTARY_LINEAR_ACCEL_ENABLED_KEY)
-        fSensorKalmanLinearAccel = findPreference(Preferences.FSENSOR_KALMAN_LINEAR_ACCEL_ENABLED_KEY)
-        fSensorLpfLinearAccel = findPreference(Preferences.FSENSOR_LPF_LINEAR_ACCEL_ENABLED_KEY)
+        fSensorComplimentaryLinearAccel = findPreference(Preferences.FSENSOR_COMPLIMENTARY_LINEAR_ACCEL_ENABLED_KEY)!!
+        fSensorKalmanLinearAccel = findPreference(Preferences.FSENSOR_KALMAN_LINEAR_ACCEL_ENABLED_KEY)!!
+        fSensorLpfLinearAccel = findPreference(Preferences.FSENSOR_LPF_LINEAR_ACCEL_ENABLED_KEY)!!
     }
 
     override fun onResume() {
@@ -49,16 +49,11 @@ class PreferencesFragment : PreferenceFragmentCompat(), OnSharedPreferenceChange
         preferenceScreen.sharedPreferences!!.unregisterOnSharedPreferenceChangeListener(this)
     }
 
-    override fun onPreferenceClick(preference: Preference): Boolean {
-        return false
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences,
-                                           key: String?) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         when (key) {
-            Preferences.FSENSOR_LPF_LINEAR_ACCEL_ENABLED_KEY -> if (sharedPreferences.getBoolean(key, false)) {
-                fSensorKalmanLinearAccel!!.isChecked = false
-                fSensorComplimentaryLinearAccel!!.isChecked = false
+            Preferences.FSENSOR_LPF_LINEAR_ACCEL_ENABLED_KEY -> if (sharedPreferences.getBoolean(key, true)) {
+                fSensorKalmanLinearAccel.isChecked = false
+                fSensorComplimentaryLinearAccel.isChecked = false
 
                 val edit = sharedPreferences.edit()
                 edit.putBoolean(Preferences.FSENSOR_KALMAN_LINEAR_ACCEL_ENABLED_KEY, false)
@@ -67,8 +62,8 @@ class PreferencesFragment : PreferenceFragmentCompat(), OnSharedPreferenceChange
             }
 
             Preferences.FSENSOR_COMPLIMENTARY_LINEAR_ACCEL_ENABLED_KEY -> if (sharedPreferences.getBoolean(key, false)) {
-                fSensorKalmanLinearAccel!!.isChecked = false
-                fSensorLpfLinearAccel!!.isChecked = false
+                fSensorKalmanLinearAccel.isChecked = false
+                fSensorLpfLinearAccel.isChecked = false
 
                 val edit = sharedPreferences.edit()
                 edit.putBoolean(Preferences.FSENSOR_KALMAN_LINEAR_ACCEL_ENABLED_KEY, false)
@@ -77,8 +72,8 @@ class PreferencesFragment : PreferenceFragmentCompat(), OnSharedPreferenceChange
             }
 
             Preferences.FSENSOR_KALMAN_LINEAR_ACCEL_ENABLED_KEY -> if (sharedPreferences.getBoolean(key, false)) {
-                fSensorComplimentaryLinearAccel!!.isChecked = false
-                fSensorLpfLinearAccel!!.isChecked = false
+                fSensorComplimentaryLinearAccel.isChecked = false
+                fSensorLpfLinearAccel.isChecked = false
 
                 val edit = sharedPreferences.edit()
                 edit.putBoolean(Preferences.FSENSOR_COMPLIMENTARY_LINEAR_ACCEL_ENABLED_KEY, false)
@@ -86,10 +81,5 @@ class PreferencesFragment : PreferenceFragmentCompat(), OnSharedPreferenceChange
                 edit.apply()
             }
         }
-    }
-
-    companion object {
-        private val tag: String = PreferencesFragment::class.java
-                .simpleName
     }
 }

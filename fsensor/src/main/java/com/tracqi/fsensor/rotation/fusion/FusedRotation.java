@@ -22,9 +22,7 @@ import org.apache.commons.math3.complex.Quaternion;
 
 /**
  * A base implementation for an orientation IMU sensor fusion.
- * Created by kaleb on 7/6/17.
  */
-
 public abstract class FusedRotation implements Rotation {
 
     protected static final float EPSILON = 0.000000001f;

@@ -18,9 +18,6 @@ import android.hardware.SensorManager;
  * limitations under the License.
  */
 
-/**
- * Created by kaleb on 7/6/17.
- */
 public class Gravity {
     /**
      * Assumes a positive, counter-clockwise, right-handed rotation
@@ -31,8 +28,6 @@ public class Gravity {
      * @return The gravity components of the orientation.
      */
     public static float[] getGravityFromOrientation(float[] orientation) {
-       // Log.d("GravityUtil", "Orientation: " + Arrays.toString(orientation));
-
         float[] components = new float[3];
 
         float pitch = orientation[1];

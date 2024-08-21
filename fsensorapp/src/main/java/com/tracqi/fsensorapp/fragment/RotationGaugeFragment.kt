@@ -29,17 +29,20 @@ import com.tracqi.fsensorapp.viewmodel.FSensorViewModel
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-/**
- * Created by kaleb on 7/8/17.
- */
+
 class RotationGaugeFragment : Fragment() {
-    private var gaugeRotation: GaugeRotation? = null
-    private var handler: Handler? = null
-    private var runnable: Runnable? = null
+    private lateinit var gaugeRotation: GaugeRotation
+    private lateinit var handler: Handler
+    private val runnable = object : Runnable {
+        override fun run() {
+            updateRotationGauge()
+            handler.postDelayed(this, 20)
+        }
+    }
 
     private var rotation = FloatArray(3)
 
-    private var viewModel: FSensorViewModel? = null
+    private lateinit var viewModel: FSensorViewModel
 
     private val sensorEventListener = FSensorEventListener { fSensorEvent: FSensorEvent -> rotation = fSensorEvent.values }
 
@@ -47,15 +50,9 @@ class RotationGaugeFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         val viewModelProvider = ViewModelProvider(requireActivity())
-        viewModel = viewModelProvider.get(FSensorViewModel::class.java)
-
+        viewModel = viewModelProvider[FSensorViewModel::class.java]
         handler = Handler(Looper.getMainLooper())
-        runnable = object : Runnable {
-            override fun run() {
-                updateRotationGauge()
-                handler!!.postDelayed(this, 20)
-            }
-        }
+        runnable
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -67,18 +64,18 @@ class RotationGaugeFragment : Fragment() {
     }
 
     override fun onPause() {
-        viewModel!!.unregisterRotationSensorListener(sensorEventListener)
-        handler!!.removeCallbacks(runnable!!)
+        viewModel.unregisterRotationSensorListener(sensorEventListener)
+        handler.removeCallbacks(runnable)
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel!!.registerRotationSensorListener(sensorEventListener)
-        handler!!.post(runnable!!)
+        viewModel.registerRotationSensorListener(sensorEventListener)
+        handler.post(runnable)
     }
 
     private fun updateRotationGauge() {
-        gaugeRotation!!.updateRotation(rotation)
+        gaugeRotation.updateRotation(rotation)
     }
 }

@@ -59,7 +59,6 @@ import java.util.Arrays;
  * ideal method because quaternions are not subject to many of the singularties
  * of rotation matrices, such as gimbal lock.
  * <p>
- * Created by kaleb on 7/6/17.
  */
 
 public class KalmanRotation extends FusedRotation {

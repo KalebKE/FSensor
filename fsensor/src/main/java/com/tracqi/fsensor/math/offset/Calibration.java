@@ -18,10 +18,7 @@ import org.apache.commons.math3.linear.RealVector;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Represents a field calibration.
- * Created by kaleb on 3/18/18.
- */
+
 public class Calibration {
     public final RealMatrix scalar;
     public final RealVector offset;

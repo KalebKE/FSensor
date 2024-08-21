@@ -18,10 +18,7 @@ package com.tracqi.fsensor.math.offset;
 
 /**
  * A representation of a three space point with double precision.
- * 
- * @author Kaleb
- * @version 1.0
- * 
+ *
  */
 public class ThreeSpacePoint
 {

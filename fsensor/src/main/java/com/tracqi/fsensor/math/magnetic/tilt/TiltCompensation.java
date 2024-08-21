@@ -17,8 +17,7 @@ package com.tracqi.fsensor.math.magnetic.tilt;
  */
 
 /**
- * Providers helpers to compensate for the tilt of a magnetic sensor.
- * Created by kaleb on 3/18/18.
+ * Providers functions to compensate for the tilt of a magnetic sensor.
  */
 public class TiltCompensation {
 

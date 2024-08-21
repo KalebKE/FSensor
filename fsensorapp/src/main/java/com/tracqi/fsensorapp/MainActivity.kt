@@ -23,7 +23,6 @@ import com.tracqi.fsensorapp.fragment.GaugesFragment
  * A class that provides a navigation menu to the features of Acceleration
  * Explorer.
  *
- * @author Kaleb
  */
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

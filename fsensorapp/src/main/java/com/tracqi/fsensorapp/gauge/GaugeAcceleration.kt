@@ -12,7 +12,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import com.tracqi.fsensorapp.R
-import com.tracqi.fsensorapp.gauge.GaugeAcceleration
 import kotlin.math.min
 
 /*
@@ -38,26 +37,24 @@ import kotlin.math.min
  * Android 3.0 which won't hog the UI thread like View will. This should only be
  * used with devices or certain libraries that require View.
  *
- * @author Kaleb
- * @version %I%, %G%
  */
 class GaugeAcceleration : View {
     // holds the cached static part
     private var background: Bitmap? = null
 
-    private var backgroundPaint: Paint? = null
-    private var pointPaint: Paint? = null
-    private var rimPaint: Paint? = null
-    private var rimShadowPaint: Paint? = null
+    private lateinit var backgroundPaint: Paint
+    private lateinit var pointPaint: Paint
+    private lateinit var rimPaint: Paint
+    private lateinit var rimShadowPaint: Paint
 
-    private var faceRect: RectF? = null
-    private var rimRect: RectF? = null
+    private lateinit var faceRect: RectF
+    private lateinit var rimRect: RectF
 
     // added by Scott
-    private var rimOuterRect: RectF? = null
-    private var innerRim: RectF? = null
-    private var innerFace: RectF? = null
-    private var innerMostDot: RectF? = null
+    private lateinit var rimOuterRect: RectF
+    private lateinit var innerRim: RectF
+    private lateinit var innerFace: RectF
+    private lateinit var innerMostDot: RectF
 
     private var x = 0f
     private var y = 0f
@@ -120,8 +117,8 @@ class GaugeAcceleration : View {
             y = -SensorManager.GRAVITY_EARTH
         }
 
-        this.x = scaleX * -x + rimRect!!.centerX()
-        this.y = scaleY * y + rimRect!!.centerY()
+        this.x = scaleX * -x + rimRect.centerX()
+        this.y = scaleY * y + rimRect.centerY()
 
         this.invalidate()
     }
@@ -139,8 +136,8 @@ class GaugeAcceleration : View {
     private fun initDrawingTools() {
         rimRect = RectF(0.1f, 0.1f, 0.9f, 0.9f)
 
-        scaleX = ((rimRect!!.right - rimRect!!.left) / (SensorManager.GRAVITY_EARTH * 2))
-        scaleY = ((rimRect!!.bottom - rimRect!!.top) / (SensorManager.GRAVITY_EARTH * 2))
+        scaleX = (rimRect.right - rimRect.left) / (SensorManager.GRAVITY_EARTH * 2)
+        scaleY = (rimRect.bottom - rimRect.top) / (SensorManager.GRAVITY_EARTH * 2)
 
         // inner rim oval
         innerRim = RectF(0.25f, 0.25f, 0.75f, 0.75f)
@@ -150,38 +147,38 @@ class GaugeAcceleration : View {
 
         // the linear gradient is a bit skewed for realism
         rimPaint = Paint()
-        rimPaint!!.flags = Paint.ANTI_ALIAS_FLAG
-        rimPaint!!.color = context.getColor(R.color.md_theme_outline)
+        rimPaint.flags = Paint.ANTI_ALIAS_FLAG
+        rimPaint.color = context.getColor(R.color.md_theme_outline)
 
         val rimSize = 0.02f
         faceRect = RectF()
-        faceRect!![rimRect!!.left + rimSize, rimRect!!.top + rimSize, rimRect!!.right - rimSize] = rimRect!!.bottom - rimSize
+        faceRect[rimRect.left + rimSize, rimRect.top + rimSize, rimRect.right - rimSize] = rimRect.bottom - rimSize
 
         rimShadowPaint = Paint()
-        rimShadowPaint!!.style = Paint.Style.FILL
-        rimShadowPaint!!.isAntiAlias = true
-        rimShadowPaint!!.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
+        rimShadowPaint.style = Paint.Style.FILL
+        rimShadowPaint.isAntiAlias = true
+        rimShadowPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
 
         // set the size of the outside white with the rectangles.
         // a 'bigger' negative will increase the size.
         val rimOuterSize = -0.04f
         rimOuterRect = RectF()
-        rimOuterRect!![rimRect!!.left + rimOuterSize, rimRect!!.top
-                + rimOuterSize, rimRect!!.right - rimOuterSize] = (rimRect!!.bottom
+        rimOuterRect[rimRect.left + rimOuterSize, rimRect.top
+                + rimOuterSize, rimRect.right - rimOuterSize] = (rimRect.bottom
                 - rimOuterSize)
 
         // inner rim declarations the black oval/rect
         val rimInnerSize = 0.02f
         innerFace = RectF()
-        innerFace!![innerRim!!.left + rimInnerSize, innerRim!!.top + rimInnerSize, innerRim!!.right - rimInnerSize] = innerRim!!.bottom - rimInnerSize
+        innerFace[innerRim.left + rimInnerSize, innerRim.top + rimInnerSize, innerRim.right - rimInnerSize] = innerRim.bottom - rimInnerSize
 
         pointPaint = Paint()
-        pointPaint!!.isAntiAlias = true
-        pointPaint!!.color = context.getColor(R.color.md_theme_primaryFixedDim)
-        pointPaint!!.style = Paint.Style.FILL_AND_STROKE
+        pointPaint.isAntiAlias = true
+        pointPaint.color = context.getColor(R.color.md_theme_primaryFixedDim)
+        pointPaint.style = Paint.Style.FILL_AND_STROKE
 
         backgroundPaint = Paint()
-        backgroundPaint!!.isFilterBitmap = true
+        backgroundPaint.isFilterBitmap = true
     }
 
     /**
@@ -233,19 +230,19 @@ class GaugeAcceleration : View {
     private fun drawGauge(canvas: Canvas) {
         // first, draw the metallic body
 
-        canvas.drawOval(rimRect!!, rimPaint!!)
+        canvas.drawOval(rimRect, rimPaint)
 
         // draw the rim shadow inside the face
-        canvas.drawOval(faceRect!!, rimShadowPaint!!)
+        canvas.drawOval(faceRect, rimShadowPaint)
 
         // draw the inner white rim circle
-        canvas.drawOval(innerRim!!, rimPaint!!)
+        canvas.drawOval(innerRim, rimPaint)
 
         // draw the inner black oval
-        canvas.drawOval(innerFace!!, rimShadowPaint!!)
+        canvas.drawOval(innerFace, rimShadowPaint)
 
         // draw inner white dot
-        canvas.drawOval(innerMostDot!!, rimPaint!!)
+        canvas.drawOval(innerMostDot, rimPaint)
     }
 
     /**
@@ -255,7 +252,7 @@ class GaugeAcceleration : View {
      */
     private fun drawPoint(canvas: Canvas) {
         canvas.save()
-        canvas.drawCircle(this.x, this.y, 0.025f, pointPaint!!)
+        canvas.drawCircle(this.x, this.y, 0.025f, pointPaint)
         canvas.restore()
     }
 
@@ -266,9 +263,7 @@ class GaugeAcceleration : View {
      */
     private fun drawBackground(canvas: Canvas) {
         // Use the cached background bitmap.
-        if (background == null) {
-            Log.w(Companion.tag, "Background not created")
-        } else {
+        if (background != null) {
             canvas.drawBitmap(background!!, 0f, 0f, backgroundPaint)
         }
     }
@@ -289,8 +284,6 @@ class GaugeAcceleration : View {
      * Indicate the desired size of the canvas has changed.
      */
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        Log.d(Companion.tag, "Size changed to " + w + "x" + h)
-
         regenerateBackground()
     }
 
@@ -312,9 +305,5 @@ class GaugeAcceleration : View {
         backgroundCanvas.scale(scale, scale)
 
         drawGauge(backgroundCanvas)
-    }
-
-    companion object {
-        private val tag: String = GaugeAcceleration::class.java.simpleName
     }
 }

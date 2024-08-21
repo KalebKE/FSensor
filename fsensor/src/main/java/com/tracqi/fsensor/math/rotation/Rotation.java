@@ -23,10 +23,6 @@ import java.util.Arrays;
  * limitations under the License.
  */
 
-/**
- * Created by kaleb on 4/1/18.
- */
-
 public class Rotation {
 
     /**

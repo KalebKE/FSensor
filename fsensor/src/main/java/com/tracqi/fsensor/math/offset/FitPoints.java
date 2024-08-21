@@ -43,7 +43,6 @@ import java.util.Arrays;
  * the data is to sparse, the values of the eigenvectors could be reversed
  * resulting in a fit that is not an ellipsoid.
  *
- * @author Kaleb
  */
 public class FitPoints {
     private static final String TAG = FitPoints.class.getSimpleName();

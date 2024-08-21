@@ -1,9 +1,10 @@
 package com.tracqi.fsensorapp.preference
 
 import android.content.Context
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import android.content.SharedPreferences
 import android.hardware.SensorManager
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
+
 
 object Preferences {
     const val SENSOR_FREQUENCY_KEY: String = "sensor_frequency_preference"
@@ -25,72 +26,72 @@ object Preferences {
     const val FSENSOR_LPF_LINEAR_ACCEL_TIME_CONSTANT_KEY: String = "lpf_linear_accel_time_constant_preference"
     const val FSENSOR_COMPLIMENTARY_LINEAR_ACCEL_TIME_CONSTANT_KEY: String = "complimentary_fusion_time_constant_preference"
 
-    fun registerPreferenceChangeListener(context: Context?, listener: OnSharedPreferenceChangeListener?) {
+    fun registerPreferenceChangeListener(context: Context, listener: SharedPreferences.OnSharedPreferenceChangeListener?) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.registerOnSharedPreferenceChangeListener(listener)
     }
 
-    fun unregisterPreferenceChangeListener(context: Context?, listener: OnSharedPreferenceChangeListener?) {
+    fun unregisterPreferenceChangeListener(context: Context, listener: SharedPreferences.OnSharedPreferenceChangeListener?) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.unregisterOnSharedPreferenceChangeListener(listener)
     }
 
-    fun getPrefFSensorLpfLinearAccelerationEnabled(context: Context?): Boolean {
+    fun getPrefFSensorLpfLinearAccelerationEnabled(context: Context): Boolean {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getBoolean(FSENSOR_LPF_LINEAR_ACCEL_ENABLED_KEY, true)
     }
 
-    fun getPrefFSensorLpfLinearAccelerationTimeConstant(context: Context?): Float {
+    fun getPrefFSensorLpfLinearAccelerationTimeConstant(context: Context): Float {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getString(FSENSOR_LPF_LINEAR_ACCEL_TIME_CONSTANT_KEY, 0.5f.toString())!!.toFloat()
     }
 
-    fun getPrefFSensorComplimentaryLinearAccelerationEnabled(context: Context?): Boolean {
+    fun getPrefFSensorComplimentaryLinearAccelerationEnabled(context: Context): Boolean {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getBoolean(FSENSOR_COMPLIMENTARY_LINEAR_ACCEL_ENABLED_KEY, false)
     }
 
-    fun getPrefFSensorComplimentaryLinearAccelerationTimeConstant(context: Context?): Float {
+    fun getPrefFSensorComplimentaryLinearAccelerationTimeConstant(context: Context): Float {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getString(FSENSOR_COMPLIMENTARY_LINEAR_ACCEL_TIME_CONSTANT_KEY, 0.5f.toString())!!.toFloat()
     }
 
-    fun getPrefFSensorKalmanLinearAccelerationEnabled(context: Context?): Boolean {
+    fun getPrefFSensorKalmanLinearAccelerationEnabled(context: Context): Boolean {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getBoolean(FSENSOR_KALMAN_LINEAR_ACCEL_ENABLED_KEY, false)
     }
 
-    fun getPrefLpfSmoothingEnabled(context: Context?): Boolean {
+    fun getPrefLpfSmoothingEnabled(context: Context): Boolean {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getBoolean(LPF_SMOOTHING_ENABLED_KEY, false)
     }
 
-    fun getPrefLpfSmoothingTimeConstant(context: Context?): Float {
+    fun getPrefLpfSmoothingTimeConstant(context: Context): Float {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getString(LPF_SMOOTHING_TIME_CONSTANT_KEY, 0.5f.toString())!!.toFloat()
     }
 
-    fun getPrefMeanFilterSmoothingEnabled(context: Context?): Boolean {
+    fun getPrefMeanFilterSmoothingEnabled(context: Context): Boolean {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getBoolean(MEAN_FILTER_SMOOTHING_ENABLED_KEY, false)
     }
 
-    fun getPrefMeanFilterSmoothingTimeConstant(context: Context?): Float {
+    fun getPrefMeanFilterSmoothingTimeConstant(context: Context): Float {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getString(MEAN_FILTER_SMOOTHING_TIME_CONSTANT_KEY, 0.5f.toString())!!.toFloat()
     }
 
-    fun getPrefMedianFilterSmoothingEnabled(context: Context?): Boolean {
+    fun getPrefMedianFilterSmoothingEnabled(context: Context): Boolean {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getBoolean(MEDIAN_FILTER_SMOOTHING_ENABLED_KEY, false)
     }
 
-    fun getPrefMedianFilterSmoothingTimeConstant(context: Context?): Float {
+    fun getPrefMedianFilterSmoothingTimeConstant(context: Context): Float {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getString(MEDIAN_FILTER_SMOOTHING_TIME_CONSTANT_KEY, 0.5f.toString())!!.toFloat()
     }
 
-    fun getSensorFrequencyPrefs(context: Context?): Int {
+    fun getSensorFrequencyPrefs(context: Context): Int {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return prefs.getString(SENSOR_FREQUENCY_KEY, SensorManager.SENSOR_DELAY_FASTEST.toString())!!.toInt()
     }

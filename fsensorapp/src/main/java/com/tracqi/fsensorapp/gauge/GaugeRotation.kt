@@ -34,12 +34,11 @@ import kotlin.math.min
  * Draws an analog gauge for displaying rotation measurements in three-space
  * from device sensors.
  *
- * @author Kaleb
  */
 class GaugeRotation : View {
     // drawing tools
-    private var rimOuterRect: RectF? = null
-    private var rimOuterPaint: Paint? = null
+    private lateinit var rimOuterRect: RectF
+    private lateinit var rimOuterPaint: Paint
 
     // Keep static bitmaps of the gauge so we only have to redraw if we have to
     // Static bitmap for the bezel of the gauge
@@ -51,27 +50,26 @@ class GaugeRotation : View {
     private var mutableBitmap: Bitmap? = null
 
     private var faceCanvas: Canvas? = null
-
     private var mutableCanvas: Canvas? = null
 
     // Keep track of the rotation of the device
     private val rotation = FloatArray(3)
 
     // Rectangle to draw the rim of the gauge
-    private var rimRect: RectF? = null
+    private lateinit var rimRect: RectF
 
     // Rectangle to draw the sky section of the gauge face
-    private var faceBackgroundRect: RectF? = null
-    private var skyBackgroundRect: RectF? = null
+    private lateinit var faceBackgroundRect: RectF
+    private lateinit var skyBackgroundRect: RectF
 
     // Paint to draw the gauge bitmaps
-    private var backgroundPaint: Paint? = null
+    private lateinit var backgroundPaint: Paint
 
     // Paint to draw the rim of the bezel
-    private var rimPaint: Paint? = null
+    private lateinit var rimPaint: Paint
 
     // Paint to draw the sky portion of the gauge face
-    private var skyPaint: Paint? = null
+    private lateinit var skyPaint: Paint
 
     /**
      * Create a new instance.
@@ -108,7 +106,7 @@ class GaugeRotation : View {
      *
      * @param rotation
      */
-    fun updateRotation(rotation: FloatArray?) {
+    fun updateRotation(rotation: FloatArray) {
         System.arraycopy(rotation, 0, this.rotation, 0, this.rotation.size)
         this.invalidate()
     }
@@ -119,35 +117,35 @@ class GaugeRotation : View {
 
         // Paint for the rim of the gauge bezel
         rimPaint = Paint()
-        rimPaint!!.flags = Paint.ANTI_ALIAS_FLAG
+        rimPaint.flags = Paint.ANTI_ALIAS_FLAG
         // The linear gradient is a bit skewed for realism
-        rimPaint!!.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
+        rimPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
 
         val rimOuterSize = -0.04f
         rimOuterRect = RectF()
-        rimOuterRect!![rimRect!!.left + rimOuterSize, rimRect!!.top
-                + rimOuterSize, rimRect!!.right - rimOuterSize] = (rimRect!!.bottom
+        rimOuterRect[rimRect.left + rimOuterSize, rimRect.top
+                + rimOuterSize, rimRect.right - rimOuterSize] = (rimRect.bottom
                 - rimOuterSize)
 
         rimOuterPaint = Paint()
-        rimOuterPaint!!.flags = Paint.ANTI_ALIAS_FLAG
-        rimOuterPaint!!.color = context.getColor(R.color.md_theme_outline)
+        rimOuterPaint.flags = Paint.ANTI_ALIAS_FLAG
+        rimOuterPaint.color = context.getColor(R.color.md_theme_outline)
 
         val rimSize = 0.02f
 
         faceBackgroundRect = RectF()
-        faceBackgroundRect!![rimRect!!.left, rimRect!!.top, rimRect!!.right] = rimRect!!.bottom
+        faceBackgroundRect[rimRect.left, rimRect.top, rimRect.right] = rimRect.bottom
 
         skyBackgroundRect = RectF()
-        skyBackgroundRect!![rimRect!!.left + rimSize, rimRect!!.top + rimSize, rimRect!!.right - rimSize] = rimRect!!.bottom - rimSize
+        skyBackgroundRect[rimRect.left + rimSize, rimRect.top + rimSize, rimRect.right - rimSize] = rimRect.bottom - rimSize
 
         skyPaint = Paint()
-        skyPaint!!.isAntiAlias = true
-        skyPaint!!.flags = Paint.ANTI_ALIAS_FLAG
-        skyPaint!!.color = context.getColor(R.color.md_theme_primaryFixedDim)
+        skyPaint.isAntiAlias = true
+        skyPaint.flags = Paint.ANTI_ALIAS_FLAG
+        skyPaint.color = context.getColor(R.color.md_theme_primaryFixedDim)
 
         backgroundPaint = Paint()
-        backgroundPaint!!.isFilterBitmap = true
+        backgroundPaint.isFilterBitmap = true
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -184,9 +182,9 @@ class GaugeRotation : View {
      */
     private fun drawRim(canvas: Canvas) {
         // First draw the most back rim
-        canvas.drawOval(rimOuterRect!!, rimOuterPaint!!)
+        canvas.drawOval(rimOuterRect, rimOuterPaint)
         // Then draw the small black line
-        canvas.drawOval(rimRect!!, rimPaint!!)
+        canvas.drawOval(rimRect, rimPaint)
     }
 
     /**
@@ -195,11 +193,11 @@ class GaugeRotation : View {
      * @param canvas
      */
     private fun drawFace(canvas: Canvas) {
-        val halfHeight = ((rimRect!!.top - rimRect!!.bottom) / 2)
+        val halfHeight = ((rimRect.top - rimRect.bottom) / 2)
 
-        val top = rimRect!!.top - halfHeight + (rotation[1] * halfHeight)
+        val top = rimRect.top - halfHeight + (rotation[1] * halfHeight)
 
-        if (rimRect!!.left <= rimRect!!.right && top <= rimRect!!.bottom) {
+        if (rimRect.left <= rimRect.right && top <= rimRect.bottom) {
             // free the old bitmap
             if (faceBitmap == null) {
                 faceBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -215,7 +213,7 @@ class GaugeRotation : View {
                 mutableCanvas = Canvas(mutableBitmap!!)
             }
 
-            skyPaint!!.isFilterBitmap = false
+            skyPaint.isFilterBitmap = false
 
             skyBitmap!!.eraseColor(Color.TRANSPARENT)
 
@@ -225,10 +223,10 @@ class GaugeRotation : View {
             faceCanvas!!.scale(scale, scale)
             skyCanvas.scale(scale, scale)
 
-            skyBackgroundRect!![rimRect!!.left, top, rimRect!!.right] = rimRect!!.bottom
+            skyBackgroundRect[rimRect.left, top, rimRect.right] = rimRect.bottom
 
-            faceCanvas!!.drawArc(faceBackgroundRect!!, 0f, 360f, true, skyPaint!!)
-            skyCanvas.drawRect(skyBackgroundRect!!, skyPaint!!)
+            faceCanvas!!.drawArc(faceBackgroundRect, 0f, 360f, true, skyPaint)
+            skyCanvas.drawRect(skyBackgroundRect, skyPaint)
 
             val angle = -Math.toDegrees(rotation[2].toDouble()).toFloat()
 
@@ -236,9 +234,9 @@ class GaugeRotation : View {
             canvas.rotate(angle, faceBitmap!!.width / 2f, faceBitmap!!.height / 2f)
 
             mutableCanvas!!.drawBitmap(faceBitmap!!, 0f, 0f, skyPaint)
-            skyPaint!!.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_IN))
+            skyPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_IN))
             mutableCanvas!!.drawBitmap(skyBitmap!!, 0f, 0f, skyPaint)
-            skyPaint!!.setXfermode(null)
+            skyPaint.setXfermode(null)
 
             canvas.drawBitmap(mutableBitmap!!, 0f, 0f, backgroundPaint)
             canvas.restore()
@@ -251,16 +249,12 @@ class GaugeRotation : View {
      * @param canvas
      */
     private fun drawBezel(canvas: Canvas) {
-        if (bezelBitmap == null) {
-            Log.w(TAG, "Bezel not created")
-        } else {
+        if (bezelBitmap != null) {
             canvas.drawBitmap(bezelBitmap!!, 0f, 0f, backgroundPaint)
         }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        Log.d(TAG, "Size changed to " + w + "x" + h)
-
         regenerateBezel()
     }
 
@@ -293,9 +287,5 @@ class GaugeRotation : View {
         canvas.scale(scale, scale)
 
         canvas.restore()
-    }
-
-    companion object {
-        private val TAG: String = GaugeRotation::class.java.simpleName
     }
 }

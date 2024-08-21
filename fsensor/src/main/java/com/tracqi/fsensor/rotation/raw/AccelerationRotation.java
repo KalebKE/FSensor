@@ -76,7 +76,6 @@ import com.tracqi.fsensor.math.gravity.Gravity;
  * magnetic field sensor signals and high-pass filtering of the gyroscope
  * signals.
  *
- * @author Kaleb
  */
 public class AccelerationRotation implements Rotation {
     private final float[] rotation = new float[3];

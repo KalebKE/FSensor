@@ -17,15 +17,7 @@ package com.tracqi.fsensor.filter;
  */
 
 /**
- * An implementation of the Android Developer low-pass fusedOrientation. The Android
- * Developer LowPassFilter, is an IIR single-pole implementation. The coefficient, a
- * (alpha), can be adjusted based on the sample period of the sensor to produce
- * the desired time constant that the fusedOrientation will act on. It takes a simple form of y[0] = alpha * y[0] + (1
- * - alpha) * x[0]. Alpha is defined as alpha = timeConstant / (timeConstant +
- * dt) where the time constant is the length of signals the fusedOrientation should act on
- * and dt is the sample period (1/frequency) of the sensor.
- *
- * @author Kaleb Kircher
+ * Implements a low pass filter designed to smooth the data points based on a time constant.
  */
 public class LowPassFilter extends SensorFilter {
     private static final String tag = LowPassFilter.class.getSimpleName();

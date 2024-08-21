@@ -77,7 +77,6 @@ import org.apache.commons.math3.complex.Quaternion;
  * magnetic field sensor signals and high-pass filtering of the gyroscope
  * signals.
  *
- * @author Kaleb
  */
 public class GyroscopeRotation implements Rotation {
     private static final float NS2S = 1.0f / 1000000000.0f;

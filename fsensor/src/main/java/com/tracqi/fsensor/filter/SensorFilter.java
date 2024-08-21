@@ -18,10 +18,7 @@ package com.tracqi.fsensor.filter;
 
 /**
  * A base implementation of a sensor filter.
- *
- * @author Kaleb Kircher
  */
-
 public abstract class SensorFilter {
     public static float DEFAULT_TIME_CONSTANT = 0.18f;
 

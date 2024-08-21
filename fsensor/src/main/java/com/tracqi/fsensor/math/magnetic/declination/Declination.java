@@ -21,8 +21,6 @@ import android.location.Location;
 
 /**
  * Compensate for magnetic declination based on a location.
- *
- * Created by kaleb on 3/18/18.
  */
 public class Declination {
 
