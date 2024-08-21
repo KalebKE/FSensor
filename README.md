@@ -12,6 +12,28 @@ filters can be used to smooth sensor data. FSensor is designed to be easy to use
 * Provides estimations of device rotation with LowPass, Complimentary and Kalman based sensor fusions
 * Provides estimations of linear acceleration with Low-Pass, Complimentary and Kalman based sensor fusions
 * Provides device/sensor agnostic averaging filters in the of mean, median and low-pass varieties
+* 
+## Get FSensor
+
+In the project level build.gradle:
+
+```
+allprojects {
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
+}
+```
+
+In the module level build.gradle:
+
+```
+dependencies {
+    implementation 'com.github.KalebKE:FSensor:v2.x'
+}
+```
+
+[![](https://jitpack.io/v/KalebKE/FSensor.svg)](https://jitpack.io/#KalebKE/FSensor)
 
 ## Usage
 
