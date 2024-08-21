@@ -1,7 +1,7 @@
 # FSensor
 Android Sensor Filter and Fusion
 
-![](/documentation/images/fsensor.png | width=100)
+<img src="/documentation/images/fsensor.png" width="100" height="100">
 
 ![alt text](/documentation/images/fsensor.png "FSensor")
 
