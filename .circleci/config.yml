@@ -3,7 +3,7 @@
 version: 2.1
 
 orbs:
-  android: "2.1.2"
+  android: circleci/android@2.5.0
 
 jobs:
   release-build:
