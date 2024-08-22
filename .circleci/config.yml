@@ -48,3 +48,11 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - release-build
+      - publish-github-release:
+          requires:
+            - release-build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
