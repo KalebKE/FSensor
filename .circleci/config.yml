@@ -25,9 +25,9 @@ jobs:
       - run:
           name: Assemble release build
           command: |
-            ./gradlew assembleRelease
+            ./gradlew fsensor:assembleRelease
       - store_artifacts:
-          path: app/build/outputs/apk/release
+          path: fsensor/build/outputs/aar
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
