@@ -2,6 +2,9 @@
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 
+orbs:
+  android: "2.1.2"
+
 jobs:
   release-build:
     executor:
