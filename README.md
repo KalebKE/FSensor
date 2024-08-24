@@ -3,7 +3,6 @@ Android Sensor Filter and Fusion
 
 <img src="/documentation/images/fsensor.png" width="300">
 
-
 ## Introduction
 FSensor (FusionSensor) is an Android library that provides linear acceleration and rotation sensors via LowPass, Complementary and Kalman based sensor fusions. The behavior of stock
 Android sensor fusions can vary greatly between devices and manufacturers. FSensor provides a set of consistent and reliable sensor fusion implementations that can be used consistently,
@@ -14,6 +13,7 @@ filters can be used to smooth sensor data. FSensor is designed to be easy to use
 * Provides estimations of linear acceleration with Low-Pass, Complimentary and Kalman based sensor fusions
 * Provides device/sensor agnostic averaging filters in the of mean, median and low-pass varieties
 * 
+
 ## Get FSensor
 
 In the project level build.gradle:
@@ -28,15 +28,14 @@ allprojects {
 
 In the module level build.gradle:
 
-```
-dependencies {
-    implementation 'com.github.KalebKE:FSensor:v3.x.y'
-}
+```kotlin
+    implementation("com.github.KalebKE:FSensor:v3.x.y")
 ```
 
 [![](https://jitpack.io/v/KalebKE/FSensor.svg)](https://jitpack.io/#KalebKE/FSensor)
 
 ## Usage
+
 
 The FSensor API is very similar to the Android Sensor API. 
 
@@ -64,6 +63,7 @@ FSensor uses Quaternion based calculations. Quaternions offer an angle-axis solu
 that you will find with Euclidean based rotation matrices.
 
 ### Complimentary Filter
+
 
 A complementary filter is a frequency domain filter. In its strictest sense, the definition of a complementary filter refers to the use of two or more transfer functions, which
 are mathematical complements of one another. Thus, if the data from one sensor is operated on by G(s), then the data from the other sensor is operated on by I-G(s), and the sum of 
