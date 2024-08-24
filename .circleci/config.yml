@@ -36,6 +36,10 @@ jobs:
             ./gradlew fsensor:assembleRelease
       - store_artifacts:
           path: fsensor/build/outputs/aar
+      - persist_to_workspace:
+          root: fsensor/build/outputs/aar
+          paths:
+            - release/fsensor-release.aar
 
   publish-github-release:
     docker:
@@ -46,15 +50,11 @@ jobs:
       - run: |
           cat bash.env >> $BASH_ENV
       - attach_workspace:
-          at: ./artifacts
-      - run:
-          name: "Check if version exists"
-          command: |
-            printenv VERSION_NAME
+          at: fsensor/build/outputs/aar
       - run:
           name: "Publish Release on GitHub"
           command: |
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION_NAME} ./artifacts/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION_NAME} ./fsensor/build/outputs/aar/release/fsensor-release.aar
 
 workflows:
   release-build-workflow:
