@@ -48,6 +48,7 @@ jobs:
             git add fsensor/version.properties
             git commit -m "[skip ci] Increment version code and name"
             git push --set-upstream origin v3.0
+            
 
   publish-github-release:
     docker:
