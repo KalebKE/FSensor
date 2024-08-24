@@ -39,7 +39,7 @@ jobs:
       - persist_to_workspace:
           root: fsensor/build/outputs/aar
           paths:
-            - release/fsensor-release.aar
+            - fsensor-release.aar
 
   publish-github-release:
     docker:
@@ -54,7 +54,7 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION_NAME} ./fsensor/build/outputs/aar/release/fsensor-release.aar
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION_NAME} ./fsensor/build/outputs/aar/fsensor-release.aar
 
 workflows:
   release-build-workflow:
