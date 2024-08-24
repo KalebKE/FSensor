@@ -22,6 +22,7 @@ function incrementVersionCode {
 
 function incrementVersionName {
     ./gradlew incrementPatch
+    ./gradlew getVersionName
     VERSION=$(./gradlew getVersionName)
     echo "export VERSION_NAME=$VERSION" >> "$BASH_ENV"
     source "$BASH_ENV"
