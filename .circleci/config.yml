@@ -24,6 +24,12 @@ jobs:
       - android/restore-build-cache
       - run: source version.sh && incrementVersionCode
       - run: source version.sh && incrementVersionName
+      - run: |
+         cp $BASH_ENV bash.env
+      - persist_to_workspace:
+           root: .
+           paths:
+             - bash.env
       - run:
           name: Assemble release build
           command: |
@@ -35,6 +41,10 @@ jobs:
     docker:
       - image: cibuilds/github:0.10
     steps:
+      - attach_workspace:
+          at: .
+      - run: |
+          cat bash.env >> $BASH_ENV
       - attach_workspace:
           at: ./artifacts
       - run:
