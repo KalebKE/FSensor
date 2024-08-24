@@ -47,8 +47,7 @@ jobs:
             git config user.name "CircleCi"
             git add fsensor/version.properties
             git commit -m "[skip ci] Increment version code and name"
-            git push --set-upstream origin v3.0
-            
+            git push --set-upstream origin master
 
   publish-github-release:
     docker:
@@ -68,7 +67,11 @@ jobs:
 workflows:
   release-build-workflow:
     jobs:
-      - release-build
+      - release-build:
+          filters:
+            branches:
+              only:
+                - master
       - publish-github-release:
           requires:
             - release-build
