@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Frequency" >
+        <ListPreference
+            android:title="Sensor Frequency"
+            android:key="sensor_frequency_preference"
+            android:defaultValue="0"
+            android:entries="@array/frequency"
+            android:entryValues="@array/frequencyValues" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Filter" >
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:dialogTitle="Enable Mean Filter"
+            android:key="mean_filter_smoothing_enabled_preference"
+            android:summaryOff="Mean Filter is Off"
+            android:summaryOn="Mean Filter is On"
+            android:title="Enable Mean Filter" />
+        <EditTextPreference
+            android:defaultValue="@string/default_value_time_constant"
+            android:dialogMessage="Set Mean Filter Time Constant (Seconds)"
+            android:dialogTitle="Time Constant"
+            android:inputType="numberDecimal"
+            android:key="mean_filter_smoothing_time_constant_preference"
+            android:title="Set Mean Filter Time Constant" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:dialogTitle="Enable Median Filter"
+            android:key="median_filter_smoothing_enabled_preference"
+            android:summaryOff="Median Filter is Off"
+            android:summaryOn="Median Filter is On"
+            android:title="Enable Median Filter" />
+
+        <EditTextPreference
+            android:defaultValue="@string/default_value_time_constant"
+            android:dialogMessage="Set Median Filter Time Constant (Seconds)"
+            android:dialogTitle="Time Constant"
+            android:inputType="numberDecimal"
+            android:key="median_filter_smoothing_time_constant_preference"
+            android:title="Set Median Filter Time Constant" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:dialogTitle="Enable Low-Pass Filter"
+            android:key="lpf_smoothing_enabled_preference"
+            android:summaryOff="Low Pass Filter is Off"
+            android:summaryOn="Low Pass Filter is On"
+            android:title="Enable Low Pass Filter" />
+
+        <EditTextPreference
+            android:defaultValue="@string/default_value_time_constant"
+            android:dialogMessage="Set LPF Time Constant (Seconds)"
+            android:dialogTitle="Time Constant"
+            android:inputType="numberDecimal"
+            android:key="lpf_smoothing_time_constant_preference"
+            android:title="Set LPF Time Constant" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Fusion" >
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:dialogTitle="Enable Linear Accel Low-Pass Filter"
+            android:key="lpf_linear_accel_enabled_preference"
+            android:summaryOff="LPF Linear Accel is Off"
+            android:summaryOn="LPF Linear Accel is On"
+            android:title="Enabled Linear Accel LPF" />
+
+        <EditTextPreference
+            android:defaultValue="@string/default_value_low_pass_filter"
+            android:dialogMessage="Set LPF Time Constant"
+            android:dialogTitle="Time Constant"
+            android:inputType="numberDecimal"
+            android:key="lpf_linear_accel_time_constant_preference"
+            android:title="Set LPF Time Constant" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:dialogTitle="Enable Complimentary Fusion"
+            android:key="complimentary_fusion_enabled_preference"
+            android:summaryOff="Fusion is Off"
+            android:summaryOn="Fusion is On"
+            android:title="Enable Complimentary Fusion" />
+
+        <EditTextPreference
+            android:defaultValue="@string/default_value_low_pass_filter"
+            android:dialogMessage="Set Time Constant"
+            android:dialogTitle="Time Constant"
+            android:inputType="numberDecimal"
+            android:key="complimentary_fusion_time_constant_preference"
+            android:title="Set Filter Time Constant" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:dialogTitle="Enable Kalman Fusion"
+            android:key="kalman_fusion_enabled_preference"
+            android:summaryOff="Fusion is Off"
+            android:summaryOn="Fusion is On"
+            android:title="Enable Kalman Fusion" />
+    </PreferenceCategory>
+</PreferenceScreen>
