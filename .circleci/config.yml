@@ -45,6 +45,7 @@ jobs:
           command: |
             git config user.email "build@tracqi.com"
             git config user.name "CircleCi"
+            git add fsensor/version.properties
             git commit -m "[skip ci] Increment version code and name"
             git push
 
