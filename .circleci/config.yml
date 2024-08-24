@@ -22,6 +22,8 @@ jobs:
             echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/' >> ~/.circlerc
       - android/restore-gradle-cache
       - android/restore-build-cache
+      - run: source version.sh && incrementVersionCode
+      - run: source version.sh && incrementVersionName
       - run:
           name: Assemble release build
           command: |
@@ -38,7 +40,7 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=$(my-binary --version)
+            VERSION=$VERSION_NAME
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 workflows:
