@@ -9,7 +9,7 @@ jobs:
   release-build:
     executor:
       name: android/android-machine
-      resource-class: large
+      resource-class: small
       tag: default
     steps:
       - checkout
