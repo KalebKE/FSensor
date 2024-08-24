@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id "net.thauvin.erik.gradle.semver" version "1.0.4"
+    id 'maven-publish'
 }
 
 android {
@@ -48,5 +49,19 @@ dependencies {
 tasks.register("getVersionName") {
     doLast {
         println(project.getVersion())
+    }
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'com.tracqi'
+            artifactId = 'fsensor'
+            version = project.getVersion()
+
+            afterEvaluate {
+                from components.release
+            }
+        }
     }
 }
