@@ -31,6 +31,13 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -52,15 +59,15 @@ tasks.register("getVersionName") {
     }
 }
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'com.tracqi'
-            artifactId = 'fsensor'
-            version = project.getVersion()
-
-            afterEvaluate {
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
                 from components.release
+                groupId = 'com.tracqi'
+                artifactId = 'fsensor'
+                version = project.getVersion()
             }
         }
     }
