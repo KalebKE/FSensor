@@ -1,7 +1,7 @@
 # FSensor
 Android Sensor Filter and Fusion
 
-<img src="/documentation/images/fsensor.png" width="300">
+<img src="/documentation/images/complementary.gif" width="300">
 
 ## Introduction
 FSensor (FusionSensor) is an Android library that provides linear acceleration and rotation sensors via LowPass, Complementary and Kalman based sensor fusions. The behavior of stock
@@ -12,7 +12,7 @@ filters can be used to smooth sensor data. FSensor is designed to be easy to use
 * Provides estimations of device rotation with LowPass, Complimentary and Kalman based sensor fusions
 * Provides estimations of linear acceleration with Low-Pass, Complimentary and Kalman based sensor fusions
 * Provides device/sensor agnostic averaging filters in the of mean, median and low-pass varieties
-* 
+
 
 ## Get FSensor
 
@@ -64,6 +64,7 @@ that you will find with Euclidean based rotation matrices.
 
 ### Complimentary Filter
 
+<img src="/documentation/images/complementary.gif" width="300">
 
 A complementary filter is a frequency domain filter. In its strictest sense, the definition of a complementary filter refers to the use of two or more transfer functions, which
 are mathematical complements of one another. Thus, if the data from one sensor is operated on by G(s), then the data from the other sensor is operated on by I-G(s), and the sum of 
@@ -76,10 +77,21 @@ filter should act on and dt is the sample period (1/frequency) of the sensor.
 
 ### Kalman Filter
 
+<img src="/documentation/images/kalman.gif" width="300">
+
 Kalman filtering, also known as linear quadratic estimation (LQE), is an algorithm that uses a series of measurements observed over time, containing noise (random variations) 
 and other inaccuracies, and produces estimates of unknown variables that tend to be more precise than those based on a single measurement alone. More formally, the Kalman filter 
 operates recursively on streams of noisy input data to produce a statistically optimal estimate of the underlying system state. Like complimentary filters, Kalman filters 
 require inputs from the gyroscope, accelerometer, and magnetometer sensors.
+
+### Low-Pass Filter
+
+<img src="/documentation/images/low_pass.gif" width="300">
+
+A low-pass filter can isolate the gravity component of the acceleration sensor. The gravity component can be used to determine the tilt of the device. The tilt can be used to then
+determine the rotation of the device. The advantage to a low-pass filter is that it is computationally efficient, requires only the acceleration sensor, and is easy to implement.
+A low-pass filter is not capable of determining the heading of the device and is sensitive to orientation changes. A low-pass filter can be effective in scenarios where the device is
+held in a fixed orientation and the azimuth is not required.
 
 ## Filters
 
