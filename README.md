@@ -29,7 +29,7 @@ allprojects {
 In the module level build.gradle:
 
 ```kotlin
-    implementation("com.github.KalebKE:FSensor:3.x.y")
+implementation("com.github.KalebKE:FSensor:3.x.y")
 ```
 
 [![](https://jitpack.io/v/KalebKE/FSensor.svg)](https://jitpack.io/#KalebKE/FSensor)
