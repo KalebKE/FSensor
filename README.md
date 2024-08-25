@@ -50,6 +50,22 @@ fSensor!!.registerListener({ event -> filter!!.filter(event.values) }, sensorDel
 
 See the sample app 'fsensorapp' for more examples.
 
+## Orientation
+
+FSensor conforms with the Android API such that the y-axis points north, the x-axis points east, and the z-axis points up. The device is assumed to be in the portrait orientation 
+laying flat on a level surface. 
+
+* The orientation vector returned by FSensor will be orientation[]{azimuth, pitch, roll}. 
+
+* The linear acceleration returned by FSensor will be acceleration[]{x, y, z}.
+
+<img src="/documentation/images/axis_device.png" width="300">
+
+## Linear Acceleration
+
+Linear acceleration is defined as linearAcceleration = (acceleration - gravity). An acceleration sensor alone is not capable of determining the difference between gravity/tilt.
+FSensor provides three different estimations of linear acceleration implementing Low-Pass, Complementary and Kalman based sensor fusions.
+
 ## Orientation Sensor Fusions
 
 FSensor offers two different estimations of rotation implementing both Complementary and Kalman based fusions. The fusions utilize the acceleration, magnetic, and gyroscope sensors
@@ -134,8 +150,5 @@ FSensor uses a median filter designed to smooth the data points based on a time 
 occur over a period defined by the time constant... the number of samples that are considered is known as the filter window. The approach allows the filter window to be defined 
 over a period of time, instead of a fixed number of samples.
 
-## Linear Acceleration
-
-Linear acceleration is defined as linearAcceleration = (acceleration - gravity). An acceleration sensor alone is not capable of determining the difference between gravity/tilt.
-FSensor provides three different estimations of linear acceleration implementing Low-Pass, Complementary and Kalman based sensor fusions. 
+ 
 
