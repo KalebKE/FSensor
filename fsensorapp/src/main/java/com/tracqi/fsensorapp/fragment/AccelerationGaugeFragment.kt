@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.tracqi.fsensor.sensor.FSensorEvent
-import com.tracqi.fsensor.sensor.FSensorEventListener
+import com.tracqi.fsensor.platform.FSensorEvent
+import com.tracqi.fsensor.platform.FSensorEventListener
 import com.tracqi.fsensorapp.R
 import com.tracqi.fsensorapp.gauge.GaugeAcceleration
 import com.tracqi.fsensorapp.viewmodel.FSensorViewModel

@@ -10,32 +10,15 @@ import com.tracqi.fsensor.filter.LowPassFilter
 import com.tracqi.fsensor.filter.MeanFilter
 import com.tracqi.fsensor.filter.MedianFilter
 import com.tracqi.fsensor.filter.SensorFilter
-import com.tracqi.fsensor.sensor.FSensor
-import com.tracqi.fsensor.sensor.FSensorEvent
-import com.tracqi.fsensor.sensor.FSensorEventListener
-import com.tracqi.fsensor.sensor.acceleration.ComplementaryLinearAccelerationFSensor
-import com.tracqi.fsensor.sensor.acceleration.KalmanLinearAccelerationFSensor
-import com.tracqi.fsensor.sensor.acceleration.LowPassLinearAccelerationFSensor
-import com.tracqi.fsensor.sensor.orientation.ComplementaryOrientationFSensor
-import com.tracqi.fsensor.sensor.orientation.KalmanOrientationFSensor
-import com.tracqi.fsensor.sensor.orientation.LowPassOrientationFSensor
+import com.tracqi.fsensor.fusion.complementary.ComplementaryFusion
+import com.tracqi.fsensor.fusion.kalman.KalmanFusion
+import com.tracqi.fsensor.fusion.madgwick.MadgwickFusion
+import com.tracqi.fsensor.platform.FSensor
+import com.tracqi.fsensor.platform.FSensorEvent
+import com.tracqi.fsensor.platform.FSensorEventListener
+import com.tracqi.fsensor.platform.FusedLinearAccelerationFSensor
+import com.tracqi.fsensor.platform.FusedOrientationFSensor
 import com.tracqi.fsensorapp.preference.Preferences
-
-/*
-* Copyright 2024, Tracqi Technology, LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
 
 class FSensorViewModel(application: Application?) : AndroidViewModel(application!!) {
     private var linearAccelerationFSensor: FSensor? = null
@@ -45,7 +28,7 @@ class FSensorViewModel(application: Application?) : AndroidViewModel(application
 
     private val sensorListenerWrapperMap: MutableMap<FSensorEventListener, FSensorEventListener> = HashMap()
 
-    private val preferenceChangeListener = OnSharedPreferenceChangeListener { sharedPreferences: SharedPreferences?, key: String? ->
+    private val preferenceChangeListener = OnSharedPreferenceChangeListener { _: SharedPreferences?, _: String? ->
         initFSensors()
         initFilters()
     }
@@ -53,7 +36,6 @@ class FSensorViewModel(application: Application?) : AndroidViewModel(application
     init {
         initFSensors()
         initFilters()
-
         Preferences.registerPreferenceChangeListener(application!!, preferenceChangeListener)
     }
 
@@ -63,74 +45,60 @@ class FSensorViewModel(application: Application?) : AndroidViewModel(application
     }
 
     fun registerLinearAccelerationSensorListener(sensorEventListener: FSensorEventListener) {
-        if (linearAccelerationFSensor == null) {
-            return
-        }
-
-        val wrapper = FSensorEventListener { fSensorEvent: FSensorEvent ->
+        val sensor = linearAccelerationFSensor ?: return
+        val wrapper = FSensorEventListener { event: FSensorEvent ->
             if (linearAccelerationFilter != null) {
-                sensorEventListener.onSensorChanged(FSensorEvent(fSensorEvent.sensor, fSensorEvent.accuracy, fSensorEvent.timestamp, linearAccelerationFilter!!.filter(fSensorEvent.values)))
+                sensorEventListener.onSensorChanged(FSensorEvent(event.sensorType, event.accuracy, event.timestamp, linearAccelerationFilter!!.filter(event.values)))
             } else {
-                sensorEventListener.onSensorChanged(fSensorEvent)
+                sensorEventListener.onSensorChanged(event)
             }
         }
-
         sensorListenerWrapperMap[sensorEventListener] = wrapper
-
         val sensorDelay = Preferences.getSensorFrequencyPrefs(getApplication())
-        linearAccelerationFSensor!!.registerListener(wrapper, sensorDelay)
+        sensor.registerListener(wrapper, sensorDelay)
     }
 
     fun unregisterLinearAccelerationSensorListener(sensorEventListener: FSensorEventListener) {
-        if (linearAccelerationFSensor == null) {
-            return
-        }
-
-        val wrapper = sensorListenerWrapperMap.remove(sensorEventListener)
-        linearAccelerationFSensor!!.unregisterListener(wrapper)
+        val sensor = linearAccelerationFSensor ?: return
+        val wrapper = sensorListenerWrapperMap.remove(sensorEventListener) ?: return
+        sensor.unregisterListener(wrapper)
     }
 
     fun registerRotationSensorListener(sensorEventListener: FSensorEventListener) {
-        if (rotationFSensor == null) {
-            return
-        }
-
-        val wrapper = FSensorEventListener { fSensorEvent: FSensorEvent ->
+        val sensor = rotationFSensor ?: return
+        val wrapper = FSensorEventListener { event: FSensorEvent ->
             if (rotationFilter != null) {
-                sensorEventListener.onSensorChanged(FSensorEvent(fSensorEvent.sensor, fSensorEvent.accuracy, fSensorEvent.timestamp, rotationFilter!!.filter(fSensorEvent.values)))
+                sensorEventListener.onSensorChanged(FSensorEvent(event.sensorType, event.accuracy, event.timestamp, rotationFilter!!.filter(event.values)))
             } else {
-                sensorEventListener.onSensorChanged(fSensorEvent)
+                sensorEventListener.onSensorChanged(event)
             }
         }
-
         sensorListenerWrapperMap[sensorEventListener] = wrapper
-
         val sensorDelay = Preferences.getSensorFrequencyPrefs(getApplication())
-        rotationFSensor!!.registerListener(wrapper, sensorDelay)
+        sensor.registerListener(wrapper, sensorDelay)
     }
 
     fun unregisterRotationSensorListener(sensorEventListener: FSensorEventListener) {
-        if (rotationFSensor == null) {
-            return
-        }
-
-        val wrapper = sensorListenerWrapperMap.remove(sensorEventListener)
-        rotationFSensor!!.unregisterListener(wrapper)
+        val sensor = rotationFSensor ?: return
+        val wrapper = sensorListenerWrapperMap.remove(sensorEventListener) ?: return
+        sensor.unregisterListener(wrapper)
     }
 
     private fun initFSensors() {
         val sensorManager = getApplication<Application>().getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         if (Preferences.getPrefFSensorLpfLinearAccelerationEnabled(getApplication())) {
-            linearAccelerationFSensor = LowPassLinearAccelerationFSensor(sensorManager)
-            rotationFSensor = LowPassOrientationFSensor(sensorManager)
+            val fusion = MadgwickFusion(0.033f)
+            linearAccelerationFSensor = FusedLinearAccelerationFSensor(sensorManager, fusion)
+            rotationFSensor = FusedOrientationFSensor(sensorManager, MadgwickFusion(0.033f))
         } else if (Preferences.getPrefFSensorComplimentaryLinearAccelerationEnabled(getApplication())) {
-            val timeConstant = Preferences.getPrefFSensorComplimentaryLinearAccelerationTimeConstant(getApplication())
-            linearAccelerationFSensor = ComplementaryLinearAccelerationFSensor(sensorManager, timeConstant)
-            rotationFSensor = ComplementaryOrientationFSensor(sensorManager)
+            val fusion = ComplementaryFusion()
+            linearAccelerationFSensor = FusedLinearAccelerationFSensor(sensorManager, fusion)
+            rotationFSensor = FusedOrientationFSensor(sensorManager, ComplementaryFusion())
         } else if (Preferences.getPrefFSensorKalmanLinearAccelerationEnabled(getApplication())) {
-            linearAccelerationFSensor = KalmanLinearAccelerationFSensor(sensorManager)
-            rotationFSensor = KalmanOrientationFSensor(sensorManager)
+            val fusion = KalmanFusion()
+            linearAccelerationFSensor = FusedLinearAccelerationFSensor(sensorManager, fusion)
+            rotationFSensor = FusedOrientationFSensor(sensorManager, KalmanFusion())
         } else {
             linearAccelerationFSensor = null
             rotationFSensor = null
@@ -139,23 +107,17 @@ class FSensorViewModel(application: Application?) : AndroidViewModel(application
 
     private fun initFilters() {
         if (Preferences.getPrefLpfSmoothingEnabled(getApplication())) {
-            val timeConstant = Preferences.getPrefLpfSmoothingTimeConstant(getApplication())
-            linearAccelerationFilter = LowPassFilter()
-            (linearAccelerationFilter as LowPassFilter).setTimeConstant(timeConstant)
-            rotationFilter = LowPassFilter()
-            (rotationFilter as LowPassFilter).setTimeConstant(timeConstant)
+            val tc = Preferences.getPrefLpfSmoothingTimeConstant(getApplication())
+            linearAccelerationFilter = LowPassFilter(tc)
+            rotationFilter = LowPassFilter(tc)
         } else if (Preferences.getPrefMeanFilterSmoothingEnabled(getApplication())) {
-            val timeConstant = Preferences.getPrefMeanFilterSmoothingTimeConstant(getApplication())
-            linearAccelerationFilter = MeanFilter()
-            (linearAccelerationFilter as MeanFilter).setTimeConstant(timeConstant)
-            rotationFilter = MeanFilter()
-            (rotationFilter as MeanFilter).setTimeConstant(timeConstant)
+            val tc = Preferences.getPrefMeanFilterSmoothingTimeConstant(getApplication())
+            linearAccelerationFilter = MeanFilter(tc)
+            rotationFilter = MeanFilter(tc)
         } else if (Preferences.getPrefMedianFilterSmoothingEnabled(getApplication())) {
-            val timeConstant = Preferences.getPrefMedianFilterSmoothingTimeConstant(getApplication())
-            linearAccelerationFilter = MedianFilter()
-            (linearAccelerationFilter as MedianFilter).setTimeConstant(timeConstant)
-            rotationFilter = MedianFilter()
-            (rotationFilter as MedianFilter).setTimeConstant(timeConstant)
+            val tc = Preferences.getPrefMedianFilterSmoothingTimeConstant(getApplication())
+            linearAccelerationFilter = MedianFilter(tc)
+            rotationFilter = MedianFilter(tc)
         } else {
             linearAccelerationFilter = null
             rotationFilter = null
