@@ -5,7 +5,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.tracqi.fsensor.math.gravity.Gravity;
+import com.tracqi.fsensor.filter.LowPassFilter;
 import com.tracqi.fsensor.rotation.fusion.FusedRotation;
 import com.tracqi.fsensor.math.angle.Angles;
 import com.tracqi.fsensor.math.rotation.Rotation;
@@ -88,6 +88,8 @@ public class ComplimentaryRotation extends FusedRotation {
 
     private final SensorManager sensorManager;
     private final SensorEventListener sensorEventListener = new SensorListener();
+
+    private final LowPassFilter accelerationFilter = new LowPassFilter();
 
     private final float[] acceleration = new float[3];
     private final float[] magnetic = new float[3];
@@ -172,35 +174,23 @@ public class ComplimentaryRotation extends FusedRotation {
                 float alpha = timeConstant / (timeConstant + dT);
                 float oneMinusAlpha = (1.0f - alpha);
 
-                // Get last known orientation
-                float[] orientation = Angles.getAngles(rotationVector.getQ0(), rotationVector.getQ1(), rotationVector.getQ2(), rotationVector.getQ3());
+                // Low-pass filter raw acceleration to isolate gravity component
+                float[] gravity = accelerationFilter.filter(acceleration);
 
-                // Calculate the gravity vector from the orientation
-                float[] gravity = Gravity.getGravityFromOrientation(orientation);
-
-                for(int i = 0; i < gravity.length; i++) {
-                    // Apply acceleration sensor
-                    // output[0] = alpha * output[0] + (1 - alpha) * input[0];
-                    gravity[i] = alpha * gravity[i] + oneMinusAlpha * acceleration[i];
-                }
-
-                // Get orientation from acceleration and magnetic
+                // Get orientation from filtered acceleration and magnetic field
                 Quaternion rotationVectorAccelerationMagnetic = Rotation.getOrientationVector(gravity, magnetic);
 
                 if (rotationVectorAccelerationMagnetic != null) {
 
                     rotationVector = Rotation.integrateGyroscopeRotation(rotationVector, gyroscope, dT, EPSILON);
 
-                    // Apply the complementary fusedOrientation. // We multiply each rotation by their
-                    // coefficients (scalar matrices)...
+                    // NLERP: scale each quaternion by its weight, add, then normalize
                     Quaternion scaledRotationVectorAccelerationMagnetic = rotationVectorAccelerationMagnetic.multiply(oneMinusAlpha);
-
-                    // Scale our quaternion for the gyroscope
                     Quaternion scaledRotationVectorGyroscope = rotationVector.multiply(alpha);
+                    Quaternion result = scaledRotationVectorGyroscope.add(scaledRotationVectorAccelerationMagnetic).normalize();
 
-                    //...and then add the two quaternions together.
-                    // output[0] = alpha * output[0] + (1 - alpha) * input[0];
-                    Quaternion result = scaledRotationVectorGyroscope.add(scaledRotationVectorAccelerationMagnetic);
+                    // Update the rotation vector for next iteration
+                    rotationVector = result;
 
                     float[] angles = Angles.getAngles(result.getQ0(), result.getQ1(), result.getQ2(), result.getQ3());
                     System.arraycopy(angles, 0, this.output, 0, angles.length);

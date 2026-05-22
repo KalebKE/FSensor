@@ -68,13 +68,13 @@ public class RotationProcessModel implements ProcessModel {
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}});
 
-        // Q = processNoiseCovMatrix
+        // Q = processNoiseCovMatrix (gyroscope process noise - low because gyro is stable short-term)
         processNoiseCovMatrix = new Array2DRowRealMatrix(new double[][]
                 {
-                        {0.01, 0, 0, 0},
-                        {0, 0.01, 0, 0},
-                        {0, 0, 0.01, 0},
-                        {0, 0, 0, 0.01}});
+                        {0.001, 0, 0, 0},
+                        {0, 0.001, 0, 0},
+                        {0, 0, 0.001, 0},
+                        {0, 0, 0, 0.001}});
 
         // xP = initialStateEstimateVector
         initialStateEstimateVector = new ArrayRealVector(new double[]

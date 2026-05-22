@@ -56,8 +56,8 @@ public class Gravity {
      *          orientation[2] = azimuth, rotation around the Z axis
      */
     public static float[] getOrientationFromGravity(float[] gravity) {
-        float pitch = (float) Math.atan(-gravity[1] / gravity[2]);
-        float roll = (float) Math.asin(gravity[0] / SensorManager.GRAVITY_EARTH);
+        float pitch = (float) Math.atan2(-gravity[1], gravity[2]);
+        float roll = (float) Math.asin(Math.max(-1.0f, Math.min(1.0f, gravity[0] / SensorManager.GRAVITY_EARTH)));
         return new float[] {0, pitch, roll};
     }
 }

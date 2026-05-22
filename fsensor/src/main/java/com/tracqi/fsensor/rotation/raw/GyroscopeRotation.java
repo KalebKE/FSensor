@@ -144,6 +144,8 @@ public class GyroscopeRotation implements Rotation {
         if (this.timestamp != 0) {
             final float dT = (timestamp - this.timestamp) * NS2S;
             rotationQuaternion = com.tracqi.fsensor.math.rotation.Rotation.integrateGyroscopeRotation(rotationQuaternion, gyroscope, dT, EPSILON);
+            // Re-normalize to prevent floating-point drift from accumulating
+            rotationQuaternion = rotationQuaternion.normalize();
             angles = Angles.getAngles(rotationQuaternion.getQ0(), rotationQuaternion.getQ1(), rotationQuaternion.getQ2(), rotationQuaternion.getQ3());
 
             rotation[0] = angles[0];

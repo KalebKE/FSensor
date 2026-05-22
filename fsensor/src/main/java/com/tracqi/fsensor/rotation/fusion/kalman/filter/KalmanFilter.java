@@ -334,20 +334,11 @@ public class KalmanFilter {
 
 		// project the state estimation ahead (a priori state)
 		// xHat(k)- = A * xHat(k-1) + B * u(k-1)
-		// stateEstimation = transitionMatrix.operate(stateEstimation);
+		stateEstimation = transitionMatrix.operate(stateEstimation);
 
-		// add control input if it is available
-		// if (u != null)
-		// {
-		// stateEstimation = stateEstimation.add(controlMatrix.operate(u));
-		// }
-
-		// We don't need to use the transition matrix or control matrix, since
-		// we have already done all the work... we can just set the state
-		// estimation to u.
 		if (u != null)
 		{
-			stateEstimation = u;
+			stateEstimation = stateEstimation.add(controlMatrix.operate(u));
 		}
 
 		// project the error covariance ahead

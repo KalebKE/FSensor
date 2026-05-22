@@ -1,7 +1,6 @@
 package com.tracqi.fsensor.math.rotation;
 
 import android.hardware.SensorManager;
-import android.renderscript.Matrix3f;
 
 import org.apache.commons.math3.complex.Quaternion;
 
@@ -37,34 +36,32 @@ public class Rotation {
      * @return A Quaternion representing the orientation.
      */
     public static Quaternion integrateGyroscopeRotation(Quaternion previousRotationVector, float[] rateOfRotation, float dt, float epsilon) {
-        // Calculate the angular speed of the sample
-        float magnitude = (float) Math.sqrt(Math.pow(rateOfRotation[0], 2) + Math.pow(rateOfRotation[1], 2) + Math.pow(rateOfRotation[2], 2));
+        float wx = rateOfRotation[0];
+        float wy = rateOfRotation[1];
+        float wz = rateOfRotation[2];
 
-        // Normalize the rotation vector if it's big enough to get the axis
+        float magnitude = (float) Math.sqrt(wx * wx + wy * wy + wz * wz);
+
+        // Normalize the rotation axis if magnitude is large enough
         if (magnitude > epsilon) {
-            rateOfRotation[0] /= magnitude;
-            rateOfRotation[1] /= magnitude;
-            rateOfRotation[2] /= magnitude;
+            wx /= magnitude;
+            wy /= magnitude;
+            wz /= magnitude;
         }
 
-        // Integrate around this axis with the angular speed by the timestep
-        // in order to get a delta rotation from this sample over the timestep
-        // We will convert this axis-angle representation of the delta rotation
-        // into a quaternion before turning it into the rotation matrix.
+        // Convert axis-angle to delta quaternion
         float thetaOverTwo = magnitude * dt / 2.0f;
         float sinThetaOverTwo = (float) Math.sin(thetaOverTwo);
         float cosThetaOverTwo = (float) Math.cos(thetaOverTwo);
 
-        double[] deltaVector = new double[4];
+        Quaternion deltaQuaternion = new Quaternion(
+                cosThetaOverTwo,
+                sinThetaOverTwo * wx,
+                sinThetaOverTwo * wy,
+                sinThetaOverTwo * wz
+        );
 
-        deltaVector[0] = sinThetaOverTwo * rateOfRotation[0];
-        deltaVector[1] = sinThetaOverTwo * rateOfRotation[1];
-        deltaVector[2] = sinThetaOverTwo * rateOfRotation[2];
-        deltaVector[3] = cosThetaOverTwo;
-
-        // Since it is a unit quaternion, we can just multiply the old rotation
-        // by the new rotation delta to integrate the rotation.
-        return previousRotationVector.multiply(new Quaternion(deltaVector[3], Arrays.copyOfRange(deltaVector, 0, 3)));
+        return previousRotationVector.multiply(deltaQuaternion);
     }
 
     /**
@@ -72,28 +69,62 @@ public class Rotation {
      *
      * @param acceleration the acceleration measurement.
      * @param magnetic     the magnetic measurement.
-     * @return
+     * @return A unit quaternion representing the orientation, or null if the rotation matrix cannot be computed.
      */
     public static Quaternion getOrientationVector(float[] acceleration, float[] magnetic) {
         float[] rotationMatrix = new float[9];
         if (SensorManager.getRotationMatrix(rotationMatrix, null, acceleration, magnetic)) {
-            float[] orientation = new float[3];
-            SensorManager.getOrientation(rotationMatrix, orientation);
-            double[] rotation = getQuaternion(new Matrix3f(rotationMatrix));
-            return new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]);
+            double[] q = getQuaternion(rotationMatrix);
+            return new Quaternion(q[0], q[1], q[2], q[3]);
         }
 
         return null;
     }
 
-    private static double[] getQuaternion(Matrix3f m1) {
-        double w = Math.sqrt(1.0 + m1.get(0,0) + m1.get(1,1) + m1.get(2,2)) / 2.0;
-        double w4 = (4.0 * w);
-        double x = (m1.get(2,1) - m1.get(1,2)) / w4 ;
-        double y = (m1.get(0,2) - m1.get(2,0)) / w4 ;
-        double z = (m1.get(1,0) - m1.get(0,1)) / w4 ;
+    /**
+     * Converts a 3x3 rotation matrix (row-major, float[9]) to a unit quaternion
+     * using Shepperd's method for numerical stability across all rotation angles.
+     *
+     * @param m rotation matrix in row-major order: [m00, m01, m02, m10, m11, m12, m20, m21, m22]
+     * @return quaternion as [w, x, y, z]
+     */
+    static double[] getQuaternion(float[] m) {
+        double m00 = m[0], m01 = m[1], m02 = m[2];
+        double m10 = m[3], m11 = m[4], m12 = m[5];
+        double m20 = m[6], m21 = m[7], m22 = m[8];
 
-        return new double[]{w,x,y,z};
+        double trace = m00 + m11 + m22;
+        double w, x, y, z;
+
+        if (trace > 0) {
+            double s = 0.5 / Math.sqrt(trace + 1.0);
+            w = 0.25 / s;
+            x = (m21 - m12) * s;
+            y = (m02 - m20) * s;
+            z = (m10 - m01) * s;
+        } else if (m00 > m11 && m00 > m22) {
+            double s = 2.0 * Math.sqrt(1.0 + m00 - m11 - m22);
+            w = (m21 - m12) / s;
+            x = 0.25 * s;
+            y = (m01 + m10) / s;
+            z = (m02 + m20) / s;
+        } else if (m11 > m22) {
+            double s = 2.0 * Math.sqrt(1.0 + m11 - m00 - m22);
+            w = (m02 - m20) / s;
+            x = (m01 + m10) / s;
+            y = 0.25 * s;
+            z = (m12 + m21) / s;
+        } else {
+            double s = 2.0 * Math.sqrt(1.0 + m22 - m00 - m11);
+            w = (m10 - m01) / s;
+            x = (m02 + m20) / s;
+            y = (m12 + m21) / s;
+            z = 0.25 * s;
+        }
+
+        // Normalize to ensure unit quaternion
+        double norm = Math.sqrt(w * w + x * x + y * y + z * z);
+        return new double[]{w / norm, x / norm, y / norm, z / norm};
     }
 
 }

@@ -36,13 +36,13 @@ public class RotationMeasurementModel implements MeasurementModel {
     /**
      * The measurement noise covariance matrix.
      */
-    // R = measurementNoise
+    // R = measurementNoise (accelerometer/magnetometer noise - higher because they are vibration-sensitive)
     private final RealMatrix measurementNoise = new Array2DRowRealMatrix(new double[][]
             {
-                    {0.01, 0, 0, 0},
-                    {0, 0.01, 0, 0},
-                    {0, 0, 0.01, 0},
-                    {0, 0, 0, 0.01}});
+                    {0.1, 0, 0, 0},
+                    {0, 0.1, 0, 0},
+                    {0, 0, 0.1, 0},
+                    {0, 0, 0, 0.1}});
 
     /**
      * {@inheritDoc}

@@ -4,9 +4,6 @@ import android.hardware.SensorManager;
 
 import com.tracqi.fsensor.filter.LowPassFilter;
 import com.tracqi.fsensor.rotation.raw.AccelerationRotation;
-import com.tracqi.fsensor.rotation.raw.GyroscopeRotation;
-
-import org.apache.commons.math3.complex.Quaternion;
 
 
 /*
@@ -26,16 +23,9 @@ import org.apache.commons.math3.complex.Quaternion;
  */
 
 public class LowPassOrientationFSensor extends OrientationFSensor {
-    private static final String TAG = KalmanOrientationFSensor.class.getSimpleName();
 
     public LowPassOrientationFSensor(SensorManager sensorManager) {
         super(sensorManager, new AccelerationRotation(sensorManager, new LowPassFilter()));
     }
-
-    public void setBaseOrientation(Quaternion baseOrientation) {
-        ((GyroscopeRotation) rotation).setBaseOrientation(baseOrientation);
-    }
 }
-
-
 
