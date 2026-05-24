@@ -53,3 +53,6 @@ freeline/
 freeline_project_description.json
 .idea/
 
+# iOS frameworks (build artifacts)
+FSensorApp-iOS/Frameworks/
+
