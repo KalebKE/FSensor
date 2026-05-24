@@ -18,7 +18,7 @@ struct TimeSeriesChartView: View {
 
         if samples.count < 2 {
             Text("Waiting for data...")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.secondaryText)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             let latestTime = samples.last!.time
@@ -32,19 +32,36 @@ struct TimeSeriesChartView: View {
                 .foregroundStyle(by: .value("Axis", point.axis))
             }
             .chartForegroundStyleScale([
-                "X": Color.red,
-                "Y": Color.green,
-                "Z": Color.blue
+                "X": Color.neonCyan,
+                "Y": Color.neonMagenta,
+                "Z": Color.neonGreen
             ])
             .chartXScale(domain: (latestTime - 5)...latestTime)
             .chartYScale(domain: -yRange...yRange)
             .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: 5))
+                AxisMarks(values: .automatic(desiredCount: 5)) { _ in
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
+                        .foregroundStyle(Color.gridLine)
+                    AxisTick(stroke: StrokeStyle(lineWidth: 0.5))
+                        .foregroundStyle(Color.secondaryText)
+                    AxisValueLabel()
+                        .foregroundStyle(Color.secondaryText)
+                }
             }
             .chartYAxis {
-                AxisMarks(values: .automatic(desiredCount: 5))
+                AxisMarks(values: .automatic(desiredCount: 5)) { _ in
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
+                        .foregroundStyle(Color.gridLine)
+                    AxisTick(stroke: StrokeStyle(lineWidth: 0.5))
+                        .foregroundStyle(Color.secondaryText)
+                    AxisValueLabel()
+                        .foregroundStyle(Color.secondaryText)
+                }
             }
             .chartLegend(.hidden)
+            .chartPlotStyle { plotArea in
+                plotArea.background(Color.cyberBackground)
+            }
         }
     }
 

@@ -34,36 +34,29 @@ class MadgwickFusion(private val beta: Float = 0.033f) : FusionAlgorithm {
             mx /= normM; my /= normM; mz /= normM
 
             val _2q0 = 2.0 * q0; val _2q1 = 2.0 * q1; val _2q2 = 2.0 * q2; val _2q3 = 2.0 * q3
+            val _2q0mx = _2q0 * mx; val _2q0my = _2q0 * my; val _2q0mz = _2q0 * mz
+            val _2q1mx = _2q1 * mx
             val q0q0 = q0 * q0; val q0q1 = q0 * q1; val q0q2 = q0 * q2; val q0q3 = q0 * q3
             val q1q1 = q1 * q1; val q1q2 = q1 * q2; val q1q3 = q1 * q3
             val q2q2 = q2 * q2; val q2q3 = q2 * q3; val q3q3 = q3 * q3
 
-            val hx = mx * q0q0 - 2.0 * mx * q2q2 - 2.0 * mx * q3q3 + 2.0 * my * (q0q3 + q1q2) + 2.0 * my * q1q2 - 2.0 * mz * (q0q2 - q1q3) + 2.0 * mz * q1q3
-            val hy = -2.0 * mx * (q0q3 - q1q2) + my * q0q0 - 2.0 * my * q1q1 - 2.0 * my * q3q3 + 2.0 * mz * (q0q1 + q2q3) + 2.0 * mz * q2q3
-
+            val hx = mx * q0q0 - _2q0my * q3 + _2q0mz * q2 + mx * q1q1 + _2q1 * my * q2 + _2q1 * mz * q3 - mx * q2q2 - mx * q3q3
+            val hy = _2q0mx * q3 + my * q0q0 - _2q0mz * q1 + _2q1mx * q2 - my * q1q1 + my * q2q2 + _2q2 * mz * q3 - my * q3q3
             val _2bx = sqrt(hx * hx + hy * hy)
-            val _2bz = -2.0 * mx * (q0q2 - q1q3) - 2.0 * my * (q0q1 + q2q3) + mz * q0q0 - 2.0 * mz * q1q1 - 2.0 * mz * q2q2 + mz * q3q3
+            val _2bz = -_2q0mx * q2 + _2q0my * q1 + mz * q0q0 + _2q1mx * q3 - mz * q1q1 + _2q2 * my * q3 - mz * q2q2 + mz * q3q3
+            val _4bx = 2.0 * _2bx; val _4bz = 2.0 * _2bz
 
             val f1 = 2.0 * (q1q3 - q0q2) - ax
             val f2 = 2.0 * (q0q1 + q2q3) - ay
             val f3 = 2.0 * (0.5 - q1q1 - q2q2) - az
-            val f4 = 2.0 * _2bx * (0.5 - q2q2 - q3q3) + 2.0 * _2bz * (q1q3 - q0q2) - mx
-            val f5 = 2.0 * _2bx * (q1q2 - q0q3) + 2.0 * _2bz * (q0q1 + q2q3) - my
-            val f6 = 2.0 * _2bx * (q0q2 + q1q3) + 2.0 * _2bz * (0.5 - q1q1 - q2q2) - mz
+            val f4 = _2bx * (0.5 - q2q2 - q3q3) + _2bz * (q1q3 - q0q2) - mx
+            val f5 = _2bx * (q1q2 - q0q3) + _2bz * (q0q1 + q2q3) - my
+            val f6 = _2bx * (q0q2 + q1q3) + _2bz * (0.5 - q1q1 - q2q2) - mz
 
-            val j11or24 = _2q2; val j12or23 = _2q3; val j13or22 = _2q0; val j14or21 = _2q1
-            val j32 = 2.0 * j14or21; val j33 = 2.0 * j11or24
-            val j41 = 2.0 * _2bz * q2; val j42 = 2.0 * _2bz * q3
-            val j43 = 4.0 * _2bx * q2 + 2.0 * _2bz * q0; val j44 = 4.0 * _2bx * q3 - 2.0 * _2bz * q1
-            val j51 = 2.0 * _2bx * q3 - 2.0 * _2bz * q1; val j52 = 2.0 * _2bx * q2 + 2.0 * _2bz * q0
-            val j53 = 2.0 * _2bx * q1 + 2.0 * _2bz * q3; val j54 = 2.0 * _2bx * q0 - 2.0 * _2bz * q2
-            val j61 = 2.0 * _2bx * q2; val j62 = 2.0 * _2bx * q3 - 4.0 * _2bz * q1
-            val j63 = 2.0 * _2bx * q0 - 4.0 * _2bz * q2; val j64 = 2.0 * _2bx * q1
-
-            s0 = -j13or22 * f1 + j14or21 * f2 + -j41 * f4 + -j51 * f5 + j61 * f6
-            s1 = j12or23 * f1 + j13or22 * f2 - j32 * f3 + -j42 * f4 + j52 * f5 + j62 * f6
-            s2 = -j11or24 * f1 + j14or21 * f2 - j33 * f3 - j43 * f4 + j53 * f5 + j63 * f6
-            s3 = j12or23 * f1 + -j11or24 * f2 + -j44 * f4 - j54 * f5 + j64 * f6
+            s0 = -_2q2 * f1 + _2q1 * f2 + (-_2bz * q2) * f4 + (-_2bx * q3 + _2bz * q1) * f5 + (_2bx * q2) * f6
+            s1 = _2q3 * f1 + _2q0 * f2 - 4.0 * q1 * f3 + (_2bz * q3) * f4 + (_2bx * q2 + _2bz * q0) * f5 + (_2bx * q3 - _4bz * q1) * f6
+            s2 = -_2q0 * f1 + _2q3 * f2 - 4.0 * q2 * f3 + (-_4bx * q2 - _2bz * q0) * f4 + (_2bx * q1 + _2bz * q3) * f5 + (_2bx * q0 - _4bz * q2) * f6
+            s3 = _2q1 * f1 + _2q2 * f2 + (-_4bx * q3 + _2bz * q1) * f4 + (-_2bx * q0 + _2bz * q2) * f5 + (_2bx * q1) * f6
         } else {
             val _2q0 = 2.0 * q0; val _2q1 = 2.0 * q1; val _2q2 = 2.0 * q2; val _2q3 = 2.0 * q3
             val _4q0 = 4.0 * q0; val _4q1 = 4.0 * q1; val _4q2 = 4.0 * q2

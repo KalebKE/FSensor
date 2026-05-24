@@ -57,6 +57,40 @@ class MadgwickFusionTest {
     }
 
     @Test
+    fun update_9dofVs6dof_pitchRollShouldAgree() {
+        // Both filters start from identity, converge to the same tilted state using 6-DOF.
+        // Then fusion9 switches to 9-DOF (mag enabled). Adding magnetometer should only
+        // affect heading — pitch/roll should stay consistent with the 6-DOF filter.
+        val fusion6 = MadgwickFusion(0.1f)
+        val fusion9 = MadgwickFusion(0.1f)
+        val tiltedAccel = floatArrayOf(3f, 0f, sqrt(G * G - 9f))
+        val mag = floatArrayOf(20f, 5f, 42f)
+        val gyro = floatArrayOf(0f, 0f, 0f)
+
+        repeat(500) {
+            fusion6.update(tiltedAccel, null, gyro, 0.01f)
+            fusion9.update(tiltedAccel, null, gyro, 0.01f)
+        }
+
+        repeat(1000) {
+            fusion6.update(tiltedAccel, null, gyro, 0.01f)
+            fusion9.update(tiltedAccel, mag, gyro, 0.01f)
+        }
+
+        val orient6 = fusion6.getOrientation()
+        val orient9 = fusion9.getOrientation()
+        val pitch6 = Math.toDegrees(orient6[1].toDouble())
+        val roll6 = Math.toDegrees(orient6[2].toDouble())
+        val pitch9 = Math.toDegrees(orient9[1].toDouble())
+        val roll9 = Math.toDegrees(orient9[2].toDouble())
+
+        assertTrue(abs(pitch9 - pitch6) < 5.0,
+            "9-DOF pitch ($pitch9) should match 6-DOF ($pitch6)")
+        assertTrue(abs(roll9 - roll6) < 5.0,
+            "9-DOF roll ($roll9) should match 6-DOF ($roll6)")
+    }
+
+    @Test
     fun update_higherBeta_fasterConvergence() {
         val slow = MadgwickFusion(0.01f)
         val fast = MadgwickFusion(0.5f)

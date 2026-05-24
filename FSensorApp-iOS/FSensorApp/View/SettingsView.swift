@@ -40,13 +40,15 @@ struct SettingsView: View {
                 filterSection
                 rateSection
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.cyberBackground)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
 
     private var fusionSection: some View {
-        Section("Fusion Algorithm") {
+        Section {
             Picker("Algorithm", selection: $fusionType) {
                 Text("Madgwick").tag(FusionType.madgwick)
                 Text("Mahony").tag(FusionType.mahony)
@@ -57,7 +59,11 @@ struct SettingsView: View {
             .onChange(of: fusionType) { _ in apply() }
 
             fusionParams
+        } header: {
+            Text("Fusion Algorithm")
+                .foregroundStyle(Color.neonCyan)
         }
+        .listRowBackground(Color.cyberSurface)
     }
 
     @ViewBuilder
@@ -80,7 +86,7 @@ struct SettingsView: View {
     }
 
     private var filterSection: some View {
-        Section("Smoothing Filter") {
+        Section {
             Picker("Filter", selection: $filterType) {
                 Text("None").tag(FilterType.none)
                 Text("Low Pass").tag(FilterType.lowPass)
@@ -92,11 +98,15 @@ struct SettingsView: View {
             if filterType != .none {
                 ParamSlider(label: "Time Constant", value: $filterTimeConstant, range: 0.01...1, onChanged: apply)
             }
+        } header: {
+            Text("Smoothing Filter")
+                .foregroundStyle(Color.neonCyan)
         }
+        .listRowBackground(Color.cyberSurface)
     }
 
     private var rateSection: some View {
-        Section("Update Rate") {
+        Section {
             Picker("Rate (Hz)", selection: $rateHz) {
                 Text("25 Hz").tag(25)
                 Text("50 Hz").tag(50)
@@ -104,7 +114,11 @@ struct SettingsView: View {
             }
             .pickerStyle(.segmented)
             .onChange(of: rateHz) { _ in apply() }
+        } header: {
+            Text("Update Rate")
+                .foregroundStyle(Color.neonCyan)
         }
+        .listRowBackground(Color.cyberSurface)
     }
 
     private func apply() {
@@ -139,9 +153,11 @@ private struct ParamSlider: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("\(label): \(String(format: "%.4f", value))")
                 .font(.caption)
+                .foregroundStyle(Color.primaryText)
             Slider(value: $value, in: range, onEditingChanged: { editing in
                 if !editing { onChanged() }
             })
+            .tint(.neonCyan)
         }
     }
 }

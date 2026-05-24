@@ -19,6 +19,7 @@
 		A100000A /* RotationGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000A; };
 		A100000B /* TimeSeriesChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000B; };
 		A100000C /* FSensor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B100000C; };
+		A100000D /* CyberpunkColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000D1; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		B100000B /* TimeSeriesChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeSeriesChartView.swift; sourceTree = "<group>"; };
 		B100000C /* FSensor.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FSensor.framework; path = Frameworks/FSensor.framework; sourceTree = "<group>"; };
 		B100000D /* FSensorApp-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FSensorApp-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B100000D1 /* CyberpunkColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberpunkColors.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,8 +69,17 @@
 				D1000004 /* ViewModel */,
 				D1000005 /* View */,
 				D1000006 /* Component */,
+				D1000009 /* Theme */,
 			);
 			path = FSensorApp;
+			sourceTree = "<group>";
+		};
+		D1000009 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				B100000D1 /* CyberpunkColors.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 		D1000003 /* Model */ = {
@@ -198,6 +209,7 @@
 				A1000009 /* AccelerationGaugeView.swift in Sources */,
 				A100000A /* RotationGaugeView.swift in Sources */,
 				A100000B /* TimeSeriesChartView.swift in Sources */,
+				A100000D /* CyberpunkColors.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

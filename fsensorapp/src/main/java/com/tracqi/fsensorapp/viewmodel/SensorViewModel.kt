@@ -5,13 +5,16 @@ import android.content.Context
 import android.hardware.SensorManager
 import androidx.lifecycle.AndroidViewModel
 import com.tracqi.fsensor.filter.SensorFilter
+import com.tracqi.fsensor.filter.gps.GpsKalmanFilter
 import com.tracqi.fsensor.platform.FSensor
 import com.tracqi.fsensor.platform.FSensorEvent
 import com.tracqi.fsensor.platform.FSensorEventListener
 import com.tracqi.fsensor.platform.FusedLinearAccelerationFSensor
 import com.tracqi.fsensor.platform.FusedOrientationFSensor
 import com.tracqi.fsensorapp.model.ChartData
+import com.tracqi.fsensorapp.model.GpsUiState
 import com.tracqi.fsensorapp.model.SensorConfig
+import com.tracqi.fsensorapp.sensor.LocationBridge
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,20 +36,52 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
     private val _acceleration = MutableStateFlow(floatArrayOf(0f, 0f, 0f))
     val acceleration: StateFlow<FloatArray> = _acceleration.asStateFlow()
 
-    private val orientationBuffer = ChartData(250)
-    private val accelerationBuffer = ChartData(250)
+    private val orientationBuffer = ChartData()
+    private val accelerationBuffer = ChartData()
     private var startTimeNanos = 0L
 
-    private val _orientationHistory = MutableStateFlow(ChartData(250))
+    private val _orientationHistory = MutableStateFlow(ChartData())
     val orientationHistory: StateFlow<ChartData> = _orientationHistory.asStateFlow()
 
-    private val _accelerationHistory = MutableStateFlow(ChartData(250))
+    private val _accelerationHistory = MutableStateFlow(ChartData())
     val accelerationHistory: StateFlow<ChartData> = _accelerationHistory.asStateFlow()
 
     private var orientationListener: FSensorEventListener? = null
     private var accelerationListener: FSensorEventListener? = null
 
+    // GPS
+    private var locationBridge: LocationBridge? = null
+    private val gpsKalmanFilter = GpsKalmanFilter()
+    private val gpsTrackBuffer = mutableListOf<Pair<Double, Double>>()
+    private val filteredTrackBuffer = mutableListOf<Pair<Double, Double>>()
+    private var lastGpsTimestampNanos = 0L
+    private var gpsFixCount = 0
+
+    private val _gpsUiState = MutableStateFlow(GpsUiState())
+    val gpsUiState: StateFlow<GpsUiState> = _gpsUiState.asStateFlow()
+
+    private val _locationPermissionGranted = MutableStateFlow(false)
+    val locationPermissionGranted: StateFlow<Boolean> = _locationPermissionGranted.asStateFlow()
+
     private var isRunning = false
+
+    fun onLocationPermissionResult(granted: Boolean) {
+        _locationPermissionGranted.value = granted
+        if (granted && isRunning) startGps()
+    }
+
+    fun reset() {
+        val wasRunning = isRunning
+        if (wasRunning) stop()
+        rebuildSensors()
+        gpsKalmanFilter.reset()
+        gpsTrackBuffer.clear()
+        filteredTrackBuffer.clear()
+        lastGpsTimestampNanos = 0L
+        gpsFixCount = 0
+        _gpsUiState.value = GpsUiState()
+        if (wasRunning) start()
+    }
 
     fun updateConfig(newConfig: SensorConfig) {
         val wasRunning = isRunning
@@ -92,6 +127,8 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
         accelerationSensor?.registerListener(accelerationListener!!, delay)
+
+        if (_locationPermissionGranted.value) startGps()
     }
 
     fun stop() {
@@ -101,11 +138,47 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
         accelerationListener?.let { accelerationSensor?.unregisterListener(it) }
         orientationListener = null
         accelerationListener = null
+        locationBridge?.stop()
+        locationBridge = null
     }
 
     override fun onCleared() {
         stop()
         super.onCleared()
+    }
+
+    private fun startGps() {
+        locationBridge?.stop()
+        val bridge = LocationBridge(getApplication())
+        bridge.onLocation = { enuEast, enuNorth, speedMps, accuracyM, bearingDeg, hasBearing, timestampNanos ->
+            gpsFixCount++
+
+            val dt = if (lastGpsTimestampNanos == 0L) 1.0
+                     else (timestampNanos - lastGpsTimestampNanos) / 1_000_000_000.0
+            lastGpsTimestampNanos = timestampNanos
+
+            val heading = if (hasBearing) Math.toRadians(bearingDeg.toDouble()) else 0.0
+
+            gpsKalmanFilter.predict(heading, dt)
+            gpsKalmanFilter.correct(enuEast, enuNorth, speedMps, 0.0, true)
+            val state = gpsKalmanFilter.getState()
+
+            gpsTrackBuffer.add(enuEast to enuNorth)
+            filteredTrackBuffer.add(state.east to state.north)
+
+            _gpsUiState.value = GpsUiState(
+                gpsTrack = gpsTrackBuffer.toList(),
+                filteredTrack = filteredTrackBuffer.toList(),
+                speedMps = state.speed,
+                eastM = state.east,
+                northM = state.north,
+                hasGpsFix = true,
+                accuracyM = accuracyM,
+                fixCount = gpsFixCount
+            )
+        }
+        bridge.start()
+        locationBridge = bridge
     }
 
     private fun rebuildSensors() {

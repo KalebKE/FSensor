@@ -1,6 +1,6 @@
 package com.tracqi.fsensorapp.model
 
-class ChartData(private val capacity: Int = 250) {
+class ChartData(private val capacity: Int = 500) {
     private val x = FloatArray(capacity)
     private val y = FloatArray(capacity)
     private val z = FloatArray(capacity)

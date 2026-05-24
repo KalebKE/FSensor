@@ -5,17 +5,17 @@ struct AccelerationView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
+            VStack(spacing: 12) {
                 AccelerationGaugeView(
                     x: viewModel.acceleration[0],
                     y: viewModel.acceleration[1]
                 )
-                .frame(width: 200, height: 200)
+                .padding(.horizontal, 32)
 
                 HStack(spacing: 32) {
-                    ValueLabel(axis: "X", value: viewModel.acceleration[0], color: .red)
-                    ValueLabel(axis: "Y", value: viewModel.acceleration[1], color: .green)
-                    ValueLabel(axis: "Z", value: viewModel.acceleration[2], color: .blue)
+                    ValueLabel(axis: "X", value: viewModel.acceleration[0], color: .neonCyan)
+                    ValueLabel(axis: "Y", value: viewModel.acceleration[1], color: .neonMagenta)
+                    ValueLabel(axis: "Z", value: viewModel.acceleration[2], color: .neonGreen)
                 }
 
                 TimeSeriesChartView(
@@ -25,8 +25,18 @@ struct AccelerationView: View {
                 )
                 .frame(maxHeight: .infinity)
                 .padding(.horizontal)
+
+                Button(action: { viewModel.reset() }) {
+                    Text("Reset")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .tint(.neonCyan)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 8)
             }
             .padding(.top)
+            .background(Color.cyberBackground)
             .navigationTitle("Acceleration")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -46,6 +56,7 @@ private struct ValueLabel: View {
             Text(String(format: "%.2f", value))
                 .font(.body)
                 .monospacedDigit()
+                .foregroundStyle(Color.primaryText)
         }
     }
 }

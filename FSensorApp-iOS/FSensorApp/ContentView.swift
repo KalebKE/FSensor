@@ -20,6 +20,7 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gearshape")
                 }
         }
+        .tint(.neonCyan)
         .onAppear { viewModel.start() }
         .onDisappear { viewModel.stop() }
     }

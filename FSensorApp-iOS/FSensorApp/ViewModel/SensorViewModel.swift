@@ -35,6 +35,12 @@ class SensorViewModel: ObservableObject {
         accelerationProvider = nil
     }
 
+    func reset() {
+        let wasRunning = isRunning
+        if wasRunning { stop() }
+        if wasRunning { start() }
+    }
+
     func updateConfig(_ newConfig: SensorConfig) {
         let wasRunning = isRunning
         if wasRunning { stop() }

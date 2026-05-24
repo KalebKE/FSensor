@@ -60,13 +60,16 @@ class IosSensorProvider(private val fusion: FusionAlgorithm) {
     }
 
     private fun extractSensorData(motion: CMDeviceMotion): Triple<FloatArray, FloatArray, FloatArray> {
+        // iOS gravity points toward ground (face-up = 0,0,-1g).
+        // Android TYPE_ACCELEROMETER measures the opposing force (face-up = 0,0,+1g).
+        // All fusion algorithms use the Android convention, so negate.
         val accel = motion.gravity.useContents {
             val ua = motion.userAcceleration
             ua.useContents {
                 floatArrayOf(
-                    ((this@useContents.x + this.x) * 9.81).toFloat(),
-                    ((this@useContents.y + this.y) * 9.81).toFloat(),
-                    ((this@useContents.z + this.z) * 9.81).toFloat()
+                    (-(this@useContents.x + this.x) * 9.81).toFloat(),
+                    (-(this@useContents.y + this.y) * 9.81).toFloat(),
+                    (-(this@useContents.z + this.z) * 9.81).toFloat()
                 )
             }
         }
