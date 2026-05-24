@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 21 58 58">
+  <title>FSensor — Gimbal mark</title>
+  <defs>
+    <filter id="fsensor-gimbal-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+  <ellipse cx="50" cy="50" rx="26" ry="26" fill="none" stroke="#00F0FF" stroke-width="2"/>
+  <ellipse cx="50" cy="50" rx="26" ry="11" fill="none" stroke="#FF00E5" stroke-width="2" transform="rotate(28 50 50)"/>
+  <ellipse cx="50" cy="50" rx="11" ry="26" fill="none" stroke="#39FF14" stroke-width="2" transform="rotate(28 50 50)"/>
+  <circle cx="50" cy="50" r="6" fill="#FFB300" filter="url(#fsensor-gimbal-glow)"/>
+  <circle cx="50" cy="50" r="4.5" fill="#FFB300"/>
+</svg>
