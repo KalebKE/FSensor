@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tracqi.fsensorapp.model.GpsUiState
 import com.tracqi.fsensorapp.ui.component.TrackPlot
@@ -76,9 +77,9 @@ fun GpsTab(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            GpsLabeledValue("Speed", String.format("%.1f m/s", gpsUiState.speedMps), NeonCyan)
-            GpsLabeledValue("East", String.format("%.1f m", gpsUiState.eastM), NeonMagenta)
-            GpsLabeledValue("North", String.format("%.1f m", gpsUiState.northM), NeonGreen)
+            GpsLabeledValue("Speed", String.format("%8s", String.format("%.1f m/s", gpsUiState.speedMps)), NeonCyan)
+            GpsLabeledValue("East", String.format("%8s", String.format("%.1f m", gpsUiState.eastM)), NeonMagenta)
+            GpsLabeledValue("North", String.format("%8s", String.format("%.1f m", gpsUiState.northM)), NeonGreen)
         }
 
         Spacer(Modifier.height(8.dp))
@@ -136,6 +137,6 @@ private fun LegendDot(color: Color) {
 private fun GpsLabeledValue(label: String, value: String, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = color)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace, textAlign = TextAlign.End)
     }
 }

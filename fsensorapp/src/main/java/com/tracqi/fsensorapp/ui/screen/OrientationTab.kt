@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tracqi.fsensorapp.model.ChartData
 import com.tracqi.fsensorapp.ui.component.RotationGauge
@@ -87,9 +88,10 @@ private fun LabeledValue(label: String, value: Float, color: androidx.compose.ui
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = color)
         Text(
-            String.format("%.1f°", value),
+            String.format("%7s", String.format("%.1f°", value)),
             style = MaterialTheme.typography.bodyMedium,
-            fontFamily = FontFamily.Monospace
+            fontFamily = FontFamily.Monospace,
+            textAlign = TextAlign.End
         )
     }
 }

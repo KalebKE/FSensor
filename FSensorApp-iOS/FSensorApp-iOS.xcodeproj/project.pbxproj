@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A100000E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B100000E; };
 		A1000001 /* FSensorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000001; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002; };
 		A1000003 /* SensorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000003; };
@@ -37,6 +38,7 @@
 		B100000C /* FSensor.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FSensor.framework; path = Frameworks/FSensor.framework; sourceTree = "<group>"; };
 		B100000D /* FSensorApp-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FSensorApp-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B100000D1 /* CyberpunkColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberpunkColors.swift; sourceTree = "<group>"; };
+		B100000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +67,7 @@
 			children = (
 				B1000001 /* FSensorApp.swift */,
 				B1000002 /* ContentView.swift */,
+				B100000E /* Assets.xcassets */,
 				D1000003 /* Model */,
 				D1000004 /* ViewModel */,
 				D1000005 /* View */,
@@ -188,6 +191,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A100000E /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
