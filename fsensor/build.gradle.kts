@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.multiplatform")
@@ -16,10 +18,12 @@ kotlin {
         publishLibraryVariants("release")
     }
 
+    val xcf = XCFramework("FSensor")
     listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach {
         it.binaries.framework {
             baseName = "FSensor"
             isStatic = true
+            xcf.add(this)
         }
     }
 

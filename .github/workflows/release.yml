@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: macos-14
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        run: ./gradlew :fsensor:allTests
+
+      - name: Build Android release
+        run: ./gradlew :fsensor:assembleRelease
+
+      - name: Build XCFramework
+        run: ./gradlew :fsensor:assembleFSensorReleaseXCFramework
+
+      - name: Zip XCFramework
+        run: |
+          cd fsensor/build/XCFrameworks/release
+          zip -r FSensor.xcframework.zip FSensor.xcframework
+
+      - name: Compute XCFramework checksum
+        id: checksum
+        run: |
+          CHECKSUM=$(swift package compute-checksum fsensor/build/XCFrameworks/release/FSensor.xcframework.zip)
+          echo "CHECKSUM=$CHECKSUM" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+          files: |
+            fsensor/build/outputs/aar/fsensor-release.aar
+            fsensor/build/XCFrameworks/release/FSensor.xcframework.zip
+
+      - name: Update Package.swift checksum
+        run: |
+          sed -i '' "s|checksum: \".*\"|checksum: \"${{ steps.checksum.outputs.CHECKSUM }}\"|" Package.swift
+          sed -i '' "s|releases/download/v[^/]*/|releases/download/${{ github.ref_name }}/|" Package.swift
+          git config user.email "build@tracqi.com"
+          git config user.name "GitHub Actions"
+          git checkout master
+          git add Package.swift
+          git commit -m "[skip ci] Update Package.swift for ${{ github.ref_name }}"
+          git push origin master

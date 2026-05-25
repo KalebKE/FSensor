@@ -1,5 +1,5 @@
 # FSensor
-Android Sensor Filter and Fusion
+Sensor Filter and Fusion for Android and iOS
 
 <p align="center">
   <img src="/documentation/images/fsensor-gimbal.svg" width="200">
@@ -10,8 +10,8 @@ Android Sensor Filter and Fusion
 </p>
 
 ## Introduction
-FSensor (FusionSensor) is an Android library that provides linear acceleration and rotation sensors via sensor fusions including Madgwick, Mahony, EKF, Complementary, Kalman and Low-Pass
-implementations. The behavior of stock Android sensor fusions can vary greatly between devices and manufacturers. FSensor provides a set of consistent and reliable sensor fusion
+FSensor (FusionSensor) is a Kotlin Multiplatform library for Android and iOS that provides linear acceleration and rotation sensors via sensor fusions including Madgwick, Mahony, EKF, Complementary, Kalman and Low-Pass
+implementations. The behavior of stock sensor fusions can vary greatly between devices and manufacturers. FSensor provides a set of consistent and reliable sensor fusion
 implementations that can be used consistently across all devices. The FSensor API allows for custom fusion implementations optimized for specific use-cases. FSensor also provides
 averaging filters for smoothing sensor data, a GPS Kalman filter for position estimation, and coordinate conversion utilities for working with GPS data in local tangent plane coordinates.
 
@@ -23,6 +23,8 @@ averaging filters for smoothing sensor data, a GPS Kalman filter for position es
 
 
 ## Get FSensor
+
+### Android
 
 In the project level build.gradle:
 
@@ -42,21 +44,158 @@ implementation("com.github.KalebKE:FSensor:3.x.y")
 
 [![](https://jitpack.io/v/KalebKE/FSensor.svg)](https://jitpack.io/#KalebKE/FSensor)
 
-## Usage
+### iOS (Swift Package Manager)
 
+In Xcode, go to File > Add Package Dependencies and enter the repository URL:
 
-The FSensor API is very similar to the Android Sensor API. 
-
-```kotlin
-val sensorManager = getApplication<Application>().getSystemService(Context.SENSOR_SERVICE) as SensorManager
-var fSensor: FSensor? = ComplementaryLinearAccelerationFSensor(sensorManager, timeConstant)
-
-val filter: FSensor? = LowPassFilter()
-
-fSensor!!.registerListener({ event -> filter!!.filter(event.values) }, sensorDelay)
+```
+https://github.com/KalebKE/FSensor.git
 ```
 
-See the sample app 'fsensorapp' for more examples.
+Or add it to your `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/KalebKE/FSensor.git", from: "3.1.0")
+]
+```
+
+## Usage
+
+### Sensor Fusions (Android)
+
+FSensor provides orientation and linear acceleration sensors that wrap Android's raw sensors with a fusion algorithm. The API mirrors Android's `SensorManager`.
+
+```kotlin
+val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+// Create a fusion algorithm
+val fusion = MadgwickFusion(beta = 0.033f)
+
+// Use it for orientation or linear acceleration
+val orientationSensor = FusedOrientationFSensor(sensorManager, fusion)
+val accelerationSensor = FusedLinearAccelerationFSensor(sensorManager, MadgwickFusion())
+
+// Register a listener (same pattern as Android's SensorManager)
+orientationSensor.registerListener({ event ->
+    val (azimuth, pitch, roll) = event.values
+}, SensorManager.SENSOR_DELAY_GAME)
+
+// Stop listening
+orientationSensor.unregisterListener(listener)
+```
+
+### Fusion Algorithms
+
+Each fusion algorithm can be created with default parameters or tuned for your use case.
+
+```kotlin
+// Gradient descent optimization, good general-purpose default
+val madgwick = MadgwickFusion(beta = 0.033f)
+
+// Proportional-integral correction, computationally lighter
+val mahony = MahonyFusion(kp = 1.0f, ki = 0.0f)
+
+// Statistically optimal when noise parameters are well-tuned
+val ekf = EkfFusion(processNoiseVariance = 0.001, accelNoiseVariance = 0.1, magNoiseVariance = 0.5)
+
+// Frequency-domain blending of gyroscope and accelerometer/magnetometer
+val complementary = ComplementaryFusion(timeConstant = 0.18f)
+
+// Linear quadratic estimation
+val kalman = KalmanFusion(processNoise = 0.001, measurementNoise = 0.1)
+```
+
+All fusion algorithms implement `FusionAlgorithm` and can also be used directly without the Android platform layer:
+
+```kotlin
+val fusion = MadgwickFusion()
+fusion.update(acceleration, magnetic, gyroscope, dt)
+val orientation = fusion.getOrientation()   // [azimuth, pitch, roll] in radians
+val quaternion = fusion.getQuaternion()      // [w, x, y, z]
+```
+
+### Smoothing Filters
+
+Filters smooth noisy sensor data based on a time constant in seconds. Larger values produce smoother output with more latency.
+
+```kotlin
+val lowPass = LowPassFilter(timeConstant = 0.18f)    // IIR single-pole, constant time
+val mean = MeanFilter(timeConstant = 0.18f)           // Moving average, linear time
+val median = MedianFilter(timeConstant = 0.18f)       // Moving median, linear time
+
+// Apply to any 3-component sensor data
+val smoothed = lowPass.filter(event.values)
+```
+
+### Combining Fusions and Filters
+
+```kotlin
+val fusion = MadgwickFusion()
+val filter = LowPassFilter(timeConstant = 0.5f)
+val sensor = FusedOrientationFSensor(sensorManager, fusion)
+
+sensor.registerListener({ event ->
+    val smoothed = filter.filter(event.values)
+}, SensorManager.SENSOR_DELAY_GAME)
+```
+
+See the sample app `fsensorapp` for more examples.
+
+### Sensor Fusions (iOS)
+
+On iOS, `IosSensorProvider` wraps Core Motion and feeds sensor data through a fusion algorithm. Each provider instance handles one sensor stream.
+
+```swift
+import FSensor
+
+// Create a fusion algorithm and provider
+let fusion = MadgwickFusion(beta: 0.033)
+let provider = IosSensorProvider(fusion: fusion)
+
+// Stream orientation at 60 Hz
+provider.startOrientation(rateHz: 60) { values in
+    let azimuth = values.get(index: 0)
+    let pitch = values.get(index: 1)
+    let roll = values.get(index: 2)
+}
+
+// Or stream linear acceleration
+provider.startLinearAcceleration(rateHz: 60) { values in
+    let x = values.get(index: 0)
+    let y = values.get(index: 1)
+    let z = values.get(index: 2)
+}
+
+// Stop when done
+provider.stop()
+```
+
+### Fusion Algorithms (iOS)
+
+The same fusion algorithms are available in Swift:
+
+```swift
+let madgwick = MadgwickFusion(beta: 0.033)
+let mahony = MahonyFusion(kp: 1.0, ki: 0.0)
+let ekf = EkfFusion(processNoiseVariance: 0.001, accelNoiseVariance: 0.1, magNoiseVariance: 0.5)
+let complementary = ComplementaryFusion(timeConstant: 0.18)
+let kalman = KalmanFusion(processNoise: 0.001, measurementNoise: 0.1)
+```
+
+### Smoothing Filters (iOS)
+
+Filters accept `KotlinFloatArray` and return the smoothed result:
+
+```swift
+let filter = LowPassFilter(timeConstant: 0.5)
+
+provider.startOrientation(rateHz: 60) { values in
+    let smoothed = filter.filter(data: values)
+}
+```
+
+See the sample app `FSensorApp-iOS` for more examples.
 
 ## Orientation
 

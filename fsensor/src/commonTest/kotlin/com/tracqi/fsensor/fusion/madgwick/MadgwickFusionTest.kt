@@ -79,10 +79,11 @@ class MadgwickFusionTest {
 
         val orient6 = fusion6.getOrientation()
         val orient9 = fusion9.getOrientation()
-        val pitch6 = Math.toDegrees(orient6[1].toDouble())
-        val roll6 = Math.toDegrees(orient6[2].toDouble())
-        val pitch9 = Math.toDegrees(orient9[1].toDouble())
-        val roll9 = Math.toDegrees(orient9[2].toDouble())
+        val r2d = 180.0 / kotlin.math.PI
+        val pitch6 = orient6[1] * r2d
+        val roll6 = orient6[2] * r2d
+        val pitch9 = orient9[1] * r2d
+        val roll9 = orient9[2] * r2d
 
         assertTrue(abs(pitch9 - pitch6) < 5.0,
             "9-DOF pitch ($pitch9) should match 6-DOF ($pitch6)")
